@@ -19,7 +19,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   Cell,
 } from "recharts";
 
@@ -36,9 +35,7 @@ interface UserRecord {
     score: number;
     passed: boolean;
   }[];
-  certificate?: {
-    issued: boolean;
-  } | null;
+  certificateIssued?: boolean;
   createdAt?: string;
 }
 
@@ -71,9 +68,8 @@ function computeStats(users: UserRecord[]): Stats {
       ? Math.round(bestScores.reduce((a, b) => a + b, 0) / bestScores.length)
       : 0;
 
-  const certificatesIssued = users.filter((u) => u.certificate?.issued).length;
+  const certificatesIssued = users.filter((u) => u.certificateIssued).length;
 
-  // Process registration trends (last 7 days)
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - i);
@@ -85,7 +81,6 @@ function computeStats(users: UserRecord[]): Stats {
     users: users.filter((u) => u.createdAt && u.createdAt.startsWith(date)).length,
   }));
 
-  // Process completion distribution
   const distribution = [
     { name: "0-25%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) <= 25).length, color: "#000000" }, 
     { name: "26-50%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 25 && (u.progress?.completionPercentage ?? 0) <= 50).length, color: "#000000" }, 

@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Award, Printer, ChevronLeft, ShieldCheck, Download } from "lucide-react"
+import { Award, ChevronLeft, ShieldCheck, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+
+export const dynamicParams = true
 
 interface Certification {
   certificationId: string
@@ -30,9 +31,14 @@ export default function CertificateDetailPage() {
   const params = useParams()
   const router = useRouter()
   const certId = params?.id as string
+  const certificateRef = useRef<HTMLDivElement>(null)
   
   const [cert, setCert] = useState<Certification | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const handlePrint = () => {
+    window.print()
+  }
 
   useEffect(() => {
     async function fetchCert() {
@@ -69,7 +75,7 @@ export default function CertificateDetailPage() {
   if (!cert) return null
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12 space-y-6 print:static">
+    <div className="mx-auto max-w-xl px-4 py-8 space-y-4">
       {/* Page header (Hidden on print) */}
       <div className="flex items-center justify-between print:hidden">
         <Button 
@@ -81,96 +87,150 @@ export default function CertificateDetailPage() {
           <ChevronLeft className="size-4 mr-1" />
           Back
         </Button>
-        <Button onClick={() => window.print()} className="gap-2">
-          <Printer className="size-4" />
-          Print Certificate
+        <Button onClick={handlePrint} className="gap-2">
+          <Download className="size-4" />
+          Download PDF
         </Button>
       </div>
 
       {/* Certificate Frame */}
       <div className="relative group overflow-hidden">
-        {/* Certificate preview */}
         <div
+          ref={certificateRef}
           id="certificate-content"
-          className="relative border-8 border-double border-slate-200 rounded-xl bg-white px-12 py-16 flex flex-col items-center gap-8 text-center shadow-2xl transition-all duration-500 overflow-hidden"
+          className="certificate-box"
         >
           {/* Decorative Corner Ornaments */}
-          <div className="absolute top-4 left-4 size-16 border-t-2 border-l-2 border-slate-300 opacity-50" />
-          <div className="absolute top-4 right-4 size-16 border-t-2 border-r-2 border-slate-300 opacity-50" />
-          <div className="absolute bottom-4 left-4 size-16 border-b-2 border-l-2 border-slate-300 opacity-50" />
-          <div className="absolute bottom-4 right-4 size-16 border-b-2 border-r-2 border-slate-300 opacity-50" />
+          <div className="corner corner-tl" />
+          <div className="corner corner-tr" />
+          <div className="corner corner-bl" />
+          <div className="corner corner-br" />
 
           {/* Top Seal */}
-          <div className="relative">
-            <div className="size-20 rounded-full border-4 border-slate-100 flex items-center justify-center bg-slate-50 shadow-inner">
-               <Award className="size-10 text-slate-800" />
+          <div className="seal-container">
+            <div className="seal-outer">
+               <Award className="seal-icon" />
             </div>
-            <div className="absolute -bottom-2 -left-2 size-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center opacity-80">
-               <ShieldCheck className="size-4 text-slate-600" />
+            <div className="seal-badge">
+               <ShieldCheck className="seal-badge-icon" />
             </div>
           </div>
 
           {/* Title Area */}
-          <div className="space-y-4 font-sans">
-            <h2 className="text-4xl font-black tracking-tight text-slate-900 border-b-2 border-slate-100 pb-4">
-              CERTIFICATE <span className="font-light text-slate-500">of</span> COMPLETION
+          <div className="title-section">
+            <h2 className="title-text">
+              CERTIFICATE <span className="title-of">of</span> COMPLETION
             </h2>
-            <p className="text-sm font-semibold text-slate-600 uppercase tracking-[0.25em]">
+            <p className="subtitle-text">
               NAIM ACADEMY EXPERTISE CREDENTIAL
             </p>
           </div>
 
           {/* Achievement Body */}
-          <div className="space-y-6 pt-4 font-sans">
-            <p className="text-base text-slate-500 font-medium">This prestigious certificate is awarded to</p>
-            <div className="space-y-1">
-              <p className="text-4xl font-black text-slate-900 drop-shadow-sm">{cert.studentName}</p>
-              <div className="h-0.5 bg-slate-900 w-full mb-1" />
+          <div className="body-section">
+            <p className="award-label">This prestigious certificate is awarded to</p>
+            <div className="recipient-section">
+              <p className="recipient-name">{cert.studentName}</p>
+              <div className="name-line" />
             </div>
-            <p className="text-base text-slate-500 font-medium pt-2">for demonstrating exceptional knowledge and passing the</p>
-            <p className="text-2xl font-bold text-slate-900">{cert.courseTitle}</p>
-            <p className="text-sm font-medium text-slate-600 italic">Advanced Examination: {cert.examTitle}</p>
+            <p className="course-label">for demonstrating exceptional knowledge and passing the</p>
+            <p className="course-name">{cert.courseTitle}</p>
+            <p className="exam-name">Advanced Examination: {cert.examTitle}</p>
           </div>
 
           {/* Metadata Grid */}
-          <div className="grid grid-cols-2 gap-12 w-full pt-10 px-6 font-sans">
-            <div className="text-left space-y-2 border-t-2 border-slate-100 pt-3">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Date of Award</p>
-              <p className="text-sm font-black text-slate-800">{formatDate(cert.issuedAt)}</p>
+          <div className="metadata-grid">
+            <div className="metadata-item metadata-left">
+              <p className="metadata-label">Date of Award</p>
+              <p className="metadata-value">{formatDate(cert.issuedAt)}</p>
             </div>
-            <div className="text-right space-y-2 border-t-2 border-slate-100 pt-3">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Final Examination Score</p>
-              <p className="text-sm font-black text-slate-800">{cert.score}%</p>
+            <div className="metadata-item metadata-right">
+              <p className="metadata-label">Final Examination Score</p>
+              <p className="metadata-value">{cert.score}%</p>
             </div>
           </div>
 
           {/* Signature & Barcode Area */}
-          <div className="w-full flex items-end justify-between pt-12 font-sans">
-             <div className="text-left space-y-2">
-                <div className="h-10 w-32 border-b border-slate-300 flex items-end">
-                   <span className="italic text-xl text-slate-400 pl-1 opacity-60">Naim Academy</span>
+          <div className="footer-section">
+             <div className="signature-block">
+                <div className="signature-line-area">
+                   <span className="signature-text">Naim Academy</span>
                 </div>
-                <p className="text-[9px] font-extrabold text-slate-500 uppercase tracking-tighter">Academic Director</p>
+                <p className="signature-label">Academic Director</p>
              </div>
 
              {/* Barcode representation */}
-             <div className="text-right flex flex-col items-end gap-1">
-                <div className="flex gap-[1px] h-10 items-end opacity-80">
-                   {[...Array(24)].map((_, i) => (
+             <div className="barcode-block">
+                <div className="barcode-bars">
+                   {[...Array(20)].map((_, i) => (
                       <div 
                         key={i} 
-                        className="bg-slate-900" 
+                        className="barcode-bar" 
                         style={{ 
-                          width: `${(i % 3 === 0 ? 3 : i % 2 === 0 ? 1 : 2)}px`,
-                          height: `${40 + (Math.sin(i) * 5)}px`
+                          width: `${(i % 3 === 0 ? 2 : i % 2 === 0 ? 1 : 1.5)}px`,
+                          height: `${30 + (Math.sin(i) * 4)}px`
                         }} 
                       />
                    ))}
                 </div>
-                <p className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-widest select-all">
+                <p className="barcode-id">
                   {cert.certificationId}
                 </p>
              </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Thank You Letter (Only visible in print) */}
+      <div className="hidden print:block print:page-break-before" id="thank-you-letter">
+        <div className="letter-frame">
+          <div className="letter-content">
+            <div className="letter-header">
+              <p className="letter-academy">NAIM ACADEMY</p>
+              <p className="letter-tagline">Excellence in Education</p>
+            </div>
+
+            <div className="letter-body">
+              <p className="letter-date">{formatDate(cert.issuedAt)}</p>
+
+              <p className="letter-greeting">Dear <span className="font-bold">{cert.studentName}</span>,</p>
+
+              <p className="letter-paragraph">
+                Congratulations on your outstanding achievement in completing <span className="font-semibold">{cert.courseTitle}</span>. 
+                Your dedication, perseverance, and commitment to excellence are truly commendable. 
+                Earning this certification is a testament to your hard work and the passion you bring to your professional growth.
+              </p>
+
+              <p className="letter-paragraph">
+                At Naim Academy, we believe that learning is a lifelong journey — one that opens doors, 
+                sparks innovation, and transforms careers. This milestone is not an endpoint, but a stepping 
+                stone toward even greater accomplishments. We encourage you to keep pushing boundaries, 
+                exploring new horizons, and never losing that hunger for knowledge.
+              </p>
+
+              <p className="letter-paragraph">
+                The skills you have mastered will serve you well in the challenges ahead. 
+                Stay curious. Stay ambitious. And remember that every expert was once a beginner 
+                who refused to give up.
+              </p>
+
+              <p className="letter-paragraph">
+                We are honored to have been part of your journey and look forward to supporting 
+                your continued success. Keep reaching for excellence — the best is yet to come.
+              </p>
+
+              <p className="letter-closing">
+                With warm regards and highest esteem,
+              </p>
+            </div>
+
+            <div className="letter-signature">
+              <div className="signature-name-line">
+                <span className="signature-handwritten">Yahia Naim</span>
+              </div>
+              <p className="signature-fullname">Yahia Naim</p>
+              <p className="signature-title">Founder & Academic Director, Naim Academy</p>
+            </div>
           </div>
         </div>
       </div>

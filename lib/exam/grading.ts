@@ -1,3 +1,5 @@
+import { EXAM } from "@/lib/constants";
+
 export function gradeExam(
   answers: number[],
   correctAnswers: number[]
@@ -12,7 +14,7 @@ export function gradeExam(
   }
 
   const score = total > 0 ? Math.round((correct / total) * 100) : 0;
-  const passed = score >= 70;
+  const passed = score >= EXAM.DEFAULT_PASSING_SCORE;
 
   return { score, passed, total, correct };
 }

@@ -20,6 +20,10 @@ export const POST = withAuth(
     try {
       await connectDB();
 
+      if (ctx.user.role === "admin") {
+        return NextResponse.json({ error: "Admins cannot take the exam" }, { status: 403 });
+      }
+
       const userDoc = await User.findById(ctx.user.userId);
       if (!userDoc || userDoc.progress.completionPercentage < 100) {
         return NextResponse.json({ error: "Course must be 100% completed to take the exam" }, { status: 403 });

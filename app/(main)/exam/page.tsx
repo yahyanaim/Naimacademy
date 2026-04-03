@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { AlertCircle, Clock, FileQuestion } from "lucide-react"
 import {
   Card,
@@ -24,7 +25,12 @@ interface Progress {
   completionPercentage: number
 }
 
+interface User {
+  role: string
+}
+
 export default function ExamPage() {
+  const router = useRouter()
   const [examMeta, setExamMeta] = useState<ExamMeta | null>(null)
   const [progress, setProgress] = useState<Progress | null>(null)
   const [loading, setLoading] = useState(true)
@@ -32,6 +38,15 @@ export default function ExamPage() {
   useEffect(() => {
     async function fetchData() {
       try {
+        const meRes = await fetch("/api/auth/me")
+        if (meRes.ok) {
+          const meData = await meRes.json()
+          if (meData.user.role === "admin") {
+            router.push("/admin")
+            return
+          }
+        }
+
         const [examRes, progressRes] = await Promise.all([
           fetch("/api/exam"),
           fetch("/api/progress"),
@@ -54,7 +69,7 @@ export default function ExamPage() {
     }
 
     fetchData()
-  }, [])
+  }, [router])
 
   const completionPercentage = progress?.completionPercentage ?? 0
   const canStart = completionPercentage === 100

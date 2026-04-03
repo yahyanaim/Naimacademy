@@ -40,7 +40,7 @@ export interface IUser extends Document {
 const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true, lowercase: true },
+    email: { type: String, required: true, unique: true, lowercase: true, index: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["student", "admin"], default: "student" },
     progress: {
@@ -51,7 +51,7 @@ const UserSchema = new Schema<IUser>(
     },
     examAttempts: [
       {
-        examId: { type: String, required: true },
+        examId: { type: String, required: true, index: true },
         examTitle: { type: String, required: true },
         score: { type: Number, required: true },
         passed: { type: Boolean, required: true },

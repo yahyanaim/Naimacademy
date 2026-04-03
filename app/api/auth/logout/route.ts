@@ -1,14 +1,14 @@
 import { clearSession } from "@/lib/auth/session";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   try {
     const response = NextResponse.json(
       { success: true },
       { status: 200 }
     );
 
-    await clearSession(response);
+    await clearSession();
 
     return response;
   } catch (error) {

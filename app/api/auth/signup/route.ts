@@ -2,19 +2,32 @@ import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/lib/models/user.model";
 import { InviteCode } from "@/lib/models/invite-code.model";
 import { setSession } from "@/lib/auth/session";
+import { PASSWORD } from "@/lib/constants";
+import { sanitizeInput } from "@/lib/utils/sanitize";
+import { rateLimit } from "@/lib/utils/rate-limit";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 
 const signupSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  inviteCode: z.string().min(1, "Invite code is required"),
+  name: z.string().min(1, "Name is required").transform((val) => sanitizeInput(val)),
+  email: z.string().email("Invalid email address").transform((val) => sanitizeInput(val).toLowerCase()),
+  password: z.string().min(PASSWORD.MIN_LENGTH, `Password must be at least ${PASSWORD.MIN_LENGTH} characters`),
+  inviteCode: z.string().min(1, "Invite code is required").transform((val) => sanitizeInput(val)),
 });
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    const limit = rateLimit(`signup:${ip}`, 3, 15 * 60 * 1000);
+
+    if (!limit.success) {
+      return NextResponse.json(
+        { error: `Too many signup attempts. Please try again in ${limit.retryAfter} seconds.` },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
 
     const parsed = signupSchema.safeParse(body);
@@ -29,41 +42,37 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    // Validate invite code
-    let invite = await InviteCode.findOne({ code: inviteCode });
+    const invite = await InviteCode.findOneAndUpdate(
+      { code: inviteCode, $expr: { $lt: ["$usedCount", "$maxUses"] } },
+      { $inc: { usedCount: 1 } },
+      { new: true }
+    );
 
-    // Auto-seed the code on first use
     if (!invite) {
-      if (inviteCode === "learn8n") {
-        invite = await InviteCode.create({ code: "learn8n", maxUses: 500, usedCount: 0 });
-      } else {
+      const exists = await InviteCode.findOne({ code: inviteCode });
+      if (exists) {
         return NextResponse.json(
           { error: "Invalid invite code" },
-          { status: 403 }
+          { status: 400 }
         );
       }
-    }
-
-    if (invite.usedCount >= invite.maxUses) {
       return NextResponse.json(
-        { error: "This invite code has reached its maximum number of uses (500 spots are full)" },
-        { status: 403 }
+        { error: "Invalid invite code" },
+        { status: 400 }
       );
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      await InviteCode.findByIdAndUpdate(invite._id, { $inc: { usedCount: -1 } });
       return NextResponse.json(
-        { error: "Email is already in use" },
-        { status: 409 }
+        { error: "An account with this email already exists" },
+        { status: 400 }
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, PASSWORD.BCRYPT_ROUNDS);
     const user = await User.create({ name, email, password: hashedPassword });
-
-    // Increment invite code usage
-    await InviteCode.findByIdAndUpdate(invite._id, { $inc: { usedCount: 1 } });
 
     const response = NextResponse.json(
       {
@@ -80,8 +89,7 @@ export async function POST(req: NextRequest) {
     await setSession({ userId: user._id.toString(), role: user.role });
 
     return response;
-  } catch (error) {
-    console.error("[SIGNUP]", error);
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

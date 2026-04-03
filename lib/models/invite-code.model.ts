@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { INVITE_CODE } from "@/lib/constants";
 
 export interface IInviteCode extends Document {
   code: string;
@@ -8,7 +9,7 @@ export interface IInviteCode extends Document {
 
 const InviteCodeSchema = new Schema<IInviteCode>({
   code: { type: String, required: true, unique: true },
-  maxUses: { type: Number, required: true, default: 500 },
+  maxUses: { type: Number, required: true, default: INVITE_CODE.DEFAULT_MAX_USES },
   usedCount: { type: Number, required: true, default: 0 },
 });
 

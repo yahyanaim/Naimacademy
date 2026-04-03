@@ -52,6 +52,22 @@ interface SectionRecord {
   lessons: LessonRecord[];
 }
 
+function getSectionDuration(section: SectionRecord): string {
+  let totalMinutes = 0;
+  for (const lesson of section.lessons) {
+    const parts = lesson.duration.split(":").map(Number);
+    if (parts.length === 2) {
+      totalMinutes += parts[0] + parts[1] / 60;
+    }
+  }
+  if (totalMinutes < 60) {
+    return `${Math.round(totalMinutes)}m`;
+  }
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = Math.round(totalMinutes % 60);
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+}
+
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
@@ -330,7 +346,10 @@ export default function ContentManagementPage() {
                     <span className="text-xs text-muted-foreground ml-2">
                       Order: {section.order} &middot;{" "}
                       {sectionLessons.length} lesson
-                      {sectionLessons.length !== 1 ? "s" : ""}
+                      {sectionLessons.length !== 1 ? "s" : ""} &middot;{" "}
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                        {getSectionDuration(section)}
+                      </span>
                     </span>
                   </button>
 

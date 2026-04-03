@@ -35,6 +35,22 @@ function getSectionContainingLesson(sections: Section[], lessonId?: string): str
   return null;
 }
 
+function getSectionDuration(section: Section): string {
+  let totalMinutes = 0;
+  for (const lesson of section.lessons) {
+    const parts = lesson.duration.split(":").map(Number);
+    if (parts.length === 2) {
+      totalMinutes += parts[0] + parts[1] / 60;
+    }
+  }
+  if (totalMinutes < 60) {
+    return `${Math.round(totalMinutes)}m`;
+  }
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = Math.round(totalMinutes % 60);
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+}
+
 function buildInitialOpenState(sections: Section[], currentLessonId?: string): Record<string, boolean> {
   const containingSection = getSectionContainingLesson(sections, currentLessonId);
   const state: Record<string, boolean> = {};
@@ -67,8 +83,11 @@ export function CourseSidebar({ sections, completedLessons, currentLessonId }: C
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{section.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {section.lessons.length} lesson{section.lessons.length !== 1 ? "s" : ""}
+                    <p className="text-xs text-muted-foreground flex items-center gap-3 mt-0.5">
+                      <span>{section.lessons.length} lesson{section.lessons.length !== 1 ? "s" : ""}</span>
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                        {getSectionDuration(section)}
+                      </span>
                     </p>
                   </div>
                   {isOpen ? (

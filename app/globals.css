@@ -129,13 +129,99 @@
   }
 }
 
+/* Certificate screen styles */
+.certificate-box {
+  position: relative;
+  border: 4px double #e2e8f0;
+  border-radius: 0.5rem;
+  background: white;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  overflow: hidden;
+}
+
+.corner {
+  position: absolute;
+  width: 3rem;
+  height: 3rem;
+  opacity: 0.5;
+}
+
+.corner-tl { top: 0.75rem; left: 0.75rem; border-top: 2px solid #cbd5e1; border-left: 2px solid #cbd5e1; }
+.corner-tr { top: 0.75rem; right: 0.75rem; border-top: 2px solid #cbd5e1; border-right: 2px solid #cbd5e1; }
+.corner-bl { bottom: 0.75rem; left: 0.75rem; border-bottom: 2px solid #cbd5e1; border-left: 2px solid #cbd5e1; }
+.corner-br { bottom: 0.75rem; right: 0.75rem; border-bottom: 2px solid #cbd5e1; border-right: 2px solid #cbd5e1; }
+
+.seal-container { position: relative; }
+.seal-outer { width: 5rem; height: 5rem; border-radius: 9999px; border: 4px solid #f1f5f9; display: flex; align-items: center; justify-content: center; background: #f8fafc; }
+.seal-icon { width: 2.5rem; height: 2.5rem; color: #1e293b; }
+.seal-badge { position: absolute; bottom: -0.5rem; left: -0.5rem; width: 1.5rem; height: 1.5rem; border-radius: 9999px; background: #f1f5f9; border: 2px solid white; display: flex; align-items: center; justify-content: center; opacity: 0.8; }
+.seal-badge-icon { width: 0.875rem; height: 0.875rem; color: #475569; }
+
+.title-section { margin-bottom: 0.5rem; }
+.title-text { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.025em; color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.5rem; }
+.title-of { font-weight: 300; color: #64748b; }
+.subtitle-text { font-size: 0.75rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.25em; }
+
+.body-section { padding-top: 0.5rem; }
+.award-label { font-size: 0.875rem; color: #64748b; font-weight: 500; }
+.recipient-section { margin-bottom: 0.25rem; }
+.recipient-name { font-size: 1.5rem; font-weight: 900; color: #0f172a; }
+.name-line { height: 1px; background: #0f172a; width: 100%; }
+.course-label { font-size: 0.875rem; color: #64748b; font-weight: 500; padding-top: 0.25rem; }
+.course-name { font-size: 1.125rem; font-weight: 700; color: #0f172a; }
+.exam-name { font-size: 0.75rem; color: #475569; font-weight: 500; font-style: italic; }
+
+.metadata-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; width: 100%; padding-top: 1.5rem; padding-left: 1rem; padding-right: 1rem; }
+.metadata-item { }
+.metadata-left { text-align: left; }
+.metadata-right { text-align: right; }
+.metadata-label { font-size: 0.5rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; border-top: 2px solid #f1f5f9; padding-top: 0.25rem; }
+.metadata-value { font-size: 0.75rem; font-weight: 900; color: #1e293b; }
+
+.footer-section { width: 100%; display: flex; align-items: flex-end; justify-content: space-between; padding-top: 2rem; }
+.signature-block { text-align: left; }
+.signature-line-area { height: 2rem; width: 6rem; border-bottom: 1px solid #cbd5e1; display: flex; align-items: flex-end; }
+.signature-text { font-style: italic; font-size: 0.875rem; color: #94a3b8; padding-left: 0.25rem; opacity: 0.6; }
+.signature-label { font-size: 0.4375rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: -0.05em; }
+
+.barcode-block { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 0.125rem; }
+.barcode-bars { display: flex; gap: 1px; height: 2rem; align-items: flex-end; opacity: 0.8; }
+.barcode-bar { background: #0f172a; }
+.barcode-id { font-size: 0.4375rem; font-family: monospace; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; }
+
+.letter-frame { border: 4px double #e2e8f0; border-radius: 0.5rem; background: white; padding: 2.5rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+.letter-content { max-width: 42rem; margin: 0 auto; text-align: left; }
+.letter-header { border-bottom: 1px solid #f1f5f9; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+.letter-academy { font-size: 1.125rem; font-weight: 700; color: #0f172a; }
+.letter-tagline { font-size: 0.75rem; color: #64748b; }
+.letter-date { font-size: 0.875rem; color: #475569; margin-bottom: 1rem; }
+.letter-greeting { font-size: 0.875rem; color: #1e293b; margin-bottom: 1rem; }
+.letter-paragraph { font-size: 0.875rem; color: #334155; line-height: 1.625; margin-bottom: 1rem; }
+.letter-closing { font-size: 0.875rem; color: #334155; line-height: 1.625; margin-top: 1.5rem; }
+.letter-signature { padding-top: 1.5rem; }
+.signature-name-line { width: 6rem; border-bottom: 1px solid #cbd5e1; }
+.signature-handwritten { font-style: italic; font-size: 1.125rem; color: #475569; }
+.signature-fullname { font-size: 0.75rem; font-weight: 600; color: #64748b; margin-top: 0.25rem; }
+.signature-title { font-size: 0.75rem; color: #94a3b8; }
+
+.print-only { display: none; }
+
 @media print {
-  /* HIDE NAVBAR & FOOTER CONTAINERS */
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
   header, footer, nav, aside, .no-print {
     display: none !important;
   }
 
-  /* RESET WRAPPERS */
   body, html {
     background: white !important;
     margin: 0 !important;
@@ -143,34 +229,100 @@
   }
 
   main {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
-  /* FORCE COLOR RENDERING */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
 
-  #certificate-content {
-    display: block !important;
-    margin: 0 auto !important;
-    padding: 2cm !important;
-    width: 100% !important;
+  .mx-auto.max-w-xl {
     max-width: none !important;
-    border: 8px double #cbd5e1 !important; /* Fallback for slate-300 */
-    box-shadow: none !important;
-    background: white !important;
-    page-break-inside: avoid !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
-  /* FIX COLORS FOR PRINT */
-  .text-slate-900 { color: #0f172a !important; }
-  .text-slate-800 { color: #1e293b !important; }
-  .text-slate-500 { color: #64748b !important; }
-  .bg-slate-900 { background-color: #0f172a !important; }
-  .border-slate-100 { border-color: #f1f5f9 !important; }
-  .border-slate-300 { border-color: #cbd5e1 !important; }
+  .certificate-box {
+    width: 277mm !important;
+    height: 190mm !important;
+    max-width: none !important;
+    margin: 5mm auto !important;
+    padding: 10mm 15mm !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    border-width: 8px !important;
+    border-radius: 4mm !important;
+    gap: 6mm !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .corner { width: 15mm !important; height: 15mm !important; }
+  .corner-tl, .corner-tr { top: 5mm !important; }
+  .corner-bl, .corner-br { bottom: 5mm !important; }
+  .corner-tl, .corner-bl { left: 5mm !important; }
+  .corner-tr, .corner-br { right: 5mm !important; }
+
+  .seal-outer { width: 18mm !important; height: 18mm !important; border-width: 3px !important; }
+  .seal-icon { width: 10mm !important; height: 10mm !important; }
+  .seal-badge { width: 6mm !important; height: 6mm !important; }
+  .seal-badge-icon { width: 3.5mm !important; height: 3.5mm !important; }
+
+  .title-text { font-size: 10mm !important; border-bottom-width: 2px !important; padding-bottom: 3mm !important; }
+  .subtitle-text { font-size: 3.5mm !important; letter-spacing: 3px !important; }
+
+  .award-label { font-size: 4mm !important; }
+  .recipient-name { font-size: 10mm !important; }
+  .name-line { height: 1.5px !important; }
+  .course-label { font-size: 4mm !important; }
+  .course-name { font-size: 7mm !important; }
+  .exam-name { font-size: 3.5mm !important; }
+
+  .metadata-grid { gap: 15mm !important; padding-top: 8mm !important; }
+  .metadata-label { font-size: 2.8mm !important; border-top-width: 2px !important; }
+  .metadata-value { font-size: 4mm !important; }
+
+  .footer-section { padding-top: 10mm !important; }
+  .signature-line-area { height: 10mm !important; width: 30mm !important; }
+  .signature-text { font-size: 5mm !important; }
+  .signature-label { font-size: 2.5mm !important; }
+
+  .barcode-bars { height: 10mm !important; }
+  .barcode-id { font-size: 2.5mm !important; }
+
+  .print-only {
+    display: block !important;
+  }
+
+  #thank-you-letter {
+    page-break-before: always !important;
+    margin-top: 0 !important;
+    padding: 0 !important;
+  }
+
+  .letter-frame {
+    width: 277mm !important;
+    height: 186mm !important;
+    max-width: none !important;
+    margin: 2mm auto !important;
+    padding: 15mm 20mm !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+
+  .letter-academy { font-size: 7mm !important; }
+  .letter-tagline { font-size: 3.5mm !important; }
+  .letter-date { font-size: 3.5mm !important; }
+  .letter-greeting { font-size: 3.5mm !important; }
+  .letter-paragraph { font-size: 3.5mm !important; line-height: 1.6 !important; margin-bottom: 4mm !important; }
+  .letter-closing { font-size: 3.5mm !important; }
+  .signature-handwritten { font-size: 5mm !important; }
+  .signature-fullname { font-size: 3mm !important; }
+  .signature-title { font-size: 3mm !important; }
 }

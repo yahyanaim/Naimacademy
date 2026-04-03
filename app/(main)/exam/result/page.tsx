@@ -1,13 +1,14 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useState, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { ExamResult } from "@/components/exam/exam-result"
 import { Button } from "@/components/ui/button"
 
-export default function ExamResultPage() {
-  const router = useRouter()
+export const dynamic = "force-dynamic"
+
+function ExamResultContent() {
   const searchParams = useSearchParams()
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -59,10 +60,24 @@ export default function ExamResultPage() {
         results={results}
       />
       <div className="flex justify-center">
-        <Button render={<Link href="/dashboard" />} variant="ghost">
-          Back to Dashboard
-        </Button>
+        <Link href="/dashboard">
+          <Button variant="ghost">
+            Back to Dashboard
+          </Button>
+        </Link>
       </div>
     </div>
+  )
+}
+
+export default function ExamResultPage() {
+  return (
+    <Suspense fallback={
+      <div className="mx-auto max-w-2xl px-4 py-20 text-center">
+        <p className="text-muted-foreground animate-pulse">Loading your results...</p>
+      </div>
+    }>
+      <ExamResultContent />
+    </Suspense>
   )
 }

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import Footer from "@/components/layout/footer";
 
 export default function HomePage() {
@@ -18,12 +17,12 @@ export default function HomePage() {
           </div>
           
           <div className="flex items-center justify-center gap-4">
-            <Button asChild size="lg" className="h-12 px-8">
-              <Link href="/course">Start Learning</Link>
-            </Button>
-            <Button asChild size="lg" variant="ghost" className="h-12 px-6">
-              <Link href="/signup">Create Account</Link>
-            </Button>
+            <Link href="/course" className="inline-flex h-12 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80">
+              Start Learning
+            </Link>
+            <Link href="/signup" className="inline-flex h-12 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-6 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground">
+              Create Account
+            </Link>
           </div>
 
           {/* Hero Image */}
