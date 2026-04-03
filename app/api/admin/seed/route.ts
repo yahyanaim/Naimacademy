@@ -14,3 +14,9 @@ export async function POST() {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
+export async function GET() {
+  return NextResponse.json({ 
+    message: "Send POST to seed database. Default admin: admin@n8n-course.com / admin123" 
+  });
+}
