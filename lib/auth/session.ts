@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { signToken, verifyToken, JWTPayload } from "./jwt";
 import { SESSION } from "@/lib/constants";
+import { NextResponse } from "next/server";
 
 export async function setSession(payload: JWTPayload) {
   const token = await signToken(payload);
@@ -8,6 +9,18 @@ export async function setSession(payload: JWTPayload) {
   const isProduction = process.env.NODE_ENV === "production";
   
   cookieStore.set(SESSION.COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "lax",
+    maxAge: SESSION.MAX_AGE_SECONDS,
+    path: "/",
+  });
+}
+
+export function setSessionCookie(response: NextResponse, token: string) {
+  const isProduction = process.env.NODE_ENV === "production";
+  
+  response.cookies.set(SESSION.COOKIE_NAME, token, {
     httpOnly: true,
     secure: isProduction,
     sameSite: "lax",

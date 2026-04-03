@@ -1,7 +1,8 @@
 import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/lib/models/user.model";
 import { InviteCode } from "@/lib/models/invite-code.model";
-import { setSession } from "@/lib/auth/session";
+import { signToken } from "@/lib/auth/jwt";
+import { setSessionCookie } from "@/lib/auth/session";
 import { PASSWORD } from "@/lib/constants";
 import { sanitizeInput } from "@/lib/utils/sanitize";
 import { rateLimit } from "@/lib/utils/rate-limit";
@@ -49,13 +50,6 @@ export async function POST(req: NextRequest) {
     );
 
     if (!invite) {
-      const exists = await InviteCode.findOne({ code: inviteCode });
-      if (exists) {
-        return NextResponse.json(
-          { error: "Invalid invite code" },
-          { status: 400 }
-        );
-      }
       return NextResponse.json(
         { error: "Invalid invite code" },
         { status: 400 }
@@ -74,6 +68,8 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, PASSWORD.BCRYPT_ROUNDS);
     const user = await User.create({ name, email, password: hashedPassword });
 
+    const token = await signToken({ userId: user._id.toString(), role: user.role });
+
     const response = NextResponse.json(
       {
         user: {
@@ -86,7 +82,7 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
 
-    await setSession({ userId: user._id.toString(), role: user.role });
+    setSessionCookie(response, token);
 
     return response;
   } catch {

@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/lib/models/user.model";
-import { setSession } from "@/lib/auth/session";
+import { signToken } from "@/lib/auth/jwt";
+import { setSessionCookie } from "@/lib/auth/session";
 import { sanitizeInput } from "@/lib/utils/sanitize";
 import { rateLimit } from "@/lib/utils/rate-limit";
 import bcrypt from "bcryptjs";
@@ -56,6 +57,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const token = await signToken({ userId: user._id.toString(), role: user.role });
+
     const response = NextResponse.json(
       {
         user: {
@@ -68,7 +71,7 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
 
-    await setSession({ userId: user._id.toString(), role: user.role });
+    setSessionCookie(response, token);
 
     return response;
   } catch {
