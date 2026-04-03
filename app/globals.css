@@ -128,3 +128,49 @@
     @apply font-sans;
   }
 }
+
+@media print {
+  /* HIDE NAVBAR & FOOTER CONTAINERS */
+  header, footer, nav, aside, .no-print {
+    display: none !important;
+  }
+
+  /* RESET WRAPPERS */
+  body, html {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  main {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* FORCE COLOR RENDERING */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  #certificate-content {
+    display: block !important;
+    margin: 0 auto !important;
+    padding: 2cm !important;
+    width: 100% !important;
+    max-width: none !important;
+    border: 8px double #cbd5e1 !important; /* Fallback for slate-300 */
+    box-shadow: none !important;
+    background: white !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* FIX COLORS FOR PRINT */
+  .text-slate-900 { color: #0f172a !important; }
+  .text-slate-800 { color: #1e293b !important; }
+  .text-slate-500 { color: #64748b !important; }
+  .bg-slate-900 { background-color: #0f172a !important; }
+  .border-slate-100 { border-color: #f1f5f9 !important; }
+  .border-slate-300 { border-color: #cbd5e1 !important; }
+}
