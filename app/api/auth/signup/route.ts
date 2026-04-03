@@ -85,9 +85,11 @@ export async function POST(req: NextRequest) {
     setSessionCookie(response, token);
 
     return response;
-  } catch {
+  } catch (error) {
+    console.error("[SIGNUP_ERROR]", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: message },
       { status: 500 }
     );
   }
