@@ -6,6 +6,7 @@ import { Section } from "@/lib/models/section.model";
 import { Lesson } from "@/lib/models/lesson.model";
 import { Exam } from "@/lib/models/exam.model";
 import { Question } from "@/lib/models/question.model";
+import { InviteCode } from "@/lib/models/invite-code.model";
 import {
   ADMIN_USER,
   COURSE_DATA,
@@ -25,6 +26,7 @@ export async function seed() {
     Lesson.deleteMany({}),
     Exam.deleteMany({}),
     Question.deleteMany({}),
+    InviteCode.deleteMany({}),
   ]);
 
   // Create admin user
@@ -34,6 +36,13 @@ export async function seed() {
     email: ADMIN_USER.email,
     password: hashedPassword,
     role: ADMIN_USER.role,
+  });
+
+  // Create invite code
+  const invite = await InviteCode.create({
+    code: "NAIM2026",
+    maxUses: 500,
+    usedCount: 0,
   });
 
   // Create course
@@ -84,6 +93,7 @@ export async function seed() {
 
   console.log("Seed complete:");
   console.log(`  Admin user: ${admin.email}`);
+  console.log(`  Invite code: ${invite.code}`);
   console.log(`  Course: ${course.title}`);
   console.log(`  Sections: ${course.sections.length}`);
   console.log(`  Total lessons: ${totalLessons}`);
