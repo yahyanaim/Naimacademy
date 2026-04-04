@@ -90,25 +90,19 @@ export const POST = withAuth(
       const endDate = new Date(start);
       endDate.setDate(endDate.getDate() + weeksNeeded * 7);
 
-      const result = await User.findByIdAndUpdate(
-        ctx.user.userId,
-        {
-          $set: {
-            learningSchedule: {
-              lessonsPerWeek: Number(lessonsPerWeek),
-              daysOfWeek: daysOfWeek || [1, 2, 3, 4, 5],
-              startDate: start,
-              endDate: endDate,
-            },
-            lastActivityAt: new Date(),
-          },
-        },
-        { new: true }
-      );
-
-      if (!result) {
+      const dbUser = await User.findById(ctx.user.userId);
+      if (!dbUser) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
+
+      dbUser.set("learningSchedule", {
+        lessonsPerWeek: Number(lessonsPerWeek),
+        daysOfWeek: daysOfWeek || [1, 2, 3, 4, 5],
+        startDate: start,
+        endDate: endDate,
+      });
+      dbUser.lastActivityAt = new Date();
+      await dbUser.save();
 
       const startDateStr = startDate;
       const endDateStr = endDate.toISOString().split("T")[0];
