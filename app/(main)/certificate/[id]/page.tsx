@@ -87,10 +87,6 @@ export default function CertificateDetailPage() {
           <ChevronLeft className="size-4 mr-1" />
           Back
         </Button>
-        <Button onClick={handlePrint} className="gap-2">
-          <Download className="size-4" />
-          Download PDF
-        </Button>
       </div>
 
       {/* Certificate Frame */}
