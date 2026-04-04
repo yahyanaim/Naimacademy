@@ -15,7 +15,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { CheckCircle, ChevronRight, Menu } from "lucide-react";
+import { CheckCircle, ChevronRight, ChevronLeft, Menu } from "lucide-react";
 import { Progress, ProgressTrack, ProgressIndicator } from "@/components/ui/progress";
 
 interface Resource {
@@ -72,6 +72,13 @@ function getNextLesson(sections: SectionData[], currentId: string): LessonListIt
   const idx = all.findIndex((l) => l._id === currentId);
   if (idx === -1 || idx >= all.length - 1) return null;
   return all[idx + 1];
+}
+
+function getPrevLesson(sections: SectionData[], currentId: string): LessonListItem | null {
+  const all = getAllOrderedLessons(sections);
+  const idx = all.findIndex((l) => l._id === currentId);
+  if (idx <= 0) return null;
+  return all[idx - 1];
 }
 
 export default function LessonPage() {
@@ -160,6 +167,7 @@ export default function LessonPage() {
 
   const completedLessons = progress?.completedLessons ?? [];
   const nextLesson = course && lessonId ? getNextLesson(course.sections, lessonId) : null;
+  const prevLesson = course && lessonId ? getPrevLesson(course.sections, lessonId) : null;
 
   const sidebarContent = course ? (
     <CourseSidebar
@@ -269,9 +277,21 @@ export default function LessonPage() {
             transcript={lesson.transcript}
           />
 
-          {/* Next Lesson */}
-          {nextLesson && (
-            <div className="pt-4 border-t border-border">
+          {/* Navigation */}
+          <div className="pt-4 border-t border-border flex items-center justify-between gap-4">
+            {prevLesson ? (
+              <Button
+                render={<Link href={`/course/lesson/${prevLesson._id}`} />}
+                variant="outline"
+                className="flex items-center gap-1.5"
+              >
+                <ChevronLeft className="size-4" />
+                {prevLesson.title}
+              </Button>
+            ) : (
+              <div />
+            )}
+            {nextLesson && (
               <Button
                 render={<Link href={`/course/lesson/${nextLesson._id}`} />}
                 variant="outline"
@@ -280,8 +300,8 @@ export default function LessonPage() {
                 Next: {nextLesson.title}
                 <ChevronRight className="size-4" />
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
