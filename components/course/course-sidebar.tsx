@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, ChevronRight, CheckCircle, PlayCircle, LogOut, BookOpen } from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCircle, PlayCircle, LogOut } from "lucide-react";
 
 interface Lesson {
   _id: string;
@@ -17,7 +17,6 @@ interface Section {
   title: string;
   order: number;
   lessons: Lesson[];
-  isLocked?: boolean;
 }
 
 interface CourseSidebarProps {
@@ -71,45 +70,35 @@ export function CourseSidebar({ sections, completedLessons, currentLessonId }: C
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1">
-        <div className="py-1">
+    <ScrollArea className="h-full">
+      <div className="py-2 flex flex-col h-full">
+        <div className="flex-1">
           {sections.map((section) => {
             const isOpen = openSections[section._id] ?? false;
-            const isLocked = section.isLocked ?? false;
             return (
-              <div key={section._id} className="border-b border-border/50 last:border-b-0">
+              <div key={section._id} className="border-b border-border last:border-b-0">
                 <button
-                  onClick={() => !isLocked && toggleSection(section._id)}
-                  className={`w-full flex items-center justify-between gap-2 px-4 py-3 text-left transition-colors ${
-                    isLocked 
-                      ? "opacity-50 cursor-not-allowed bg-muted/20" 
-                      : "hover:bg-muted/50"
-                  }`}
+                  onClick={() => toggleSection(section._id)}
+                  className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="size-3.5 text-muted-foreground shrink-0" />
-                      <p className="text-sm font-medium truncate">{section.title}</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground flex items-center gap-3 mt-0.5 pl-5">
+                    <p className="text-sm font-medium truncate">{section.title}</p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-3 mt-0.5">
                       <span>{section.lessons.length} lesson{section.lessons.length !== 1 ? "s" : ""}</span>
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                         {getSectionDuration(section)}
                       </span>
                     </p>
                   </div>
-                  {!isLocked && (
-                    isOpen ? (
-                      <ChevronDown className="size-4 text-muted-foreground shrink-0" />
-                    ) : (
-                      <ChevronRight className="size-4 text-muted-foreground shrink-0" />
-                    )
+                  {isOpen ? (
+                    <ChevronDown className="size-4 text-muted-foreground shrink-0" />
+                  ) : (
+                    <ChevronRight className="size-4 text-muted-foreground shrink-0" />
                   )}
                 </button>
 
-                {isOpen && !isLocked && (
-                  <ul className="pb-1 bg-muted/20">
+                {isOpen && (
+                  <ul className="pb-1">
                     {section.lessons.map((lesson) => {
                       const isCompleted = completedLessons.includes(lesson._id);
                       const isCurrent = lesson._id === currentLessonId;
@@ -118,16 +107,16 @@ export function CourseSidebar({ sections, completedLessons, currentLessonId }: C
                         <li key={lesson._id}>
                           <Link
                             href={`/course/lesson/${lesson._id}`}
-                            className={`flex items-center gap-3 px-4 py-2.5 pl-9 text-sm transition-colors ${
+                            className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-muted/50 ${
                               isCurrent 
-                                ? "bg-primary/10 text-primary border-l-2 border-primary font-medium" 
-                                : "hover:bg-muted/50"
+                                ? "bg-yellow-500/10 text-yellow-700 border-l-2 border-yellow-500 font-medium" 
+                                : ""
                             }`}
                           >
                             {isCompleted ? (
-                              <CheckCircle className={`size-4 shrink-0 ${isCurrent ? "text-primary" : "text-green-500"}`} />
+                              <CheckCircle className={`size-4 shrink-0 ${isCurrent ? "text-yellow-600" : "text-green-500"}`} />
                             ) : (
-                              <PlayCircle className={`size-4 shrink-0 ${isCurrent ? "text-primary" : "text-muted-foreground"}`} />
+                              <PlayCircle className={`size-4 shrink-0 ${isCurrent ? "text-yellow-600" : "text-muted-foreground"}`} />
                             )}
                             <span className="flex-1 min-w-0 truncate">{lesson.title}</span>
                             <span className="text-xs text-muted-foreground shrink-0">{lesson.duration}</span>
@@ -141,20 +130,20 @@ export function CourseSidebar({ sections, completedLessons, currentLessonId }: C
             );
           })}
         </div>
-      </ScrollArea>
-      
-      <div className="p-3 border-t border-border/50 bg-muted/20">
-        <button
-          onClick={async () => {
-            await fetch("/api/auth/logout", { method: "POST" });
-            window.location.href = "/";
-          }}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors w-full px-2 py-2 rounded-md hover:bg-muted/50"
-        >
-          <LogOut className="size-4" />
-          Logout
-        </button>
+        
+        <div className="p-4 border-t border-border mt-auto">
+          <button
+            onClick={async () => {
+              await fetch("/api/auth/logout", { method: "POST" });
+              window.location.href = "/";
+            }}
+            className="flex items-center gap-2 text-sm text-destructive hover:opacity-80 transition-opacity"
+          >
+            <LogOut className="size-4" />
+            Logout
+          </button>
+        </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 }
