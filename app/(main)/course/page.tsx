@@ -100,6 +100,7 @@ export default function CoursePage() {
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
   const [pendingLessonId, setPendingLessonId] = useState<string>("");
+  const [hasSchedule, setHasSchedule] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -120,6 +121,7 @@ export default function CoursePage() {
         setCourse(courseData);
         setProgress(progressData);
         setUser(userData);
+        setHasSchedule(!!progressJson?.learningSchedule);
 
         if (courseData) {
           const initial: Record<string, boolean> = {};
@@ -199,7 +201,11 @@ END:VEVENT
 
   async function handleStartCourse(lessonId: string) {
     setPendingLessonId(lessonId);
-    setScheduleDialogOpen(true);
+    if (!hasSchedule) {
+      setScheduleDialogOpen(true);
+    } else {
+      router.push(`/course/lesson/${lessonId}`);
+    }
   }
 
   async function handleScheduleSave() {

@@ -21,7 +21,21 @@ export function SupportChat() {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [fetched, setFetched] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.ok ? res.json() : Promise.reject())
+      .then((data) => {
+        if (data?.user) {
+          setUserName(data.user.name || "User");
+          setUserEmail(data.user.email || "");
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (isOpen && !fetched) {
@@ -52,7 +66,11 @@ export function SupportChat() {
       const res = await fetch("/api/support", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input.trim() }),
+        body: JSON.stringify({
+          message: input.trim(),
+          userName,
+          userEmail,
+        }),
       });
 
       const data = await res.json();
@@ -74,7 +92,6 @@ export function SupportChat() {
 
   return (
     <>
-      {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 z-50 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all duration-200 hover:scale-105"
@@ -83,10 +100,8 @@ export function SupportChat() {
         {isOpen ? <X className="size-6" /> : <MessageCircle className="size-6" />}
       </button>
 
-      {/* Chat Window */}
       {isOpen && (
         <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 rounded-xl border border-border bg-background shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
-          {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50">
             <div>
               <h3 className="text-sm font-semibold">Support</h3>
@@ -104,7 +119,6 @@ export function SupportChat() {
             </button>
           </div>
 
-          {/* Messages */}
           <div className="h-72 overflow-y-auto p-4 space-y-3 bg-muted/10">
             {loading ? (
               <p className="text-sm text-muted-foreground text-center py-8">Loading...</p>
@@ -136,7 +150,6 @@ export function SupportChat() {
             <div ref={bottomRef} />
           </div>
 
-          {/* Input */}
           <div className="border-t border-border p-3 bg-background">
             {remaining > 0 ? (
               <div className="flex gap-2">

@@ -226,18 +226,6 @@ export default function LessonPage() {
         </div>
 
         <div className="flex-1 px-4 py-6 space-y-6 max-w-4xl w-full mx-auto lg:mx-0 lg:max-w-none lg:px-6">
-          {/* Progress Bar */}
-          <div className="flex items-center gap-3 text-sm">
-            <Progress value={progress?.completionPercentage ?? 0} className="flex-1">
-              <ProgressTrack>
-                <ProgressIndicator className="bg-green-500" />
-              </ProgressTrack>
-            </Progress>
-            <span className="font-medium text-green-600 dark:text-green-400 shrink-0">
-              {progress?.completionPercentage ?? 0}%
-            </span>
-          </div>
-
           {/* Video */}
           <VideoPlayer
             url={lesson.videoUrl}
@@ -282,21 +270,21 @@ export default function LessonPage() {
             {prevLesson ? (
               <Button
                 render={<Link href={`/course/lesson/${prevLesson._id}`} />}
-                className="flex items-center gap-1.5 bg-yellow-500 hover:bg-yellow-600 text-white border-0"
+                className="flex-1 flex items-center justify-center gap-1.5 bg-yellow-500 hover:bg-yellow-600 text-white border-0"
               >
-                <ChevronLeft className="size-4" />
-                {prevLesson.title}
+                <ChevronLeft className="size-4 shrink-0" />
+                <span className="truncate">{prevLesson.title}</span>
               </Button>
             ) : (
-              <div />
+              <div className="flex-1" />
             )}
             {nextLesson && (
               <Button
                 render={<Link href={`/course/lesson/${nextLesson._id}`} />}
-                className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white border-0"
+                className="flex-1 flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-600 text-white border-0"
               >
-                Next: {nextLesson.title}
-                <ChevronRight className="size-4" />
+                <span className="truncate">Next: {nextLesson.title}</span>
+                <ChevronRight className="size-4 shrink-0" />
               </Button>
             )}
           </div>

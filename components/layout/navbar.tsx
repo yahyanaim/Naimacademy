@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   Shield,
   FileBadge,
+  Coffee,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -82,6 +83,10 @@ export default function Navbar() {
     </>
   );
 
+  const handleDonate = () => {
+    setMobileOpen(false);
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.02)] transition-all duration-300">
       <div className="container mx-auto flex h-14 items-center justify-between px-4">
@@ -96,6 +101,15 @@ export default function Navbar() {
 
         {/* Right side – desktop */}
         <div className="hidden md:flex items-center gap-2">
+          {user && (
+            <Link
+              href="/donate"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 flex items-center gap-1 hover:-translate-y-0.5"
+            >
+              <Coffee className="size-4" />
+              Support
+            </Link>
+          )}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost" }), "font-semibold text-base")}>
@@ -154,6 +168,16 @@ export default function Navbar() {
             <SheetContent side="right" className="w-64">
               <nav className="flex flex-col gap-4 mt-6">
                 {navLinks}
+                {user && (
+                  <Link
+                    href="/donate"
+                    className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <Coffee className="size-4" />
+                    Support Us
+                  </Link>
+                )}
                 {user ? (
                   <>
                     <Link
