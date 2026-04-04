@@ -12,12 +12,11 @@ export async function POST() {
 
     await User.deleteOne({ email });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
     const user = await User.create({
       name: "Test User",
       email,
       password: hashedPassword,
-      role: "student",
     });
 
     return NextResponse.json({ 

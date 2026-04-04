@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/lib/models/user.model";
+import { Admin } from "@/lib/models/admin.model";
 import { signToken } from "@/lib/auth/jwt";
 import { setSessionCookie } from "@/lib/auth/session";
 import { sanitizeInput } from "@/lib/utils/sanitize";
@@ -28,7 +29,14 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    const user = await User.findOne({ email }).select("+password");
+    let user = await Admin.findOne({ email });
+    let role = "admin";
+
+    if (!user) {
+      user = await User.findOne({ email });
+      role = "student";
+    }
+
     if (!user) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       return NextResponse.json(
@@ -46,7 +54,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const token = await signToken({ userId: user._id.toString(), role: user.role });
+    const token = await signToken({ userId: user._id.toString(), role });
 
     const response = NextResponse.json(
       {
@@ -54,7 +62,7 @@ export async function POST(req: NextRequest) {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
-          role: user.role,
+          role,
         },
       },
       { status: 200 }

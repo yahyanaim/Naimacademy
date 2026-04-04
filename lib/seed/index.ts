@@ -2,6 +2,7 @@ import { PASSWORD } from "@/lib/constants";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/lib/models/user.model";
+import { Admin } from "@/lib/models/admin.model";
 import { Course } from "@/lib/models/course.model";
 import { Section } from "@/lib/models/section.model";
 import { Lesson } from "@/lib/models/lesson.model";
@@ -22,6 +23,7 @@ export async function seed() {
   // Clear all collections
   await Promise.all([
     User.deleteMany({}),
+    Admin.deleteMany({}),
     Course.deleteMany({}),
     Section.deleteMany({}),
     Lesson.deleteMany({}),
@@ -30,13 +32,12 @@ export async function seed() {
     InviteCode.deleteMany({}),
   ]);
 
-  // Create admin user
+  // Create admin in Admin collection
   const hashedPassword = await bcrypt.hash(ADMIN_USER.password, PASSWORD.BCRYPT_ROUNDS);
-  const admin = await User.create({
+  const admin = await Admin.create({
     name: ADMIN_USER.name,
     email: ADMIN_USER.email,
     password: hashedPassword,
-    role: ADMIN_USER.role,
   });
 
   // Create invite code
