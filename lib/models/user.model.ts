@@ -56,10 +56,10 @@ const UserSchema = new Schema<IUser>(
       lastVideoTimestamp: { type: Number, default: 0 },
     },
     learningSchedule: {
-      lessonsPerWeek: { type: Number, required: true },
+      lessonsPerWeek: { type: Number },
       daysOfWeek: [{ type: Number }],
-      startDate: { type: Date, required: true },
-      endDate: { type: Date, required: true },
+      startDate: { type: Date },
+      endDate: { type: Date },
     },
     examAttempts: [
       {
