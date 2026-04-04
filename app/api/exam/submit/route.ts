@@ -2,34 +2,51 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Exam } from "@/lib/models/exam.model";
 import { Question } from "@/lib/models/question.model";
 import { User } from "@/lib/models/user.model";
-import { Course } from "@/lib/models/course.model";
 import { withAuth } from "@/lib/auth/guards";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
-// Register Question model
 Question;
+
+const EXAM_SUBMISSION_LOCK = new Map<string, number>();
+const LOCK_TIMEOUT_MS = 10000;
+
+function acquireLock(userId: string): boolean {
+  const now = Date.now();
+  const lastSubmission = EXAM_SUBMISSION_LOCK.get(userId);
+  if (lastSubmission && now - lastSubmission < LOCK_TIMEOUT_MS) {
+    return false;
+  }
+  EXAM_SUBMISSION_LOCK.set(userId, now);
+  setTimeout(() => EXAM_SUBMISSION_LOCK.delete(userId), LOCK_TIMEOUT_MS);
+  return true;
+}
 
 export const POST = withAuth(
   async (
     req: NextRequest,
-    ctx: {
-      params: Promise<Record<string, string>>;
-      user: { userId: string; role: string };
-    }
+    ctx: { params: Promise<Record<string, string>>; user: { userId: string; role: string } }
   ): Promise<NextResponse> => {
     try {
       await connectDB();
 
+      if (ctx.user.role === "admin") {
+        return NextResponse.json({ message: "Admin exam not tracked" }, { status: 200 });
+      }
+
+      if (!acquireLock(ctx.user.userId)) {
+        return NextResponse.json(
+          { error: "Please wait before submitting again" },
+          { status: 429 }
+        );
+      }
+
       let body;
       try {
         body = await req.json();
-      } catch (e) {
-        console.error("[SUBMIT] Failed to parse request body:", e);
+      } catch {
         return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
       }
-
-      console.log("[SUBMIT] Received body for examId:", body?.examId);
 
       const { examId, answers } = body as {
         examId: string;
@@ -37,16 +54,14 @@ export const POST = withAuth(
       };
 
       if (!examId || !Array.isArray(answers)) {
-        console.error("[SUBMIT] Missing fields:", { examId, answersType: typeof answers });
         return NextResponse.json(
           { error: "examId and answers are required" },
           { status: 400 }
         );
       }
 
-      // Validate examId format
       if (!examId.match(/^[0-9a-fA-F]{24}$/)) {
-         return NextResponse.json({ error: "Invalid exam ID format" }, { status: 400 });
+        return NextResponse.json({ error: "Invalid exam ID format" }, { status: 400 });
       }
 
       const exam = await Exam.findById(examId)
@@ -54,47 +69,29 @@ export const POST = withAuth(
         .populate("courseId", "title");
 
       if (!exam) {
-        console.error("[SUBMIT] Exam not found in DB:", examId);
         return NextResponse.json({ error: "Exam not found" }, { status: 404 });
       }
 
-      console.log("[SUBMIT] Exam found:", exam.title, "Questions:", exam.questions?.length);
-
-      // Map student answers to exam questions using IDs
       if (!Array.isArray(exam.questions) || exam.questions.length === 0) {
-        console.error("[SUBMIT] exam.questions is invalid", exam.questions);
         return NextResponse.json({ error: "Exam has no questions defined" }, { status: 500 });
       }
 
       const mappedUserAnswers: number[] = new Array(exam.questions.length).fill(-1);
-      const results: any[] = [];
       let correctCount = 0;
 
       for (const studentAns of answers) {
-        const qIndex = (exam.questions as any[]).findIndex(
-          (q) => {
-            if (!q) return false;
-            const id = q._id ? q._id.toString() : q.toString();
-            return id === studentAns.questionId;
-          }
-        );
+        const qIndex = exam.questions.findIndex((q) => {
+          if (!q) return false;
+          const id = q._id ? q._id.toString() : q.toString();
+          return id === studentAns.questionId;
+        });
 
         if (qIndex !== -1) {
-          const question = (exam.questions as any[])[qIndex];
-          if (question && typeof question === 'object' && 'correctAnswer' in question) {
+          const question = exam.questions[qIndex];
+          if (question && typeof question === "object" && "correctAnswer" in question) {
             const isCorrect = studentAns.answer === question.correctAnswer;
             if (isCorrect) correctCount++;
-
             mappedUserAnswers[qIndex] = studentAns.answer;
-
-            results.push({
-              question: question.question,
-              options: question.options,
-              userAnswer: studentAns.answer,
-              correctAnswer: question.correctAnswer,
-              isCorrect,
-              notes: question.notes || "",
-            });
           }
         }
       }
@@ -102,69 +99,63 @@ export const POST = withAuth(
       const total = exam.questions.length;
       const score = total > 0 ? Math.round((correctCount / total) * 100) : 0;
       const passed = score >= (exam.passingScore || 70);
-      const correct = correctCount;
 
-      if (ctx.user.role !== "admin") {
-        try {
-          const updateData: any = {
-            $push: {
-              examAttempts: {
-                examId,
-                examTitle: exam.title,
-                score,
-                passed,
-                total,
-                correct,
-                answers: mappedUserAnswers,
-                submittedAt: new Date(),
-              }
-            }
-          };
+      try {
+        const updateData: Record<string, unknown> = {
+          $push: {
+            examAttempts: {
+              examId,
+              examTitle: exam.title,
+              score,
+              passed,
+              total,
+              correct: correctCount,
+              answers: mappedUserAnswers,
+              submittedAt: new Date(),
+            },
+          },
+        };
 
-          // Issue certificate if passed and not already issued
-          if (passed) {
-            const user = await User.findById(ctx.user.userId);
-            const alreadyCertified = user?.certifications?.some((c: any) => c.examId === examId);
-            
-            if (!alreadyCertified) {
-              const certificationId = `CERT-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
-              const courseIdObj = (exam.courseId as any);
-              const courseIdStr = courseIdObj?._id ? courseIdObj._id.toString() : (courseIdObj?.toString() || "");
-              const courseTitleStr = courseIdObj?.title || exam.title;
+        if (passed) {
+          const user = await User.findById(ctx.user.userId);
+          const alreadyCertified = user?.certifications?.some(
+            (c: { examId: string }) => c.examId === examId
+          );
 
-              updateData.$push.certifications = {
-                certificationId,
-                examId,
-                examTitle: exam.title,
-                courseId: courseIdStr,
-                courseTitle: courseTitleStr,
-                studentName: user?.name || "Student",
-                score,
-                issuedAt: new Date(),
-              };
-              updateData.$set = { certificateIssued: true };
-            }
+          if (!alreadyCertified) {
+            const certificationId = `CERT-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
+            const courseIdObj = exam.courseId as Record<string, unknown>;
+            const courseIdStr = courseIdObj?._id
+              ? String((courseIdObj._id as { toString: () => string }).toString())
+              : String(courseIdObj ?? "");
+            const courseTitleStr = (courseIdObj?.title as string) || exam.title;
+
+            (updateData.$push as Record<string, unknown>).certifications = {
+              certificationId,
+              examId,
+              examTitle: exam.title,
+              courseId: courseIdStr,
+              courseTitle: courseTitleStr,
+              studentName: user?.name || "Student",
+              score,
+              issuedAt: new Date(),
+            };
+            (updateData as Record<string, unknown>).$set = { certificateIssued: true };
           }
-
-          await User.findByIdAndUpdate(ctx.user.userId, updateData);
-          console.log("[SUBMIT] User progress updated atomically");
-        } catch (saveError) {
-          console.error("[SUBMIT] Error updating user progress:", saveError);
-          return NextResponse.json({ 
-            error: "Failed to save progress", 
-            details: saveError instanceof Error ? saveError.message : String(saveError)
-          }, { status: 500 });
         }
+
+        await User.findByIdAndUpdate(ctx.user.userId, updateData);
+      } catch {
+        return NextResponse.json(
+          { error: "Failed to save progress" },
+          { status: 500 }
+        );
       }
 
-      return NextResponse.json({ score, passed, total, correct, results });
-    } catch (error: any) {
-      console.error("[POST /api/exam/submit] CRITICAL ERROR:", error);
+      return NextResponse.json({ score, passed, total, correct: correctCount });
+    } catch {
       return NextResponse.json(
-        { 
-          error: "Internal server error", 
-          details: error.message || String(error)
-        },
+        { error: "Internal server error" },
         { status: 500 }
       );
     }

@@ -39,12 +39,14 @@ export default function ExamPage() {
     async function fetchData() {
       try {
         const meRes = await fetch("/api/auth/me")
-        if (meRes.ok) {
-          const meData = await meRes.json()
-          if (meData.user.role === "admin") {
-            router.push("/admin")
-            return
-          }
+        if (!meRes.ok) {
+          router.push("/login")
+          return
+        }
+        const meData = await meRes.json()
+        if (meData.user?.role === "admin") {
+          router.push("/admin")
+          return
         }
 
         const [examRes, progressRes] = await Promise.all([

@@ -13,8 +13,50 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+
+const MAX_ATTEMPTS = 5;
+const WINDOW_MS = 15 * 60 * 1000;
+
+function getRateLimitKey(ip: string): string {
+  return `login:${ip}`;
+}
+
+function checkRateLimit(key: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const entry = loginAttempts.get(key);
+
+  if (!entry || now > entry.resetAt) {
+    loginAttempts.set(key, { count: 1, resetAt: now + WINDOW_MS });
+    return { allowed: true };
+  }
+
+  if (entry.count >= MAX_ATTEMPTS) {
+    return { allowed: false, retryAfter: Math.ceil((entry.resetAt - now) / 1000) };
+  }
+
+  entry.count += 1;
+  return { allowed: true };
+}
+
+function resetRateLimit(key: string) {
+  loginAttempts.delete(key);
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+    const rateKey = getRateLimitKey(ip);
+    const limit = checkRateLimit(rateKey);
+
+    if (!limit.allowed) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      return NextResponse.json(
+        { error: `Too many login attempts. Try again in ${limit.retryAfter} seconds.` },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
 
     const parsed = loginSchema.safeParse(body);
@@ -54,6 +96,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    resetRateLimit(rateKey);
+
     const token = await signToken({ userId: user._id.toString(), role });
 
     const response = NextResponse.json(
@@ -73,9 +117,8 @@ export async function POST(req: NextRequest) {
     return response;
   } catch (error: unknown) {
     console.error("[LOGIN_ERROR]", error);
-    const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { error: message },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

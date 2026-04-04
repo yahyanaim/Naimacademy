@@ -59,7 +59,7 @@ export default function ProfilePage() {
       if (data.user?.name) setName(data.user.name);
       
       setTimeout(() => {
-        window.location.reload();
+        router.refresh();
       }, 500);
     } catch {
       toast.error("Error saving profile details.");

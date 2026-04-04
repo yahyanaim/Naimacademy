@@ -31,86 +31,44 @@ export async function POST(req: NextRequest) {
 
   await connectDB();
 
-  const invite = await InviteCode.findOne({ code: inviteCode });
-  if (!invite || invite.usedCount >= invite.maxUses) {
-    return NextResponse.json(
-      { error: "Invalid invite code" },
-      { status: 400 }
-    );
-  }
-  invite.usedCount += 1;
-  await invite.save();
-
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    await InviteCode.findByIdAndUpdate(invite._id, { $inc: { usedCount: -1 } });
     return NextResponse.json(
       { error: "An account with this email already exists" },
       { status: 400 }
     );
   }
 
-  try {
-    const hashedPassword = await bcrypt.hash(password, PASSWORD.BCRYPT_ROUNDS);
-    const user = await User.create({ name, email, password: hashedPassword });
+  const invite = await InviteCode.findOneAndUpdate(
+    { code: inviteCode, usedCount: { $lt: "$maxUses" } },
+    { $inc: { usedCount: 1 } },
+    { new: true }
+  );
 
-    const token = await signToken({ userId: user._id.toString(), role: user.role });
-
-    const response = NextResponse.json(
-      {
-        user: {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
-      },
-      { status: 201 }
-    );
-
-    setSessionCookie(response, token);
-    return response;
-  } catch (error: unknown) {
-    console.error("[SIGNUP_ERROR]", error);
-    const err = error as Error & { code?: number; message?: string };
-    
-    if (err.code === 11000 && err.message?.includes("certifications")) {
-      try {
-        const mongoose = await import("mongoose");
-        const db = mongoose.connection.db;
-        if (db) {
-          await db.collection("users").dropIndex("certifications.certificationId_1");
-          console.log("[SIGNUP] Dropped stale certification index, retrying");
-          
-          const hashedPassword = await bcrypt.hash(password, PASSWORD.BCRYPT_ROUNDS);
-          const user = await User.create({ name, email, password: hashedPassword });
-
-          const token = await signToken({ userId: user._id.toString(), role: user.role });
-
-          const response = NextResponse.json(
-            {
-              user: {
-                id: user._id.toString(),
-                name: user.name,
-                email: user.email,
-                role: user.role,
-              },
-            },
-            { status: 201 }
-          );
-
-          setSessionCookie(response, token);
-          return response;
-        }
-      } catch (dropError) {
-        console.error("[SIGNUP] Failed to handle index error:", dropError);
-      }
-    }
-    
-    const message = error instanceof Error ? error.message : "Internal server error";
+  if (!invite) {
     return NextResponse.json(
-      { error: message },
-      { status: 500 }
+      { error: "Invalid or expired invite code" },
+      { status: 400 }
     );
   }
+
+  const hashedPassword = await bcrypt.hash(password, PASSWORD.BCRYPT_ROUNDS);
+  const user = await User.create({ name, email, password: hashedPassword });
+
+  const token = await signToken({ userId: user._id.toString(), role: user.role });
+
+  const response = NextResponse.json(
+    {
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    },
+    { status: 201 }
+  );
+
+  setSessionCookie(response, token);
+  return response;
 }

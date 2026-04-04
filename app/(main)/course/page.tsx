@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ProgressBar } from "@/components/course/progress-bar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronDown, ChevronRight, CheckCircle, PlayCircle, BookOpen, Clock, Shield, Calendar, X } from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCircle, PlayCircle, BookOpen, Clock, Shield, Calendar } from "lucide-react";
+import { getSectionDuration, parseDurationToMinutes, formatDuration } from "@/lib/utils/duration";
 import {
   Dialog,
   DialogContent,
@@ -64,31 +66,10 @@ function estimateTotalDuration(sections: SectionItem[]): string {
   let totalMinutes = 0;
   for (const section of sections) {
     for (const lesson of section.lessons) {
-      const parts = lesson.duration.split(":").map(Number);
-      if (parts.length === 2) {
-        totalMinutes += parts[0] + parts[1] / 60;
-      }
+      totalMinutes += parseDurationToMinutes(lesson.duration);
     }
   }
-  const hours = Math.floor(totalMinutes / 60);
-  const mins = Math.round(totalMinutes % 60);
-  return `${mins}m`;
-}
-
-function getSectionDuration(section: SectionItem): string {
-  let totalMinutes = 0;
-  for (const lesson of section.lessons) {
-    const parts = lesson.duration.split(":").map(Number);
-    if (parts.length === 2) {
-      totalMinutes += parts[0] + parts[1] / 60;
-    }
-  }
-  if (totalMinutes < 60) {
-    return `${Math.round(totalMinutes)}m`;
-  }
-  const hours = Math.floor(totalMinutes / 60);
-  const mins = Math.round(totalMinutes % 60);
-  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  return formatDuration(totalMinutes);
 }
 
 interface UserData {
@@ -107,6 +88,7 @@ const DAY_OPTIONS = [
 ];
 
 export default function CoursePage() {
+  const router = useRouter();
   const [course, setCourse] = useState<CourseData | null>(null);
   const [progress, setProgress] = useState<ProgressData | null>(null);
   const [user, setUser] = useState<UserData | null>(null);
@@ -115,7 +97,7 @@ export default function CoursePage() {
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
   const [scheduleSaving, setScheduleSaving] = useState(false);
   const [lessonsPerWeek, setLessonsPerWeek] = useState("5");
-  const [startDate, setStartDate] = useState("");
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
   const [pendingLessonId, setPendingLessonId] = useState<string>("");
 
@@ -159,24 +141,25 @@ export default function CoursePage() {
 
   function generateCalendarFile(schedule: { lessonsPerWeek: number; daysOfWeek: number[]; startDate: string; endDate: string }) {
     const events = [];
-    const start = new Date(schedule.startDate);
-    const end = new Date(schedule.endDate);
+    const startParts = schedule.startDate.split("T")[0].split("-");
+    const endParts = schedule.endDate.split("T")[0].split("-");
+    const start = new Date(Number(startParts[0]), Number(startParts[1]) - 1, Number(startParts[2]));
+    const end = new Date(Number(endParts[0]), Number(endParts[1]) - 1, Number(endParts[2]));
     const currentDate = new Date(start);
 
     while (currentDate <= end) {
       const dayOfWeek = currentDate.getDay();
       if (schedule.daysOfWeek.includes(dayOfWeek)) {
-        const eventStart = new Date(currentDate);
-        eventStart.setHours(10, 0, 0, 0);
-        const eventEnd = new Date(currentDate);
-        eventEnd.setHours(11, 0, 0, 0);
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+        const day = String(currentDate.getDate()).padStart(2, "0");
 
         events.push({
           summary: "Naim Academy - Study Session",
           description: "Continue your n8n automation course on Naim Academy",
           location: "https://naimacademy.vercel.app/course",
-          startTime: eventStart.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z",
-          endTime: eventEnd.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z",
+          startTime: `${year}${month}${day}T100000`,
+          endTime: `${year}${month}${day}T110000`,
         });
       }
       currentDate.setDate(currentDate.getDate() + 1);
@@ -193,8 +176,8 @@ METHOD:PUBLISH
 
     events.forEach((event, index) => {
       icsContent += `BEGIN:VEVENT
-DTSTART:${event.startTime}
-DTEND:${event.endTime}
+DTSTART;VALUE=DATE-TIME:${event.startTime}
+DTEND;VALUE=DATE-TIME:${event.endTime}
 SUMMARY:${event.summary}
 DESCRIPTION:${event.description}
 URL:${event.location}
@@ -253,7 +236,7 @@ END:VEVENT
 
       if (pendingLessonId) {
         setTimeout(() => {
-          window.location.href = `/course/lesson/${pendingLessonId}`;
+          router.push(`/course/lesson/${pendingLessonId}`);
         }, 500);
       }
     } catch {
@@ -361,8 +344,8 @@ END:VEVENT
                     </div>
                     <p className="text-xs text-muted-foreground flex items-center gap-3 mt-0.5">
                       <span>{section.lessons.length} lesson{section.lessons.length !== 1 ? "s" : ""}</span>
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
-                        {getSectionDuration(section)}
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                        {getSectionDuration(section.lessons)}
                       </span>
                     </p>
                   </div>
@@ -463,7 +446,7 @@ END:VEVENT
               onClick={() => {
                 setScheduleDialogOpen(false);
                 if (pendingLessonId) {
-                  window.location.href = `/course/lesson/${pendingLessonId}`;
+                  router.push(`/course/lesson/${pendingLessonId}`);
                 }
               }}
               disabled={scheduleSaving}

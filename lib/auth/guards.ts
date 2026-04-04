@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken, JWTPayload } from "./jwt";
+import { SESSION } from "@/lib/constants";
 
 export interface AuthRequest extends NextRequest {
   user?: JWTPayload;
@@ -17,7 +18,7 @@ type AdminRouteHandler = (
 
 export function withAuth(handler: RouteHandler) {
   return async (req: NextRequest, ctx: { params: Promise<Record<string, string>> }) => {
-    const token = req.cookies.get("auth-token")?.value;
+    const token = req.cookies.get(SESSION.COOKIE_NAME)?.value;
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -33,7 +34,7 @@ export function withAuth(handler: RouteHandler) {
 
 export function withAdmin(handler: AdminRouteHandler) {
   return async (req: NextRequest, ctx: { params: Promise<Record<string, string>> }) => {
-    const token = req.cookies.get("auth-token")?.value;
+    const token = req.cookies.get(SESSION.COOKIE_NAME)?.value;
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
