@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Award, BookOpen, FileQuestion, Lock, Calendar } from "lucide-react"
+import { Award, BookOpen, FileQuestion, Lock } from "lucide-react"
 import {
   Card,
   CardContent,
@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
-import { LearningSchedule } from "@/components/course/learning-schedule"
 
 interface ExamAttempt {
   score: number
@@ -227,9 +226,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Learning Schedule */}
-      <LearningSchedule />
     </div>
   )
 }
