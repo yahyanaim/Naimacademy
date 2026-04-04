@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -12,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckIcon, MinusIcon, Pencil, Trash2 } from "lucide-react";
+import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -30,10 +31,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 interface ExamAttempt {
   score: number;
   passed: boolean;
@@ -44,6 +41,8 @@ interface UserRecord {
   name: string;
   email: string;
   role: "admin" | "student";
+  isBanned: boolean;
+  banReason?: string;
   progress?: {
     completedLessons: string[];
     completionPercentage?: number;
@@ -55,10 +54,6 @@ interface UserRecord {
   } | null;
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function bestScore(attempts: ExamAttempt[] | undefined): string {
   if (!attempts || attempts.length === 0) return "N/A";
   return `${Math.max(...attempts.map((a) => a.score))}%`;
@@ -68,10 +63,6 @@ function completionPct(user: UserRecord): string {
   const pct = user.progress?.completionPercentage ?? 0;
   return `${pct}%`;
 }
-
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
 
 export default function UsersPage() {
   const [users, setUsers] = useState<UserRecord[]>([]);
@@ -93,13 +84,11 @@ export default function UsersPage() {
     load();
   }, []);
 
-  // Edit User State
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newRole, setNewRole] = useState<"admin" | "student">("student");
   const [updating, setUpdating] = useState(false);
 
-  // Delete User State
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<UserRecord | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -148,6 +137,30 @@ export default function UsersPage() {
     }
   }
 
+  async function handleToggleBan(userId: string, isBanned: boolean) {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/ban`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isBanned }),
+      });
+
+      if (!res.ok) {
+        toast.error("Failed to update ban status");
+        return;
+      }
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === userId ? { ...u, isBanned, banReason: isBanned ? u.banReason : undefined } : u
+        )
+      );
+      toast.success(isBanned ? "User banned" : "User activated");
+    } catch {
+      toast.error("Failed to update ban status");
+    }
+  }
+
   function openEdit(user: UserRecord) {
     setEditingUser(user);
     setNewRole(user.role);
@@ -161,7 +174,6 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Users</h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -169,7 +181,6 @@ export default function UsersPage() {
         </p>
       </div>
 
-      {/* Table */}
       {loading ? (
         <div className="space-y-3">
           {[...Array(6)].map((_, i) => (
@@ -189,12 +200,13 @@ export default function UsersPage() {
                 <TableHead className="w-28">Progress</TableHead>
                 <TableHead className="w-32">Best Exam Score</TableHead>
                 <TableHead className="w-24 text-center">Certificate</TableHead>
+                <TableHead className="w-32">Status</TableHead>
                 <TableHead className="w-24 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {users.map((user) => (
-                <TableRow key={user._id}>
+                <TableRow key={user._id} className={user.isBanned ? "bg-destructive/5" : ""}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {user.email}
@@ -215,6 +227,29 @@ export default function UsersPage() {
                       <CheckIcon className="size-4 text-green-500 mx-auto" />
                     ) : (
                       <MinusIcon className="size-4 text-muted-foreground mx-auto" />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={!user.isBanned}
+                        onCheckedChange={(checked) => handleToggleBan(user._id, !checked)}
+                      />
+                      {user.isBanned ? (
+                        <Badge variant="destructive" className="text-xs">
+                          <ShieldAlert className="size-3 mr-1" />
+                          Banned
+                        </Badge>
+                      ) : (
+                        <Badge variant="default" className="text-xs bg-green-500">
+                          Active
+                        </Badge>
+                      )}
+                    </div>
+                    {user.isBanned && user.banReason && (
+                      <p className="text-[10px] text-muted-foreground mt-1 truncate max-w-[200px]" title={user.banReason}>
+                        {user.banReason}
+                      </p>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -244,7 +279,6 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Edit Role Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -279,7 +313,6 @@ export default function UsersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete User Confirmation */}
       <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
