@@ -37,8 +37,17 @@ export const GET = withAuth(
       const lessonsPerWeek = dbUser.learningSchedule.lessonsPerWeek;
       const weeksRemaining = lessonsPerWeek > 0 ? Math.ceil(remainingLessons / lessonsPerWeek) : 0;
 
+      const schedule = dbUser.learningSchedule;
+      const startDateStr = schedule.startDate instanceof Date ? schedule.startDate.toISOString().split("T")[0] : schedule.startDate;
+      const endDateStr = schedule.endDate instanceof Date ? schedule.endDate.toISOString().split("T")[0] : schedule.endDate;
+
       return NextResponse.json({
-        schedule: dbUser.learningSchedule,
+        schedule: {
+          lessonsPerWeek: schedule.lessonsPerWeek,
+          daysOfWeek: schedule.daysOfWeek,
+          startDate: startDateStr,
+          endDate: endDateStr,
+        },
         stats: {
           totalLessons,
           completedLessons: completedCount,
@@ -87,18 +96,26 @@ export const POST = withAuth(
       const endDate = new Date(start);
       endDate.setDate(endDate.getDate() + weeksNeeded * 7);
 
+      const startDateStr = start.toISOString().split("T")[0];
+      const endDateStr = endDate.toISOString().split("T")[0];
+
       dbUser.learningSchedule = {
         lessonsPerWeek,
         daysOfWeek: daysOfWeek || [1, 2, 3, 4, 5],
-        startDate: start,
-        endDate,
+        startDate: startDateStr,
+        endDate: endDateStr,
       };
 
       await dbUser.save();
 
       return NextResponse.json({
-        schedule: dbUser.learningSchedule,
-        estimatedCompletion: endDate,
+        schedule: {
+          lessonsPerWeek,
+          daysOfWeek: daysOfWeek || [1, 2, 3, 4, 5],
+          startDate: startDateStr,
+          endDate: endDateStr,
+        },
+        estimatedCompletion: endDateStr,
       }, { status: 200 });
     } catch (error) {
       console.error("[POST /api/schedule]", error);

@@ -39,18 +39,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const invite = await InviteCode.findOneAndUpdate(
-    { code: inviteCode, usedCount: { $lt: "$maxUses" } },
-    { $inc: { usedCount: 1 } },
-    { new: true }
-  );
-
-  if (!invite) {
+  const invite = await InviteCode.findOne({ code: inviteCode });
+  if (!invite || invite.usedCount >= invite.maxUses) {
     return NextResponse.json(
       { error: "Invalid or expired invite code" },
       { status: 400 }
     );
   }
+  invite.usedCount += 1;
+  await invite.save();
 
   const hashedPassword = await bcrypt.hash(password, PASSWORD.BCRYPT_ROUNDS);
   const user = await User.create({ name, email, password: hashedPassword });
