@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { StoreProvider } from "@/components/providers/store-provider";
+import { SupportChat } from "@/components/course/support-chat";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -28,6 +29,7 @@ export default function RootLayout({
         <StoreProvider>
           {children}
           <Toaster />
+          <SupportChat />
         </StoreProvider>
       </body>
     </html>

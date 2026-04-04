@@ -3,8 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { MessageCircle, Send, AlertCircle } from "lucide-react";
+import { MessageCircle, Send, X, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface Message {
@@ -15,23 +14,31 @@ interface Message {
 }
 
 export function SupportChat() {
+  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [remaining, setRemaining] = useState(5);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [fetched, setFetched] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch("/api/support")
-      .then((res) => res.ok ? res.json() : Promise.reject())
-      .then((data) => {
-        setMessages(data.messages || []);
-        setRemaining(data.remaining ?? 5);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+    if (isOpen && !fetched) {
+      setLoading(true);
+      fetch("/api/support")
+        .then((res) => res.ok ? res.json() : Promise.reject())
+        .then((data) => {
+          setMessages(data.messages || []);
+          setRemaining(data.remaining ?? 5);
+        })
+        .catch(() => {})
+        .finally(() => {
+          setLoading(false);
+          setFetched(true);
+        });
+    }
+  }, [isOpen, fetched]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -65,77 +72,100 @@ export function SupportChat() {
     }
   }
 
-  if (loading) return null;
-
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <MessageCircle className="size-5" />
-          Contact Support
-        </CardTitle>
-        <CardDescription>
-          {remaining > 0
-            ? `${remaining} message${remaining !== 1 ? "s" : ""} remaining`
-            : "Support message limit reached"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="h-64 overflow-y-auto space-y-3 rounded-lg border border-border bg-muted/20 p-4">
-          {messages.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No messages yet. Send us a question!
-            </p>
-          ) : (
-            messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.isAdmin ? "justify-start" : "justify-end"}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                    msg.isAdmin
-                      ? "bg-muted text-foreground"
-                      : "bg-primary text-primary-foreground"
-                  }`}
-                >
-                  <p>{msg.message}</p>
-                  <p className={`text-[10px] mt-1 ${msg.isAdmin ? "text-muted-foreground" : "text-primary-foreground/70"}`}>
-                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                </div>
-              </div>
-            ))
-          )}
-          <div ref={bottomRef} />
-        </div>
+    <>
+      {/* Floating Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed bottom-6 right-6 z-50 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all duration-200 hover:scale-105"
+        aria-label="Open support chat"
+      >
+        {isOpen ? <X className="size-6" /> : <MessageCircle className="size-6" />}
+      </button>
 
-        {remaining > 0 ? (
-          <div className="flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message..."
-              onKeyDown={(e) => e.key === "Enter" && !sending && handleSend()}
-              disabled={sending}
-              className="h-10"
-            />
-            <Button
-              onClick={handleSend}
-              disabled={sending || !input.trim()}
-              size="icon"
-              className="h-10 w-10 shrink-0"
+      {/* Chat Window */}
+      {isOpen && (
+        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 rounded-xl border border-border bg-background shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50">
+            <div>
+              <h3 className="text-sm font-semibold">Support</h3>
+              <p className="text-xs text-muted-foreground">
+                {remaining > 0
+                  ? `${remaining} message${remaining !== 1 ? "s" : ""} left`
+                  : "Limit reached"}
+              </p>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-1 rounded-md hover:bg-muted transition-colors"
             >
-              <Send className="size-4" />
-            </Button>
+              <X className="size-4 text-muted-foreground" />
+            </button>
           </div>
-        ) : (
-          <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2">
-            <AlertCircle className="size-4 shrink-0" />
-            You've used all {5} support messages. Contact admin directly.
+
+          {/* Messages */}
+          <div className="h-72 overflow-y-auto p-4 space-y-3 bg-muted/10">
+            {loading ? (
+              <p className="text-sm text-muted-foreground text-center py-8">Loading...</p>
+            ) : messages.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No messages yet. Send us a question!
+              </p>
+            ) : (
+              messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.isAdmin ? "justify-start" : "justify-end"}`}
+                >
+                  <div
+                    className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
+                      msg.isAdmin
+                        ? "bg-muted text-foreground rounded-bl-sm"
+                        : "bg-primary text-primary-foreground rounded-br-sm"
+                    }`}
+                  >
+                    <p>{msg.message}</p>
+                    <p className={`text-[10px] mt-1 ${msg.isAdmin ? "text-muted-foreground" : "text-primary-foreground/70"}`}>
+                      {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={bottomRef} />
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {/* Input */}
+          <div className="border-t border-border p-3 bg-background">
+            {remaining > 0 ? (
+              <div className="flex gap-2">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Type a message..."
+                  onKeyDown={(e) => e.key === "Enter" && !sending && handleSend()}
+                  disabled={sending}
+                  className="h-9 text-sm"
+                />
+                <Button
+                  onClick={handleSend}
+                  disabled={sending || !input.trim()}
+                  size="icon"
+                  className="h-9 w-9 shrink-0"
+                >
+                  <Send className="size-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2">
+                <AlertCircle className="size-3.5 shrink-0" />
+                All 5 messages used. Contact admin directly.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

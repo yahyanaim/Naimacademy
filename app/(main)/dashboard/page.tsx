@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
-import { SupportChat } from "@/components/course/support-chat"
 
 interface ExamAttempt {
   score: number
@@ -227,9 +226,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Support Chat */}
-      <SupportChat />
     </div>
   )
 }
