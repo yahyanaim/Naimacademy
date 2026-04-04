@@ -16,6 +16,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { CheckCircle, ChevronRight, Menu } from "lucide-react";
+import { Progress, ProgressTrack, ProgressIndicator } from "@/components/ui/progress";
 
 interface Resource {
   name: string;
@@ -151,6 +152,13 @@ export default function LessonPage() {
         const json = await res.json();
         setProgress(json.progress);
         setIsCompleted(true);
+        if (json.sectionUnlocked) {
+          const courseRes = await fetch("/api/course");
+          if (courseRes.ok) {
+            const courseJson = await courseRes.json();
+            setCourse(courseJson.course);
+          }
+        }
       }
     } finally {
       setMarking(false);
@@ -217,6 +225,18 @@ export default function LessonPage() {
         </div>
 
         <div className="flex-1 px-4 py-6 space-y-6 max-w-4xl w-full mx-auto lg:mx-0 lg:max-w-none lg:px-6">
+          {/* Progress Bar */}
+          <div className="flex items-center gap-3 text-sm">
+            <Progress value={progress?.completionPercentage ?? 0} className="flex-1">
+              <ProgressTrack>
+                <ProgressIndicator className="bg-green-500" />
+              </ProgressTrack>
+            </Progress>
+            <span className="font-medium text-green-600 dark:text-green-400 shrink-0">
+              {progress?.completionPercentage ?? 0}%
+            </span>
+          </div>
+
           {/* Video */}
           <VideoPlayer
             url={lesson.videoUrl}

@@ -5,7 +5,18 @@ import Link from "next/link";
 import { ProgressBar } from "@/components/course/progress-bar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronDown, ChevronRight, CheckCircle, PlayCircle, BookOpen, Clock, Shield } from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCircle, PlayCircle, BookOpen, Clock, Shield, Calendar, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 interface LessonItem {
   _id: string;
@@ -85,12 +96,28 @@ interface UserData {
   role: string;
 }
 
+const DAY_OPTIONS = [
+  { value: 1, label: "Mon" },
+  { value: 2, label: "Tue" },
+  { value: 3, label: "Wed" },
+  { value: 4, label: "Thu" },
+  { value: 5, label: "Fri" },
+  { value: 6, label: "Sat" },
+  { value: 0, label: "Sun" },
+];
+
 export default function CoursePage() {
   const [course, setCourse] = useState<CourseData | null>(null);
   const [progress, setProgress] = useState<ProgressData | null>(null);
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+  const [scheduleSaving, setScheduleSaving] = useState(false);
+  const [lessonsPerWeek, setLessonsPerWeek] = useState("5");
+  const [startDate, setStartDate] = useState("");
+  const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [hasSchedule, setHasSchedule] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -111,6 +138,7 @@ export default function CoursePage() {
         setCourse(courseData);
         setProgress(progressData);
         setUser(userData);
+        setHasSchedule(!!progressJson?.learningSchedule);
 
         if (courseData) {
           const initial: Record<string, boolean> = {};
@@ -123,6 +151,64 @@ export default function CoursePage() {
     }
     load();
   }, []);
+
+  function toggleDay(day: number) {
+    setSelectedDays(prev =>
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+    );
+  }
+
+  async function handleStartCourse(lessonId: string) {
+    if (completedLessons.length === 0 && !hasSchedule) {
+      setScheduleDialogOpen(true);
+      return;
+    }
+    window.location.href = `/course/lesson/${lessonId}`;
+  }
+
+  async function handleScheduleSave() {
+    if (!startDate || !lessonsPerWeek) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    if (selectedDays.length === 0) {
+      toast.error("Select at least one day");
+      return;
+    }
+
+    setScheduleSaving(true);
+    try {
+      const res = await fetch("/api/schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lessonsPerWeek: parseInt(lessonsPerWeek),
+          daysOfWeek: selectedDays,
+          startDate,
+        }),
+      });
+
+      if (!res.ok) {
+        toast.error("Failed to save schedule");
+        return;
+      }
+
+      setHasSchedule(true);
+      setScheduleDialogOpen(false);
+      toast.success("Schedule saved! Starting course...");
+
+      const lessonId = ctaLesson?._id;
+      if (lessonId) {
+        setTimeout(() => {
+          window.location.href = `/course/lesson/${lessonId}`;
+        }, 500);
+      }
+    } catch {
+      toast.error("Failed to save schedule");
+    } finally {
+      setScheduleSaving(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -194,7 +280,7 @@ export default function CoursePage() {
             </div>
 
             {ctaLesson && (
-              <Button render={<Link href={`/course/lesson/${ctaLesson._id}`} />} size="lg">
+              <Button onClick={() => handleStartCourse(ctaLesson._id)} size="lg">
                 {ctaLabel}
               </Button>
             )}
@@ -262,6 +348,81 @@ export default function CoursePage() {
           })}
         </div>
       </div>
+
+      {/* Schedule Dialog */}
+      <Dialog open={scheduleDialogOpen} onOpenChange={setScheduleDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="size-5" />
+              Plan Your Schedule
+            </DialogTitle>
+            <DialogDescription>
+              Set your learning pace before starting the course
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="lessonsPerWeek">Lessons per week</Label>
+              <Input
+                id="lessonsPerWeek"
+                type="number"
+                min="1"
+                max="20"
+                value={lessonsPerWeek}
+                onChange={(e) => setLessonsPerWeek(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="startDate">Start date</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Study days</Label>
+              <div className="flex flex-wrap gap-2">
+                {DAY_OPTIONS.map(day => (
+                  <button
+                    key={day.value}
+                    type="button"
+                    onClick={() => toggleDay(day.value)}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                      selectedDays.includes(day.value)
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}
+                  >
+                    {day.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setScheduleDialogOpen(false);
+                if (ctaLesson) {
+                  window.location.href = `/course/lesson/${ctaLesson._id}`;
+                }
+              }}
+              disabled={scheduleSaving}
+            >
+              Skip for now
+            </Button>
+            <Button onClick={handleScheduleSave} disabled={scheduleSaving}>
+              {scheduleSaving ? "Saving..." : "Save & Start Course"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
