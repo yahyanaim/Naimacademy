@@ -20,7 +20,7 @@ export default function HomePage() {
             <Link href="/course" className="inline-flex h-12 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80">
               Start Learning
             </Link>
-            <Link href="/signup" className="inline-flex h-12 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-6 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground">
+            <Link href="/signup" className="inline-flex h-12 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-border px-6 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground">
               Create Account
             </Link>
           </div>

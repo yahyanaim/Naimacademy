@@ -2,13 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, User as UserIcon, Mail, Lock, Save } from "lucide-react";
+import { Loader2, User as UserIcon, Mail, Lock, Save, Trash2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -17,6 +25,9 @@ export default function ProfilePage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState("");
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -48,12 +59,31 @@ export default function ProfilePage() {
       if (data.user?.name) setName(data.user.name);
       
       setTimeout(() => {
-        window.location.reload(); // Force full reload to update navbar state reliably
+        window.location.reload();
       }, 500);
     } catch {
       toast.error("Error saving profile details.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (confirmEmail !== email) {
+      toast.error("Email does not match");
+      return;
+    }
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/user/account", { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      toast.success("Account deleted successfully");
+      window.location.href = "/";
+    } catch {
+      toast.error("Failed to delete account");
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
     }
   };
 
@@ -66,7 +96,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container max-w-3xl mx-auto py-12 px-6">
+    <div className="container max-w-3xl mx-auto py-12 px-6 space-y-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
         <p className="text-muted-foreground mt-2">Manage your personal information and security credentials.</p>
@@ -130,10 +160,10 @@ export default function ProfilePage() {
                 placeholder="Leave blank to keep current password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                minLength={6}
+                minLength={8}
                 className="h-11"
               />
-              <p className="text-[0.8rem] text-muted-foreground">Must be at least 6 characters long.</p>
+              <p className="text-[0.8rem] text-muted-foreground">Must be at least 8 characters long.</p>
             </div>
           </CardContent>
           <CardFooter className="bg-muted/30 border-t border-border px-6 py-4 flex justify-end">
@@ -144,6 +174,85 @@ export default function ProfilePage() {
           </CardFooter>
         </Card>
       </form>
+
+      {/* Danger Zone */}
+      <Card className="shadow-sm border-destructive/30 overflow-hidden">
+        <CardHeader className="bg-destructive/5 border-b border-destructive/20 pb-6">
+          <CardTitle className="text-xl flex items-center gap-2 text-destructive">
+            <AlertTriangle className="size-5" />
+            Danger Zone
+          </CardTitle>
+          <CardDescription>
+            Irreversible and destructive actions
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-lg border border-border">
+            <div>
+              <p className="text-sm font-medium">Delete your account</p>
+              <p className="text-sm text-muted-foreground">
+                Permanently delete your account and all associated data
+              </p>
+            </div>
+            <Button
+              variant="destructive"
+              onClick={() => setDeleteDialogOpen(true)}
+              className="shrink-0"
+            >
+              <Trash2 className="size-4 mr-1.5" />
+              Delete Account
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="size-5" />
+              Delete Account
+            </DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. All your progress, certificates, and data will be permanently removed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="confirmEmail">
+                Type your email <strong>{email}</strong> to confirm
+              </Label>
+              <Input
+                id="confirmEmail"
+                type="email"
+                value={confirmEmail}
+                onChange={(e) => setConfirmEmail(e.target.value)}
+                placeholder="Enter your email"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setConfirmEmail("");
+              }}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={deleting || confirmEmail !== email}
+            >
+              {deleting ? "Deleting..." : "Delete Account"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
