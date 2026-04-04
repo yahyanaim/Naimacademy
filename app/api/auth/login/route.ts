@@ -26,14 +26,9 @@ export async function POST(req: NextRequest) {
 
     const { email, password } = parsed.data;
 
-    console.log("[LOGIN] Attempting login for:", email);
-
     await connectDB();
-    console.log("[LOGIN] DB connected");
 
     const user = await User.findOne({ email }).select("+password");
-    console.log("[LOGIN] User found:", user ? "yes" : "no", user?.role);
-
     if (!user) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       return NextResponse.json(
@@ -43,8 +38,6 @@ export async function POST(req: NextRequest) {
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log("[LOGIN] Password match:", isMatch);
-
     if (!isMatch) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       return NextResponse.json(
@@ -54,7 +47,6 @@ export async function POST(req: NextRequest) {
     }
 
     const token = await signToken({ userId: user._id.toString(), role: user.role });
-    console.log("[LOGIN] Token created for role:", user.role);
 
     const response = NextResponse.json(
       {
@@ -69,14 +61,13 @@ export async function POST(req: NextRequest) {
     );
 
     setSessionCookie(response, token);
-    console.log("[LOGIN] Cookie set, returning success");
 
     return response;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("[LOGIN_ERROR]", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { error: "Internal server error", details: message },
+      { error: message },
       { status: 500 }
     );
   }

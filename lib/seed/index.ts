@@ -1,3 +1,4 @@
+import { PASSWORD } from "@/lib/constants";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/lib/models/user.model";
@@ -30,7 +31,7 @@ export async function seed() {
   ]);
 
   // Create admin user
-  const hashedPassword = await bcrypt.hash(ADMIN_USER.password, 10);
+  const hashedPassword = await bcrypt.hash(ADMIN_USER.password, PASSWORD.BCRYPT_ROUNDS);
   const admin = await User.create({
     name: ADMIN_USER.name,
     email: ADMIN_USER.email,

@@ -32,18 +32,15 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    const invite = await InviteCode.findOneAndUpdate(
-      { code: inviteCode, $expr: { $lt: ["$usedCount", "$maxUses"] } },
-      { $inc: { usedCount: 1 } },
-      { new: true }
-    );
-
-    if (!invite) {
+    const invite = await InviteCode.findOne({ code: inviteCode });
+    if (!invite || invite.usedCount >= invite.maxUses) {
       return NextResponse.json(
         { error: "Invalid invite code" },
         { status: 400 }
       );
     }
+    invite.usedCount += 1;
+    await invite.save();
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -74,10 +71,11 @@ export async function POST(req: NextRequest) {
     setSessionCookie(response, token);
 
     return response;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("[SIGNUP_ERROR]", error);
+    const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: message },
       { status: 500 }
     );
   }
