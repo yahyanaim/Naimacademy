@@ -117,7 +117,7 @@ export default function CoursePage() {
   const [lessonsPerWeek, setLessonsPerWeek] = useState("5");
   const [startDate, setStartDate] = useState("");
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
-  const [hasSchedule, setHasSchedule] = useState(false);
+  const [pendingLessonId, setPendingLessonId] = useState<string>("");
 
   useEffect(() => {
     async function load() {
@@ -138,7 +138,6 @@ export default function CoursePage() {
         setCourse(courseData);
         setProgress(progressData);
         setUser(userData);
-        setHasSchedule(!!progressJson?.learningSchedule);
 
         if (courseData) {
           const initial: Record<string, boolean> = {};
@@ -158,12 +157,66 @@ export default function CoursePage() {
     );
   }
 
-  async function handleStartCourse(lessonId: string) {
-    if (completedLessons.length === 0 && !hasSchedule) {
-      setScheduleDialogOpen(true);
-      return;
+  function generateCalendarFile(schedule: { lessonsPerWeek: number; daysOfWeek: number[]; startDate: string; endDate: string }) {
+    const events = [];
+    const start = new Date(schedule.startDate);
+    const end = new Date(schedule.endDate);
+    const currentDate = new Date(start);
+
+    while (currentDate <= end) {
+      const dayOfWeek = currentDate.getDay();
+      if (schedule.daysOfWeek.includes(dayOfWeek)) {
+        const eventStart = new Date(currentDate);
+        eventStart.setHours(10, 0, 0, 0);
+        const eventEnd = new Date(currentDate);
+        eventEnd.setHours(11, 0, 0, 0);
+
+        events.push({
+          summary: "Naim Academy - Study Session",
+          description: "Continue your n8n automation course on Naim Academy",
+          location: "https://naimacademy.vercel.app/course",
+          startTime: eventStart.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z",
+          endTime: eventEnd.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z",
+        });
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
     }
-    window.location.href = `/course/lesson/${lessonId}`;
+
+    if (events.length === 0) return;
+
+    let icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Naim Academy//Learning Schedule//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+`;
+
+    events.forEach((event, index) => {
+      icsContent += `BEGIN:VEVENT
+DTSTART:${event.startTime}
+DTEND:${event.endTime}
+SUMMARY:${event.summary}
+DESCRIPTION:${event.description}
+URL:${event.location}
+UID:naim-academy-${index}@naimacademy.vercel.app
+END:VEVENT
+`;
+    });
+
+    icsContent += "END:VCALENDAR";
+
+    const blob = new Blob([icsContent], { type: "text/calendar" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "naim-academy-schedule.ics";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleStartCourse(lessonId: string) {
+    setPendingLessonId(lessonId);
+    setScheduleDialogOpen(true);
   }
 
   async function handleScheduleSave() {
@@ -193,14 +246,14 @@ export default function CoursePage() {
         return;
       }
 
-      setHasSchedule(true);
+      const data = await res.json();
       setScheduleDialogOpen(false);
-      toast.success("Schedule saved! Starting course...");
+      generateCalendarFile(data.schedule);
+      toast.success("Schedule saved & added to calendar!");
 
-      const lessonId = ctaLesson?._id;
-      if (lessonId) {
+      if (pendingLessonId) {
         setTimeout(() => {
-          window.location.href = `/course/lesson/${lessonId}`;
+          window.location.href = `/course/lesson/${pendingLessonId}`;
         }, 500);
       }
     } catch {
@@ -409,16 +462,16 @@ export default function CoursePage() {
               variant="ghost"
               onClick={() => {
                 setScheduleDialogOpen(false);
-                if (ctaLesson) {
-                  window.location.href = `/course/lesson/${ctaLesson._id}`;
+                if (pendingLessonId) {
+                  window.location.href = `/course/lesson/${pendingLessonId}`;
                 }
               }}
               disabled={scheduleSaving}
             >
-              Skip for now
+              Skip & Start Course
             </Button>
             <Button onClick={handleScheduleSave} disabled={scheduleSaving}>
-              {scheduleSaving ? "Saving..." : "Save & Start Course"}
+              {scheduleSaving ? "Saving..." : "Save & Add to Calendar"}
             </Button>
           </DialogFooter>
         </DialogContent>
