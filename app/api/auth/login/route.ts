@@ -3,7 +3,6 @@ import { User } from "@/lib/models/user.model";
 import { signToken } from "@/lib/auth/jwt";
 import { setSessionCookie } from "@/lib/auth/session";
 import { sanitizeInput } from "@/lib/utils/sanitize";
-import { rateLimit } from "@/lib/utils/rate-limit";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
@@ -15,16 +14,6 @@ const loginSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
-    const limit = rateLimit(`login:${ip}`, 5, 15 * 60 * 1000);
-
-    if (!limit.success) {
-      return NextResponse.json(
-        { error: `Too many login attempts. Please try again in ${limit.retryAfter} seconds.` },
-        { status: 429 }
-      );
-    }
-
     const body = await req.json();
 
     const parsed = loginSchema.safeParse(body);
@@ -74,7 +63,8 @@ export async function POST(req: NextRequest) {
     setSessionCookie(response, token);
 
     return response;
-  } catch {
+  } catch (error) {
+    console.error("[LOGIN_ERROR]", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

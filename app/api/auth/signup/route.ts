@@ -5,7 +5,6 @@ import { signToken } from "@/lib/auth/jwt";
 import { setSessionCookie } from "@/lib/auth/session";
 import { PASSWORD } from "@/lib/constants";
 import { sanitizeInput } from "@/lib/utils/sanitize";
-import { rateLimit } from "@/lib/utils/rate-limit";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
@@ -19,16 +18,6 @@ const signupSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
-    const limit = rateLimit(`signup:${ip}`, 3, 15 * 60 * 1000);
-
-    if (!limit.success) {
-      return NextResponse.json(
-        { error: `Too many signup attempts. Please try again in ${limit.retryAfter} seconds.` },
-        { status: 429 }
-      );
-    }
-
     const body = await req.json();
 
     const parsed = signupSchema.safeParse(body);
@@ -87,9 +76,8 @@ export async function POST(req: NextRequest) {
     return response;
   } catch (error) {
     console.error("[SIGNUP_ERROR]", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Internal server error", details: message },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

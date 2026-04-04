@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/db/mongoose";
 import { seed } from "@/lib/seed";
+import { InviteCode } from "@/lib/models/invite-code.model";
 import { NextResponse } from "next/server";
 
 export async function POST() {
@@ -16,7 +17,16 @@ export async function POST() {
 }
 
 export async function GET() {
-  return NextResponse.json({ 
-    message: "Send POST to seed database. Default admin: admin@n8n-course.com / admin123" 
-  });
+  try {
+    await connectDB();
+
+    const existingInvite = await InviteCode.findOne({ code: "NAIM2026" });
+    
+    return NextResponse.json({ 
+      message: "POST to seed. Invite exists: " + !!existingInvite,
+      inviteCode: existingInvite ? "NAIM2026" : "none"
+    });
+  } catch (error) {
+    return NextResponse.json({ error: "Error" }, { status: 500 });
+  }
 }
