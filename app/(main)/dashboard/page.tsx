@@ -206,7 +206,7 @@ export default function DashboardPage() {
                     You&apos;ve successfully completed the course.
                   </p>
                 </div>
-                <Button render={<Link href="/certificate" />} size="sm" className="mt-auto">
+                <Button render={<Link href="/certificates" />} size="sm" className="mt-auto">
                   Download Certificate
                 </Button>
               </>
