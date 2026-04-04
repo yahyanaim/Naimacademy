@@ -12,6 +12,12 @@ export interface IUser extends Document {
     lastLessonId?: Types.ObjectId;
     lastVideoTimestamp: number;
   };
+  learningSchedule: {
+    lessonsPerWeek: number;
+    daysOfWeek: number[];
+    startDate: Date;
+    endDate: Date;
+  } | null;
   examAttempts: {
     examId: string;
     examTitle: string;
@@ -48,6 +54,12 @@ const UserSchema = new Schema<IUser>(
       completionPercentage: { type: Number, default: 0 },
       lastLessonId: { type: Schema.Types.ObjectId, ref: "Lesson" },
       lastVideoTimestamp: { type: Number, default: 0 },
+    },
+    learningSchedule: {
+      lessonsPerWeek: { type: Number, required: true },
+      daysOfWeek: [{ type: Number }],
+      startDate: { type: Date, required: true },
+      endDate: { type: Date, required: true },
     },
     examAttempts: [
       {
