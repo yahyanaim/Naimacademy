@@ -80,9 +80,9 @@ export const POST = withAuth(
       let correctCount = 0;
 
       for (const studentAns of answers) {
-        const qIndex = exam.questions.findIndex((q) => {
+        const qIndex = exam.questions.findIndex((q: Record<string, unknown>) => {
           if (!q) return false;
-          const id = q._id ? q._id.toString() : q.toString();
+          const id = q._id ? String(q._id) : String(q);
           return id === studentAns.questionId;
         });
 

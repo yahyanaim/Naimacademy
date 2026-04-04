@@ -39,6 +39,8 @@ export interface IUser extends Document {
     issuedAt: Date;
   }[];
   certificateIssued: boolean;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -86,6 +88,8 @@ const UserSchema = new Schema<IUser>(
       },
     ],
     certificateIssued: { type: Boolean, default: false },
+    passwordResetToken: { type: String },
+    passwordResetExpires: { type: Date },
   },
   { timestamps: true }
 );
