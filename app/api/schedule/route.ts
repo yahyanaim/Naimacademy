@@ -1,7 +1,6 @@
 import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/lib/models/user.model";
 import { Course } from "@/lib/models/course.model";
-import { Lesson } from "@/lib/models/lesson.model";
 import { withAuth } from "@/lib/auth/guards";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -38,8 +37,8 @@ export const GET = withAuth(
       const weeksRemaining = lessonsPerWeek > 0 ? Math.ceil(remainingLessons / lessonsPerWeek) : 0;
 
       const schedule = dbUser.learningSchedule;
-      const startDateStr = schedule.startDate instanceof Date ? schedule.startDate.toISOString().split("T")[0] : schedule.startDate;
-      const endDateStr = schedule.endDate instanceof Date ? schedule.endDate.toISOString().split("T")[0] : schedule.endDate;
+      const startDateStr = schedule.startDate instanceof Date ? schedule.startDate.toISOString().split("T")[0] : String(schedule.startDate);
+      const endDateStr = schedule.endDate instanceof Date ? schedule.endDate.toISOString().split("T")[0] : String(schedule.endDate);
 
       return NextResponse.json({
         schedule: {
@@ -86,34 +85,37 @@ export const POST = withAuth(
         (sum: number, s: { lessons: unknown[] }) => sum + s.lessons.length, 0
       ) ?? 0;
 
-      const dbUser = await User.findById(ctx.user.userId);
-      if (!dbUser) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
-
       const weeksNeeded = Math.ceil(totalLessons / lessonsPerWeek);
-      const start = new Date(startDate);
+      const start = new Date(startDate + "T00:00:00");
       const endDate = new Date(start);
       endDate.setDate(endDate.getDate() + weeksNeeded * 7);
 
-      const startDateStr = start.toISOString().split("T")[0];
-      const endDateStr = endDate.toISOString().split("T")[0];
-
-      await User.findByIdAndUpdate(ctx.user.userId, {
-        $set: {
-          learningSchedule: {
-            lessonsPerWeek,
-            daysOfWeek: daysOfWeek || [1, 2, 3, 4, 5],
-            startDate: new Date(startDateStr),
-            endDate: new Date(endDateStr),
+      const result = await User.findByIdAndUpdate(
+        ctx.user.userId,
+        {
+          $set: {
+            learningSchedule: {
+              lessonsPerWeek: Number(lessonsPerWeek),
+              daysOfWeek: daysOfWeek || [1, 2, 3, 4, 5],
+              startDate: start,
+              endDate: endDate,
+            },
+            lastActivityAt: new Date(),
           },
-          lastActivityAt: new Date(),
         },
-      });
+        { new: true }
+      );
+
+      if (!result) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      const startDateStr = startDate;
+      const endDateStr = endDate.toISOString().split("T")[0];
 
       return NextResponse.json({
         schedule: {
-          lessonsPerWeek,
+          lessonsPerWeek: Number(lessonsPerWeek),
           daysOfWeek: daysOfWeek || [1, 2, 3, 4, 5],
           startDate: startDateStr,
           endDate: endDateStr,
@@ -122,7 +124,8 @@ export const POST = withAuth(
       }, { status: 200 });
     } catch (error) {
       console.error("[POST /api/schedule]", error);
-      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+      const message = error instanceof Error ? error.message : "Internal server error";
+      return NextResponse.json({ error: message }, { status: 500 });
     }
   }
 );
@@ -135,13 +138,9 @@ export const DELETE = withAuth(
     try {
       await connectDB();
 
-      const dbUser = await User.findById(ctx.user.userId);
-      if (!dbUser) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
-
-      dbUser.learningSchedule = null;
-      await dbUser.save();
+      await User.findByIdAndUpdate(ctx.user.userId, {
+        $set: { learningSchedule: null },
+      });
 
       return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {

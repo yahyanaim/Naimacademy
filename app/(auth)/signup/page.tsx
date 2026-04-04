@@ -15,19 +15,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { MathCaptcha } from "@/components/auth/math-captcha";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/lib/store/authSlice";
 
 export default function SignupPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [inviteCode, setInviteCode] = useState("");
+  const [captchaValid, setCaptchaValid] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!captchaValid) {
+      setError("Please complete the security check");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -42,10 +53,14 @@ export default function SignupPage() {
         throw new Error(data.error || "Signup failed");
       }
 
+      const data = await res.json();
+      dispatch(setUser(data.user));
+
       router.push("/dashboard");
       router.refresh();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Signup failed";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -117,6 +132,7 @@ export default function SignupPage() {
               onChange={(e) => setInviteCode(e.target.value)}
             />
           </div>
+          <MathCaptcha onVerify={setCaptchaValid} />
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
