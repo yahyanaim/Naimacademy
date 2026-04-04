@@ -201,20 +201,20 @@ export default function LessonPage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile header with sidebar trigger */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-border lg:hidden">
+        <div className="sticky top-0 z-50 flex items-center gap-3 px-4 py-3 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border lg:hidden">
           <Sheet>
-            <SheetTrigger render={<Button variant="ghost" size="icon" />}>
+            <SheetTrigger render={<Button variant="ghost" size="icon" className="size-9" />}>
               <Menu className="size-5" />
               <span className="sr-only">Course contents</span>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-80">
-              <SheetHeader className="px-4 py-3 border-b border-border">
-                <SheetTitle>{course?.title ?? "Course Contents"}</SheetTitle>
+            <SheetContent side="left" className="w-80 p-0">
+              <SheetHeader className="px-5 py-4 border-b border-border">
+                <SheetTitle className="text-base">{course?.title ?? "Course Contents"}</SheetTitle>
               </SheetHeader>
-              <div className="h-[calc(100%-57px)]">{sidebarContent}</div>
+              <div className="h-[calc(100%-57px)] overflow-y-auto">{sidebarContent}</div>
             </SheetContent>
           </Sheet>
-          <span className="text-sm font-medium truncate">{course?.title}</span>
+          <span className="text-sm font-medium truncate flex-1">{course?.title}</span>
         </div>
 
         <div className="flex-1 px-4 py-6 space-y-6 max-w-4xl w-full mx-auto lg:mx-0 lg:max-w-none lg:px-6">
