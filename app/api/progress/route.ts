@@ -1,13 +1,8 @@
 import { connectDB } from "@/lib/db/mongoose";
 import { Course } from "@/lib/models/course.model";
-import { Lesson } from "@/lib/models/lesson.model";
-import { Section } from "@/lib/models/section.model";
 import { User } from "@/lib/models/user.model";
 import { withAuth } from "@/lib/auth/guards";
 import { NextRequest, NextResponse } from "next/server";
-
-Lesson;
-Section;
 
 export const GET = withAuth(
   async (
@@ -83,60 +78,10 @@ export const POST = withAuth(
 
       await dbUser.save();
 
-      // Auto-unlock sections
-      const allSections = await Section.find({ courseId: course?._id }).sort({ order: 1 });
-      let sectionUnlocked = false;
-      let allCompleted = false;
-
-      // Build a map of section -> completed lesson count
-      const sectionCompletedMap = new Map<string, number>();
-      const sectionTotalMap = new Map<string, number>();
-
-      for (const section of allSections) {
-        const sectionLessons = await Lesson.find({ sectionId: section._id });
-        sectionTotalMap.set(section._id.toString(), sectionLessons.length);
-        const completedInSection = sectionLessons.filter(l =>
-          completedLessons.includes(l._id.toString())
-        ).length;
-        sectionCompletedMap.set(section._id.toString(), completedInSection);
-      }
-
-      // Unlock sections sequentially
-      for (const section of allSections) {
-        if (section.isLocked) {
-          // Check if ALL previous sections are fully completed
-          let allPreviousComplete = true;
-          for (const prevSection of allSections) {
-            if (prevSection._id.toString() === section._id.toString()) break;
-            const prevTotal = sectionTotalMap.get(prevSection._id.toString()) ?? 0;
-            const prevCompleted = sectionCompletedMap.get(prevSection._id.toString()) ?? 0;
-            if (prevCompleted < prevTotal) {
-              allPreviousComplete = false;
-              break;
-            }
-          }
-
-          if (allPreviousComplete) {
-            section.isLocked = false;
-            await section.save();
-            sectionUnlocked = true;
-            console.log(`[AUTO-UNLOCK] Section "${section.title}" unlocked`);
-          }
-        }
-      }
-
-      // Check if all lessons are completed
-      if (completedLessons.length >= totalLessons && totalLessons > 0) {
-        allCompleted = true;
-        // Unlock ALL sections
-        await Section.updateMany({ courseId: course?._id, isLocked: true }, { $set: { isLocked: false } });
-        console.log("[AUTO-UNLOCK] All sections unlocked - course completed");
-      }
-
       return NextResponse.json({ 
         progress: dbUser.progress,
-        sectionUnlocked,
-        allCompleted,
+        sectionUnlocked: false,
+        allCompleted: completedLessons.length >= totalLessons && totalLessons > 0,
       }, { status: 200 });
     } catch (error) {
       console.error("[POST /api/progress]", error);

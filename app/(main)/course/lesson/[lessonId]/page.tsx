@@ -152,10 +152,6 @@ export default function LessonPage() {
         const json = await res.json();
         setProgress(json.progress);
         setIsCompleted(true);
-        await Promise.all([
-          fetch("/api/course").then(r => r.ok ? r.json() : null).then(d => { if (d?.course) setCourse(d.course); }),
-          fetch("/api/progress").then(r => r.ok ? r.json() : null).then(d => { if (d?.progress) setProgress(d.progress); }),
-        ]);
       }
     } finally {
       setMarking(false);
