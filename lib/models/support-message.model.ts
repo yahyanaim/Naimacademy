@@ -14,7 +14,7 @@ const SupportMessageSchema = new Schema<ISupportMessage>(
   {
     userId: { type: Schema.Types.ObjectId, required: true, index: true },
     userName: { type: String, required: true },
-    userEmail: { type: String, required: true },
+    userEmail: { type: String },
     message: { type: String, required: true },
     isAdmin: { type: Boolean, default: false },
   },
