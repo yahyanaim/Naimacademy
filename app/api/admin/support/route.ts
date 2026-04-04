@@ -42,7 +42,7 @@ export const POST = withAdmin(
         return NextResponse.json({ error: "Message not found" }, { status: 404 });
       }
 
-      await SupportMessage.create({
+      const reply = await SupportMessage.create({
         userId: original.userId,
         userName: "Admin",
         userEmail: "",
@@ -50,10 +50,11 @@ export const POST = withAdmin(
         isAdmin: true,
       });
 
-      return NextResponse.json({ success: true }, { status: 201 });
+      return NextResponse.json({ success: true, reply }, { status: 201 });
     } catch (error) {
       console.error("[POST /api/admin/support]", error);
-      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+      const message = error instanceof Error ? error.message : "Internal server error";
+      return NextResponse.json({ error: message }, { status: 500 });
     }
   }
 );

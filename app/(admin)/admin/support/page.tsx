@@ -24,17 +24,26 @@ export default function AdminSupportPage() {
   const [replyText, setReplyText] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    fetch("/api/admin/support")
-      .then((res) => res.ok ? res.json() : Promise.reject())
-      .then((data) => setMessages(data.messages || []))
-      .catch(() => toast.error("Failed to load messages"))
-      .finally(() => setLoading(false));
+    fetchMessages();
   }, []);
 
-  const threads = messages.reduce<Record<string, Message[]>>((acc, msg) => {
-    const key = msg.isAdmin ? msg.userId : `${msg.userId}-${msg._id}`;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(msg);
+  async function fetchMessages() {
+    try {
+      const res = await fetch("/api/admin/support");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setMessages(data.messages || []);
+    } catch {
+      toast.error("Failed to load messages");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const threads = messages.reduce<Record<string, { userId: string; messages: Message[] }>>((acc, msg) => {
+    const key = msg.userId;
+    if (!acc[key]) acc[key] = { userId: msg.userId, messages: [] };
+    acc[key].messages.push(msg);
     return acc;
   }, {});
 
@@ -42,27 +51,30 @@ export default function AdminSupportPage() {
     setExpandedThreads((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
-  async function handleReply(threadId: string, userId: string) {
-    const text = replyText[threadId]?.trim();
+  async function handleReply(userId: string) {
+    const threadMsgs = threads[userId]?.messages || [];
+    const firstUserMsg = threadMsgs.find((m) => !m.isAdmin);
+    if (!firstUserMsg) return;
+
+    const text = replyText[userId]?.trim();
     if (!text) return;
 
     try {
       const res = await fetch("/api/admin/support", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messageId: threadId, message: text }),
+        body: JSON.stringify({ messageId: firstUserMsg._id, message: text }),
       });
 
       if (!res.ok) {
-        toast.error("Failed to send reply");
+        const data = await res.json();
+        toast.error(data.error || "Failed to send reply");
         return;
       }
 
-      setReplyText((prev) => ({ ...prev, [threadId]: "" }));
+      setReplyText((prev) => ({ ...prev, [userId]: "" }));
       toast.success("Reply sent");
-
-      const data = await fetch("/api/admin/support").then((r) => r.json());
-      setMessages(data.messages || []);
+      await fetchMessages();
     } catch {
       toast.error("Failed to send reply");
     }
@@ -94,13 +106,13 @@ export default function AdminSupportPage() {
       </div>
 
       <div className="space-y-4">
-        {Object.entries(threads).map(([threadId, threadMessages]) => {
+        {Object.entries(threads).map(([userId, { messages: threadMessages }]) => {
           const userMsg = threadMessages.find((m) => !m.isAdmin);
-          const isExpanded = expandedThreads[threadId];
+          const isExpanded = expandedThreads[userId];
           return (
-            <Card key={threadId}>
+            <Card key={userId}>
               <button
-                onClick={() => toggleThread(threadId)}
+                onClick={() => toggleThread(userId)}
                 className="w-full text-left"
               >
                 <CardHeader className="pb-3">
@@ -154,13 +166,13 @@ export default function AdminSupportPage() {
 
                   <div className="flex gap-2">
                     <Textarea
-                      value={replyText[threadId] || ""}
-                      onChange={(e) => setReplyText((prev) => ({ ...prev, [threadId]: e.target.value }))}
+                      value={replyText[userId] || ""}
+                      onChange={(e) => setReplyText((prev) => ({ ...prev, [userId]: e.target.value }))}
                       placeholder="Type your reply..."
                       className="text-sm min-h-[60px]"
                     />
                     <Button
-                      onClick={() => handleReply(threadId, userMsg?.userId || "")}
+                      onClick={() => handleReply(userId)}
                       size="icon"
                       className="shrink-0 self-end"
                     >
