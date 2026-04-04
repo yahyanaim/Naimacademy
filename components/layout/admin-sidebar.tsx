@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Shield,
   LogOut,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ const navItems = [
   { href: "/admin/content", label: "Content", icon: BookOpen },
   { href: "/admin/exam", label: "Exam", icon: FileQuestion },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/support", label: "Support", icon: MessageSquare },
 ];
 
 export default function AdminSidebar() {
