@@ -73,6 +73,21 @@ export async function POST(req: NextRequest) {
     return response;
   } catch (error: unknown) {
     console.error("[SIGNUP_ERROR]", error);
+    const err = error as Error & { code?: number };
+    if (err.code === 11000 && err.message?.includes("certifications.certificationId")) {
+      try {
+        const mongoose = await import("mongoose");
+        const db = mongoose.connection.db;
+        await db.collection("users").dropIndex("certifications.certificationId_1");
+        console.log("[SIGNUP] Dropped stale certification index, retry signup");
+        return NextResponse.json(
+          { error: "Please try again" },
+          { status: 500 }
+        );
+      } catch (dropError) {
+        console.error("[SIGNUP] Failed to drop index:", dropError);
+      }
+    }
     const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
       { error: message },
