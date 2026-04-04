@@ -55,11 +55,13 @@ export async function seed() {
 
   for (const sectionData of SECTIONS_DATA) {
     const { lessons: lessonsData, ...sectionFields } = sectionData;
+    const isFirst = sectionData.order === 1;
 
     const section = await Section.create({
       ...sectionFields,
       courseId: course._id,
       lessons: [],
+      isLocked: !isFirst,
     });
 
     const lessons = await Lesson.insertMany(

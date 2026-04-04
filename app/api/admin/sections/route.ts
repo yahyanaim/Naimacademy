@@ -45,3 +45,32 @@ export const POST = withAdmin(
     }
   }
 );
+
+export const PATCH = withAdmin(
+  async (
+    req: NextRequest,
+    ctx: { params: Promise<Record<string, string>>; user: { userId: string; role: string } }
+  ) => {
+    try {
+      await connectDB();
+
+      const body = await req.json();
+      const { sectionId, isLocked } = body;
+
+      const section = await Section.findByIdAndUpdate(
+        sectionId,
+        { isLocked },
+        { new: true }
+      );
+
+      if (!section) {
+        return NextResponse.json({ error: "Section not found" }, { status: 404 });
+      }
+
+      return NextResponse.json(section);
+    } catch (error) {
+      console.error("PATCH /api/admin/sections error:", error);
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
+  }
+);

@@ -27,6 +27,8 @@ import {
   Trash2,
   ChevronDown,
   ChevronRight,
+  Lock,
+  Unlock,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -50,6 +52,7 @@ interface SectionRecord {
   order: number;
   courseId: string;
   lessons: LessonRecord[];
+  isLocked: boolean;
 }
 
 function getSectionDuration(section: SectionRecord): string {
@@ -286,6 +289,24 @@ export default function ContentManagementPage() {
     setExpandedSections((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
+  async function toggleLock(sectionId: string, isLocked: boolean) {
+    try {
+      const res = await fetch("/api/admin/sections", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sectionId, isLocked }),
+      });
+      if (!res.ok) {
+        toast.error("Failed to update section lock status.");
+        return;
+      }
+      toast.success(isLocked ? "Section locked" : "Section unlocked");
+      fetchData();
+    } catch {
+      toast.error("Failed to update section lock status.");
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
@@ -354,6 +375,18 @@ export default function ContentManagementPage() {
                   </button>
 
                   <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => toggleLock(section._id, !section.isLocked)}
+                      title={section.isLocked ? "Unlock section" : "Lock section"}
+                    >
+                      {section.isLocked ? (
+                        <Lock className="text-amber-500" />
+                      ) : (
+                        <Unlock className="text-green-500" />
+                      )}
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon-sm"

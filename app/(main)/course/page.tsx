@@ -19,6 +19,7 @@ interface SectionItem {
   title: string;
   order: number;
   lessons: LessonItem[];
+  isLocked: boolean;
 }
 
 interface CourseData {
@@ -207,14 +208,18 @@ export default function CoursePage() {
         <div className="rounded-lg border border-border overflow-hidden">
           {course.sections.map((section) => {
             const isOpen = openSections[section._id] ?? false;
+            const isLocked = section.isLocked && user?.role !== "admin";
             return (
               <div key={section._id} className="border-b border-border last:border-b-0">
                 <button
-                  onClick={() => toggleSection(section._id)}
-                  className="w-full flex items-center justify-between gap-2 px-4 py-4 text-left hover:bg-muted/50 transition-colors"
+                  onClick={() => !isLocked && toggleSection(section._id)}
+                  className={`w-full flex items-center justify-between gap-2 px-4 py-4 text-left transition-colors ${isLocked ? "opacity-60 cursor-not-allowed" : "hover:bg-muted/50"}`}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold">{section.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold">{section.title}</p>
+                      {isLocked && <Shield className="size-3.5 text-muted-foreground" />}
+                    </div>
                     <p className="text-xs text-muted-foreground flex items-center gap-3 mt-0.5">
                       <span>{section.lessons.length} lesson{section.lessons.length !== 1 ? "s" : ""}</span>
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
@@ -222,14 +227,14 @@ export default function CoursePage() {
                       </span>
                     </p>
                   </div>
-                  {isOpen ? (
+                  {isLocked ? null : isOpen ? (
                     <ChevronDown className="size-4 text-muted-foreground shrink-0" />
                   ) : (
                     <ChevronRight className="size-4 text-muted-foreground shrink-0" />
                   )}
                 </button>
 
-                {isOpen && (
+                {isOpen && !isLocked && (
                   <ul className="border-t border-border">
                     {section.lessons.map((lesson) => {
                       const isCompleted = completedLessons.includes(lesson._id);

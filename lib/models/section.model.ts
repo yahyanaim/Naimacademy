@@ -6,6 +6,7 @@ export interface ISection extends Document {
   order: number;
   courseId: Types.ObjectId;
   lessons: Types.ObjectId[];
+  isLocked: boolean;
 }
 
 const SectionSchema = new Schema<ISection>({
@@ -13,6 +14,7 @@ const SectionSchema = new Schema<ISection>({
   order: { type: Number, required: true },
   courseId: { type: Schema.Types.ObjectId, ref: "Course", required: true },
   lessons: [{ type: Schema.Types.ObjectId, ref: "Lesson" }],
+  isLocked: { type: Boolean, default: false },
 });
 
 export const Section =
