@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { ExamTimer } from "@/components/exam/exam-timer"
 import { QuestionCard } from "@/components/exam/question-card"
@@ -14,6 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
+import { AlertTriangle } from "lucide-react"
 
 interface Question {
   _id: string
@@ -21,6 +22,8 @@ interface Question {
   question: string
   options: string[]
 }
+
+const MAX_WARNINGS = 2
 
 export default function TakeExamPage() {
   const router = useRouter()
@@ -32,6 +35,9 @@ export default function TakeExamPage() {
   const [loading, setLoading] = useState(true)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [warnings, setWarnings] = useState(0)
+  const [banned, setBanned] = useState(false)
+  const warningSentRef = useRef(false)
 
   useEffect(() => {
     async function startExam() {
@@ -56,6 +62,32 @@ export default function TakeExamPage() {
 
     startExam()
   }, [router])
+
+  useEffect(() => {
+    if (!examId) return
+
+    function handleVisibilityChange() {
+      if (document.hidden && !warningSentRef.current) {
+        warningSentRef.current = true
+        setTimeout(() => { warningSentRef.current = false }, 2000)
+
+        const newWarnings = warnings + 1
+        setWarnings(newWarnings)
+
+        if (newWarnings >= MAX_WARNINGS) {
+          setBanned(true)
+          fetch("/api/exam/ban-cheating", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ examId }),
+          }).catch(() => {})
+        }
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange)
+  }, [examId, warnings])
 
   const submitExam = useCallback(
     async (finalAnswers: (number | null)[]) => {
@@ -121,12 +153,43 @@ export default function TakeExamPage() {
     )
   }
 
+  if (banned) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-center space-y-4 max-w-md px-6">
+          <div className="flex justify-center">
+            <div className="size-16 rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertTriangle className="size-8 text-destructive" />
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-destructive">Exam Terminated</h1>
+          <p className="text-muted-foreground">
+            Your exam has been terminated due to suspected cheating. You left the exam page {MAX_WARNINGS} times. Your account has been flagged and the admin has been notified.
+          </p>
+          <Button onClick={() => router.push("/dashboard")} className="mt-4">
+            Return to Dashboard
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   const question = questions[currentQuestion]
   const isFirst = currentQuestion === 0
   const isLast = currentQuestion === questions.length - 1
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 flex flex-col gap-6">
+      {/* Warning Banner */}
+      {warnings > 0 && (
+        <div className="flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-3">
+          <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <p className="text-sm text-amber-800 dark:text-amber-200">
+            Warning {warnings}/{MAX_WARNINGS}: Leaving the exam page will result in automatic termination.
+          </p>
+        </div>
+      )}
+
       {/* Header row: timer */}
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold">Exam</h1>
