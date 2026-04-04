@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,10 +35,30 @@ interface ScheduleStats {
 export function LearningSchedule() {
   const [schedule, setSchedule] = useState<ScheduleData | null>(null);
   const [stats, setStats] = useState<ScheduleStats | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [lessonsPerWeek, setLessonsPerWeek] = useState("5");
   const [startDate, setStartDate] = useState("");
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch("/api/schedule");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.schedule) {
+            setSchedule(data.schedule);
+            setStats(data.stats);
+          }
+        }
+      } catch {
+        // silently ignore
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
 
   function toggleDay(day: number) {
     setSelectedDays(prev =>
@@ -75,11 +95,23 @@ export function LearningSchedule() {
 
       const data = await res.json();
       setSchedule(data.schedule);
+      setStats(data.stats);
       toast.success("Schedule saved!");
     } catch {
       toast.error("Failed to save schedule");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete() {
+    try {
+      await fetch("/api/schedule", { method: "DELETE" });
+      setSchedule(null);
+      setStats(null);
+      toast.success("Schedule removed");
+    } catch {
+      toast.error("Failed to remove schedule");
     }
   }
 
@@ -146,6 +178,10 @@ END:VEVENT
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Calendar file downloaded!");
+  }
+
+  if (loading) {
+    return null;
   }
 
   if (!schedule) {
@@ -219,7 +255,7 @@ END:VEVENT
               Your Learning Schedule
             </CardTitle>
             <CardDescription>
-              {schedule.lessonsPerWeek} lessons/week • {stats?.weeksRemaining} weeks remaining
+              {schedule.lessonsPerWeek} lessons/week &middot; {stats?.weeksRemaining ?? 0} weeks remaining
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -230,11 +266,7 @@ END:VEVENT
             <Button
               variant="ghost"
               size="icon-sm"
-              onClick={async () => {
-                await fetch("/api/schedule", { method: "DELETE" });
-                setSchedule(null);
-                toast.success("Schedule removed");
-              }}
+              onClick={handleDelete}
             >
               <Trash2 className="size-4 text-destructive" />
             </Button>
@@ -258,6 +290,23 @@ END:VEVENT
             </div>
           </div>
         </div>
+
+        {stats && (
+          <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
+            <div>
+              <p className="text-muted-foreground">Total</p>
+              <p className="font-semibold">{stats.totalLessons} lessons</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Completed</p>
+              <p className="font-semibold">{stats.completedLessons} lessons</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Remaining</p>
+              <p className="font-semibold">{stats.remainingLessons} lessons</p>
+            </div>
+          </div>
+        )}
 
         <div className="mt-4 flex flex-wrap gap-2">
           {DAY_OPTIONS.filter(d => schedule.daysOfWeek.includes(d.value)).map(day => (

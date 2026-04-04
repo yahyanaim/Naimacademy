@@ -66,13 +66,9 @@ export const POST = withAuth(
       });
 
       let totalLessons = 0;
-      const unlockedSections: string[] = [];
       if (course?.sections) {
-        for (const section of course.sections as Array<{ _id: string; isLocked: boolean; lessons: Array<{ _id: unknown }> }>) {
+        for (const section of course.sections as Array<{ lessons: Array<{ _id: unknown }> }>) {
           totalLessons += section.lessons?.length ?? 0;
-          if (!section.isLocked) {
-            unlockedSections.push(section._id);
-          }
         }
       }
 
@@ -87,36 +83,60 @@ export const POST = withAuth(
 
       await dbUser.save();
 
-      // Auto-unlock: check if all lessons in the first locked section are completed
+      // Auto-unlock sections
       const allSections = await Section.find({ courseId: course?._id }).sort({ order: 1 });
-      let allUnlockedLessonsCompleted = 0;
+      let sectionUnlocked = false;
+      let allCompleted = false;
+
+      // Build a map of section -> completed lesson count
+      const sectionCompletedMap = new Map<string, number>();
+      const sectionTotalMap = new Map<string, number>();
 
       for (const section of allSections) {
-        if (!section.isLocked) {
-          const sectionLessons = await Lesson.find({ sectionId: section._id });
-          for (const lesson of sectionLessons) {
-            if (completedLessons.includes(lesson._id.toString())) {
-              allUnlockedLessonsCompleted++;
+        const sectionLessons = await Lesson.find({ sectionId: section._id });
+        sectionTotalMap.set(section._id.toString(), sectionLessons.length);
+        const completedInSection = sectionLessons.filter(l =>
+          completedLessons.includes(l._id.toString())
+        ).length;
+        sectionCompletedMap.set(section._id.toString(), completedInSection);
+      }
+
+      // Unlock sections sequentially
+      for (const section of allSections) {
+        if (section.isLocked) {
+          // Check if ALL previous sections are fully completed
+          let allPreviousComplete = true;
+          for (const prevSection of allSections) {
+            if (prevSection._id.toString() === section._id.toString()) break;
+            const prevTotal = sectionTotalMap.get(prevSection._id.toString()) ?? 0;
+            const prevCompleted = sectionCompletedMap.get(prevSection._id.toString()) ?? 0;
+            if (prevCompleted < prevTotal) {
+              allPreviousComplete = false;
+              break;
             }
           }
-        } else {
-          // Found first locked section - check if all previous unlocked lessons are done
-          const totalUnlockedLessons = allSections
-            .filter(s => !s.isLocked)
-            .reduce((sum, s) => sum + (s.lessons?.length ?? 0), 0);
 
-          if (allUnlockedLessonsCompleted >= totalUnlockedLessons) {
+          if (allPreviousComplete) {
             section.isLocked = false;
             await section.save();
+            sectionUnlocked = true;
             console.log(`[AUTO-UNLOCK] Section "${section.title}" unlocked`);
           }
-          break;
         }
+      }
+
+      // Check if all lessons are completed
+      if (completedLessons.length >= totalLessons && totalLessons > 0) {
+        allCompleted = true;
+        // Unlock ALL sections
+        await Section.updateMany({ courseId: course?._id, isLocked: true }, { $set: { isLocked: false } });
+        console.log("[AUTO-UNLOCK] All sections unlocked - course completed");
       }
 
       return NextResponse.json({ 
         progress: dbUser.progress,
-        sectionUnlocked: allUnlockedLessonsCompleted > completedLessons.length - 1
+        sectionUnlocked,
+        allCompleted,
       }, { status: 200 });
     } catch (error) {
       console.error("[POST /api/progress]", error);

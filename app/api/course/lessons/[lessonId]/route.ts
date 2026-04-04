@@ -29,9 +29,9 @@ export const GET = withAuth(
       const dbUser = await User.findById(ctx.user.userId).select("progress");
 
       const completedLessons: string[] = dbUser?.progress?.completedLessons?.map(String) ?? [];
-      const isCompleted = completedLessons.includes(lessonId);
+      const isCompleted = completedLessons.includes(String(lessonId));
       const lastVideoTimestamp =
-        dbUser?.progress?.lastLessonId?.toString() === lessonId
+        dbUser?.progress?.lastLessonId?.toString() === String(lessonId)
           ? (dbUser?.progress?.lastVideoTimestamp ?? 0)
           : 0;
 
