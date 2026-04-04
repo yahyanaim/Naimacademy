@@ -206,7 +206,18 @@ export default function DashboardPage() {
                     You&apos;ve successfully completed the course.
                   </p>
                 </div>
-                <Button onClick={() => window.location.href = "/api/certificate/download"} size="sm" className="mt-auto">
+                <Button onClick={async () => {
+                  try {
+                    const res = await fetch("/api/auth/me");
+                    if (res.ok) {
+                      const json = await res.json();
+                      const cert = json.user?.certifications?.[0];
+                      if (cert) {
+                        window.open(`/certificate/${cert.certificationId}?download=true`, "_blank");
+                      }
+                    }
+                  } catch {}
+                }} size="sm" className="mt-auto">
                   Download Certificate
                 </Button>
               </>
