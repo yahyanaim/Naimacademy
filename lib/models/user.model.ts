@@ -63,7 +63,7 @@ const UserSchema = new Schema<IUser>(
     ],
     certifications: [
       {
-        certificationId: { type: String, unique: true, sparse: true },
+        certificationId: { type: String },
         examId: { type: String, required: true },
         examTitle: { type: String, required: true },
         courseId: { type: String, required: true },
