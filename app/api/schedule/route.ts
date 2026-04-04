@@ -99,14 +99,17 @@ export const POST = withAuth(
       const startDateStr = start.toISOString().split("T")[0];
       const endDateStr = endDate.toISOString().split("T")[0];
 
-      dbUser.learningSchedule = {
-        lessonsPerWeek,
-        daysOfWeek: daysOfWeek || [1, 2, 3, 4, 5],
-        startDate: startDateStr,
-        endDate: endDateStr,
-      };
-
-      await dbUser.save();
+      await User.findByIdAndUpdate(ctx.user.userId, {
+        $set: {
+          learningSchedule: {
+            lessonsPerWeek,
+            daysOfWeek: daysOfWeek || [1, 2, 3, 4, 5],
+            startDate: new Date(startDateStr),
+            endDate: new Date(endDateStr),
+          },
+          lastActivityAt: new Date(),
+        },
+      });
 
       return NextResponse.json({
         schedule: {

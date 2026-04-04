@@ -96,6 +96,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (role === "student" && (user as Record<string, unknown>).isBanned) {
+      return NextResponse.json(
+        { error: "Your account has been banned", reason: (user as Record<string, unknown>).banReason },
+        { status: 403 }
+      );
+    }
+
     resetRateLimit(rateKey);
 
     const token = await signToken({ userId: user._id.toString(), role });

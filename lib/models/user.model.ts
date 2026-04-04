@@ -6,6 +6,9 @@ export interface IUser extends Document {
   email: string;
   password: string;
   role: "student";
+  isBanned: boolean;
+  banReason?: string;
+  lastActivityAt: Date;
   progress: {
     completedLessons: Types.ObjectId[];
     completionPercentage: number;
@@ -51,6 +54,9 @@ const UserSchema = new Schema<IUser>(
     email: { type: String, required: true, unique: true, lowercase: true, index: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["student"], default: "student" },
+    isBanned: { type: Boolean, default: false },
+    banReason: { type: String },
+    lastActivityAt: { type: Date, default: Date.now },
     progress: {
       completedLessons: [{ type: Schema.Types.ObjectId, ref: "Lesson" }],
       completionPercentage: { type: Number, default: 0 },

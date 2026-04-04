@@ -12,10 +12,17 @@ export const GET = withAuth(
     try {
       await connectDB();
 
-      const dbUser = await User.findById(ctx.user.userId).select("progress learningSchedule");
+      const dbUser = await User.findById(ctx.user.userId).select("progress learningSchedule isBanned banReason");
 
       if (!dbUser) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      if (dbUser.isBanned) {
+        return NextResponse.json(
+          { error: "Your account has been banned", reason: dbUser.banReason },
+          { status: 403 }
+        );
       }
 
       return NextResponse.json({ progress: dbUser.progress, learningSchedule: dbUser.learningSchedule }, { status: 200 });
@@ -50,6 +57,13 @@ export const POST = withAuth(
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
+      if (dbUser.isBanned) {
+        return NextResponse.json(
+          { error: "Your account has been banned", reason: dbUser.banReason },
+          { status: 403 }
+        );
+      }
+
       const completedLessons: string[] = dbUser.progress?.completedLessons?.map(String) ?? [];
       if (!completedLessons.includes(lessonId.toString())) {
         completedLessons.push(lessonId.toString());
@@ -75,6 +89,7 @@ export const POST = withAuth(
         completedLessons,
         completionPercentage,
       };
+      dbUser.lastActivityAt = new Date();
 
       await dbUser.save();
 
