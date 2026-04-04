@@ -105,14 +105,16 @@ export default function CoursePage() {
   useEffect(() => {
     async function load() {
       try {
-        const [courseRes, progressRes, userRes] = await Promise.all([
+        const [courseRes, progressRes, userRes, scheduleRes] = await Promise.all([
           fetch("/api/course"),
           fetch("/api/progress"),
           fetch("/api/auth/me"),
+          fetch("/api/schedule"),
         ]);
         const courseJson = courseRes.ok ? await courseRes.json() : null;
         const progressJson = progressRes.ok ? await progressRes.json() : null;
         const userJson = userRes.ok ? await userRes.json() : null;
+        const scheduleJson = scheduleRes.ok ? await scheduleRes.json() : null;
 
         const courseData: CourseData | null = courseJson?.course ?? null;
         const progressData: ProgressData | null = progressJson?.progress ?? null;
@@ -121,7 +123,7 @@ export default function CoursePage() {
         setCourse(courseData);
         setProgress(progressData);
         setUser(userData);
-        setHasSchedule(!!progressJson?.learningSchedule);
+        setHasSchedule(!!scheduleJson?.schedule);
 
         if (courseData) {
           const initial: Record<string, boolean> = {};

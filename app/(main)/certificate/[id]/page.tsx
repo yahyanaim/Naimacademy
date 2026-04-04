@@ -63,6 +63,15 @@ export default function CertificateDetailPage() {
     if (certId) fetchCert()
   }, [certId, router])
 
+  useEffect(() => {
+    if (!loading && cert) {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get("download") === "true") {
+        setTimeout(() => window.print(), 500)
+      }
+    }
+  }, [loading, cert])
+
   if (loading) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-12 space-y-6">
