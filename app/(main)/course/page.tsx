@@ -230,14 +230,18 @@ END:VEVENT
         }),
       });
 
+      const data = await res.json().catch(() => null);
+
       if (!res.ok) {
-        toast.error("Failed to save schedule");
+        toast.error(data?.error || "Failed to save schedule");
         return;
       }
 
-      const data = await res.json();
       setScheduleDialogOpen(false);
-      generateCalendarFile(data.schedule);
+      setHasSchedule(true);
+      if (data?.schedule) {
+        generateCalendarFile(data.schedule);
+      }
       toast.success("Schedule saved & added to calendar!");
 
       if (pendingLessonId) {
@@ -245,7 +249,8 @@ END:VEVENT
           router.push(`/course/lesson/${pendingLessonId}`);
         }, 500);
       }
-    } catch {
+    } catch (err) {
+      console.error("[SCHEDULE_SAVE]", err);
       toast.error("Failed to save schedule");
     } finally {
       setScheduleSaving(false);

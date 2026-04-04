@@ -3,7 +3,7 @@ import { User } from "@/lib/models/user.model";
 import { withAuth } from "@/lib/auth/guards";
 import { NextRequest, NextResponse } from "next/server";
 
-export const POST = withAuth(
+export const GET = withAuth(
   async (
     _req: NextRequest,
     ctx: { params: Promise<Record<string, string>>; user: { userId: string; role: string } }
