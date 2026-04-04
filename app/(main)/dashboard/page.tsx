@@ -208,13 +208,24 @@ export default function DashboardPage() {
                 </div>
                 <Button onClick={async () => {
                   try {
-                    const res = await fetch("/api/auth/me");
+                    const res = await fetch("/api/certificate/download");
                     if (res.ok) {
-                      const json = await res.json();
-                      const cert = json.user?.certifications?.[0];
-                      if (cert) {
-                        window.open(`/certificate/${cert.certificationId}?download=true`, "_blank");
-                      }
+                      const html = await res.text();
+                      const iframe = document.createElement("iframe");
+                      iframe.style.position = "fixed";
+                      iframe.style.right = "0";
+                      iframe.style.bottom = "0";
+                      iframe.style.width = "0";
+                      iframe.style.height = "0";
+                      iframe.style.border = "0";
+                      document.body.appendChild(iframe);
+                      iframe.contentWindow?.document.write(html);
+                      iframe.contentWindow?.document.close();
+                      setTimeout(() => {
+                        iframe.contentWindow?.focus();
+                        iframe.contentWindow?.print();
+                        setTimeout(() => document.body.removeChild(iframe), 1000);
+                      }, 500);
                     }
                   } catch {}
                 }} size="sm" className="mt-auto">
