@@ -55,14 +55,6 @@ export default function Navbar() {
     window.location.href = "/";
   };
 
-  const navLinksArray: { href: string; label: string; icon?: React.ComponentType<{ className?: string }> }[] = [
-    { href: "/course", label: "Course" },
-    ...(user ? [
-      { href: "/certificates", label: "Certificates" },
-      { href: user.role === "admin" ? "/admin" : "/dashboard", label: user.role === "admin" ? "Admin" : "Dashboard" },
-    ] : []),
-  ];
-
   const desktopNavLinks = (
     <>
       <Link
@@ -174,28 +166,17 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
               <div className="flex flex-col gap-1 pt-12">
-                {navLinksArray.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
-                  >
-                    {link.icon && <link.icon className="size-5" />}
-                    {link.label}
-                  </Link>
-                ))}
-                {user && (
-                  <Link
-                    href="/donate"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
-                  >
-                    <Coffee className="size-5" />
-                    Support Us
-                  </Link>
-                )}
+                <Link
+                  href="/course"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
+                >
+                  <GraduationCap className="size-5" />
+                  Course
+                </Link>
+                
                 <div className="my-2 border-t" />
+                
                 {user ? (
                   <>
                     <Link
@@ -212,7 +193,7 @@ export default function Navbar() {
                       className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
                     >
                       <User className="size-5" />
-                      {user.name || user.email}
+                      Profile
                     </Link>
                     <Link
                       href="/certificates"
@@ -221,6 +202,14 @@ export default function Navbar() {
                     >
                       <FileBadge className="size-5" />
                       My Certificates
+                    </Link>
+                    <Link
+                      href="/donate"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
+                    >
+                      <Coffee className="size-5" />
+                      Support Us
                     </Link>
                     {user.role === "admin" && (
                       <Link
@@ -232,6 +221,9 @@ export default function Navbar() {
                         Admin
                       </Link>
                     )}
+                    
+                    <div className="my-2 border-t" />
+                    
                     <button
                       onClick={() => {
                         setMobileOpen(false);
