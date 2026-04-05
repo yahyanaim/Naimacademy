@@ -203,6 +203,18 @@ END:VEVENT
 
   async function handleStartCourse(lessonId: string) {
     if (percentage >= 100) return;
+    
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    
+    const hasProgress = (progress?.completedLessons?.length ?? 0) > 0;
+    if (!hasSchedule && !hasProgress) {
+      setScheduleDialogOpen(true);
+      return;
+    }
+    
     router.push(`/course/lesson/${lessonId}`);
   }
 
