@@ -24,9 +24,6 @@ export default function HomePage() {
           <p className="text-base sm:text-lg leading-relaxed text-muted-foreground max-w-xl mx-auto">
             The complete curriculum to design, build, and deploy sophisticated logic pipelines. No fluff, just pure engineering.
           </p>
-          <p className="text-lg font-medium text-primary">
-            Welcome to Naim Academy - Start your automation journey today!
-          </p>
         </div>
         
         <div className="flex items-center justify-center gap-4 mt-6">

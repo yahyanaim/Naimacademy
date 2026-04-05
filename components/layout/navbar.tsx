@@ -165,77 +165,79 @@ export default function Navbar() {
             <SheetTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground">
               <Menu className="h-5 w-5" />
             </SheetTrigger>
-            <SheetContent side="right" className="w-64">
-              <nav className="flex flex-col gap-4 mt-6">
-                {navLinks}
-                {user && (
-                  <Link
-                    href="/donate"
-                    className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    <Coffee className="size-4" />
-                    Support Us
-                  </Link>
-                )}
-                {user ? (
-                  <>
+            <SheetContent side="right" className="w-72 p-0">
+              <div className="px-4 pt-12 pb-4">
+                <nav className="flex flex-col gap-1">
+                  {navLinks}
+                  {user && (
                     <Link
-                      href="/profile"
-                      className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
+                      href="/donate"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                       onClick={() => setMobileOpen(false)}
                     >
-                      <User className="h-4 w-4" />
-                      {user.name || user.email}
+                      <Coffee className="size-5" />
+                      Support Us
                     </Link>
-                    <Link
-                      href="/certificates"
-                      className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <FileBadge className="h-4 w-4" />
-                      My Certificates
-                    </Link>
-                    {user.role === "admin" && (
+                  )}
+                  {user ? (
+                    <>
                       <Link
-                        href="/admin"
-                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                        href="/profile"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-muted hover:text-primary transition-colors"
                         onClick={() => setMobileOpen(false)}
                       >
-                        <Shield className="h-4 w-4" />
-                        Admin
+                        <User className="size-5" />
+                        {user.name || user.email}
                       </Link>
-                    )}
-                    <button
-                      onClick={() => {
-                        setMobileOpen(false);
-                        handleLogout();
-                      }}
-                      className="flex items-center gap-2 text-sm text-destructive hover:opacity-80"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/login"
-                      className="text-sm font-medium text-muted-foreground hover:text-foreground"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href="/signup"
-                      className="text-sm font-medium text-muted-foreground hover:text-foreground"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      Sign Up
-                    </Link>
-                  </>
-                )}
-              </nav>
+                      <Link
+                        href="/certificates"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-muted hover:text-primary transition-colors"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <FileBadge className="size-5" />
+                        My Certificates
+                      </Link>
+                      {user.role === "admin" && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          <Shield className="size-5" />
+                          Admin
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => {
+                          setMobileOpen(false);
+                          handleLogout();
+                        }}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-destructive hover:bg-destructive/10"
+                      >
+                        <LogOut className="size-5" />
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/login"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        href="/signup"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        Sign Up
+                      </Link>
+                    </>
+                  )}
+                </nav>
+              </div>
             </SheetContent>
           </Sheet>
         </div>
