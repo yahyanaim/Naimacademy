@@ -202,6 +202,10 @@ END:VEVENT
   }
 
   async function handleStartCourse(lessonId: string) {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
     setPendingLessonId(lessonId);
     const hasProgress = (progress?.completedLessons?.length ?? 0) > 0;
     if (!hasSchedule && !hasProgress) {
