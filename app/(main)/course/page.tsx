@@ -203,7 +203,7 @@ END:VEVENT
 
   async function handleStartCourse(lessonId: string) {
     setPendingLessonId(lessonId);
-    if (!hasSchedule) {
+    if (!hasSchedule && completedLessons.length === 0) {
       setScheduleDialogOpen(true);
     } else {
       router.push(`/course/lesson/${lessonId}`);

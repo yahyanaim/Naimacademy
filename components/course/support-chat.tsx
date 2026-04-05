@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, Send, X, AlertCircle } from "lucide-react";
@@ -14,6 +15,9 @@ interface Message {
 }
 
 export function SupportChat() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/certificate")) return null;
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");

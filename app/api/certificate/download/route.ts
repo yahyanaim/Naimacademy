@@ -131,9 +131,7 @@ export const GET = withAuth(
 
       return new NextResponse(html, {
         status: 200,
-        headers: {
-          "Content-Type": "text/html",
-        },
+        headers: { "Content-Type": "text/html" },
       });
     } catch (error) {
       console.error("[GET /api/certificate/download]", error);
