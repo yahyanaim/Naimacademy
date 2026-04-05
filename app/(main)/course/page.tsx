@@ -336,6 +336,27 @@ END:VEVENT
               <ProgressBar percentage={percentage} />
             </div>
 
+            {hasSchedule && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  fetch("/api/schedule")
+                    .then(res => res.json())
+                    .then(data => {
+                      if (data?.schedule) {
+                        generateCalendarFile(data.schedule);
+                        toast.success("Calendar downloaded!");
+                      }
+                    })
+                    .catch(() => toast.error("Failed to download calendar"));
+                }}
+              >
+                <Calendar className="size-4 mr-2" />
+                Download Calendar
+              </Button>
+            )}
+
             {user ? (
               percentage < 100 && ctaLesson ? (
                 <Button onClick={() => handleStartCourse(ctaLesson._id)} size="lg">

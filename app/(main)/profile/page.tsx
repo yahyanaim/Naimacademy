@@ -183,26 +183,18 @@ export default function ProfilePage() {
             Danger Zone
           </CardTitle>
           <CardDescription>
-            Irreversible and destructive actions
+            Permanently delete your account and data
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-lg border border-border">
-            <div>
-              <p className="text-sm font-medium">Delete your account</p>
-              <p className="text-sm text-muted-foreground">
-                Permanently delete your account and all associated data
-              </p>
-            </div>
-            <Button
-              variant="destructive"
-              onClick={() => setDeleteDialogOpen(true)}
-              className="shrink-0"
-            >
-              <Trash2 className="size-4 mr-1.5" />
-              Delete Account
-            </Button>
-          </div>
+        <CardContent className="pt-4">
+          <Button
+            variant="outline"
+            onClick={() => setDeleteDialogOpen(true)}
+            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+          >
+            <Trash2 className="size-4 mr-2" />
+            Delete Account
+          </Button>
         </CardContent>
       </Card>
 
