@@ -347,9 +347,9 @@ END:VEVENT
                 </Button>
               ) : null
             ) : (
-              <Button disabled size="lg" variant="outline">
+              <Link href="/login" className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border px-2.5 text-sm font-medium hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-50">
                 Log in to start learning
-              </Button>
+              </Link>
             )}
           </>
         )}

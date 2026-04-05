@@ -270,10 +270,11 @@ export default function LessonPage() {
             {prevLesson ? (
               <Button
                 render={<Link href={`/course/lesson/${prevLesson._id}`} />}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-yellow-500 hover:bg-yellow-600 text-white border-0"
+                size="sm"
+                className="flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white border-0"
               >
-                <ChevronLeft className="size-4 shrink-0" />
-                <span className="truncate">{prevLesson.title}</span>
+                <ChevronLeft className="size-3.5 shrink-0" />
+                <span className="truncate max-w-[120px]">{prevLesson.title}</span>
               </Button>
             ) : (
               <div className="flex-1" />
@@ -281,10 +282,11 @@ export default function LessonPage() {
             {nextLesson && (
               <Button
                 render={<Link href={`/course/lesson/${nextLesson._id}`} />}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-600 text-white border-0"
+                size="sm"
+                className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white border-0"
               >
-                <span className="truncate">Next: {nextLesson.title}</span>
-                <ChevronRight className="size-4 shrink-0" />
+                <span className="truncate max-w-[120px]">Next: {nextLesson.title}</span>
+                <ChevronRight className="size-3.5 shrink-0" />
               </Button>
             )}
           </div>
