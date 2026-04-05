@@ -6,6 +6,7 @@ import Link from "next/link";
 import { VideoPlayer } from "@/components/course/video-player";
 import { CourseSidebar } from "@/components/course/course-sidebar";
 import { LessonContent } from "@/components/course/lesson-content";
+import { AIChat } from "@/components/course/ai-chat";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -300,6 +301,8 @@ export default function LessonPage() {
         </div>
         <div className="flex-1 min-h-0">{sidebarContent}</div>
       </aside>
+
+      <AIChat lessonTitle={lesson?.title} lessonContent={lesson?.transcript} />
     </div>
   );
 }
