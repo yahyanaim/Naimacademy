@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Footer from "@/components/layout/footer";
-import { ArrowLeft, Copy, Check, Heart } from "lucide-react";
+import { ArrowLeft, Copy, Check, Heart, Wallet, CreditCard } from "lucide-react";
 
 export default function DonatePage() {
   return (
