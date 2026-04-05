@@ -44,6 +44,10 @@ export interface IUser extends Document {
   certificateIssued: boolean;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  chatQuestions: {
+    question: string;
+    answeredAt: Date;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -96,6 +100,12 @@ const UserSchema = new Schema<IUser>(
     certificateIssued: { type: Boolean, default: false },
     passwordResetToken: { type: String },
     passwordResetExpires: { type: Date },
+    chatQuestions: [
+      {
+        question: { type: String },
+        answeredAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );
