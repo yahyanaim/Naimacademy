@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageCircle, X, Send, Bot, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface ChatMessage {
@@ -91,22 +91,21 @@ export function AIChat({ lessonTitle, lessonContent }: { lessonTitle?: string; l
     <>
       <button
         onClick={openChat}
-        className="fixed bottom-6 right-24 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-[#C41E3A] to-[#a01830] text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+        className="fixed bottom-6 right-24 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-black text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
         aria-label="Open AI Chat"
       >
-        <Bot className="size-5" />
-        <span className="text-sm font-medium">AI Helper</span>
+        <span className="text-sm font-bold">AI</span>
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 rounded-2xl bg-white dark:bg-gray-900 shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
-          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-[#C41E3A]/10 to-[#C41E3A]/5 border-b border-gray-100 dark:border-gray-800">
+        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 rounded-2xl bg-white dark:bg-gray-900 shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between px-4 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-[#C41E3A] flex items-center justify-center">
-                <Bot className="size-4 text-white" />
+              <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center">
+                <span className="text-xs font-bold text-white">AI</span>
               </div>
               <div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white">AI Tutor</h3>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">AI Assistant</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {remaining !== null ? `${remaining} questions left today` : "Loading..."}
                 </p>
@@ -114,7 +113,7 @@ export function AIChat({ lessonTitle, lessonContent }: { lessonTitle?: string; l
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
               <X className="size-4 text-gray-500" />
             </button>
@@ -129,8 +128,8 @@ export function AIChat({ lessonTitle, lessonContent }: { lessonTitle?: string; l
                 <div
                   className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
                     msg.role === "user"
-                      ? "bg-[#C41E3A] text-white rounded-br-sm"
-                      : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-100 dark:border-gray-700 rounded-bl-sm"
+                      ? "bg-black text-white rounded-br-sm"
+                      : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-bl-sm"
                   }`}
                 >
                   {msg.content}
@@ -139,14 +138,14 @@ export function AIChat({ lessonTitle, lessonContent }: { lessonTitle?: string; l
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white dark:bg-gray-800 rounded-2xl px-4 py-2.5 border border-gray-100 dark:border-gray-700">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl px-4 py-2.5 border border-gray-200 dark:border-gray-700">
                   <Loader2 className="size-4 animate-spin text-gray-400" />
                 </div>
               </div>
             )}
           </div>
 
-          <div className="border-t border-gray-100 dark:border-gray-800 p-3 bg-white dark:bg-gray-900">
+          <div className="border-t border-gray-200 dark:border-gray-700 p-3 bg-white dark:bg-gray-900">
             {remaining !== null && remaining > 0 ? (
               <div className="flex gap-2">
                 <Input
@@ -155,13 +154,13 @@ export function AIChat({ lessonTitle, lessonContent }: { lessonTitle?: string; l
                   placeholder="Ask a question..."
                   onKeyDown={(e) => e.key === "Enter" && !loading && handleSend()}
                   disabled={loading}
-                  className="h-9 text-sm bg-gray-50 dark:bg-gray-800 border-none"
+                  className="h-9 text-sm bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
                 />
                 <Button
                   onClick={handleSend}
                   disabled={loading || !input.trim()}
                   size="icon"
-                  className="h-9 w-9 shrink-0 bg-[#C41E3A] hover:bg-[#a01830]"
+                  className="h-9 w-9 shrink-0 bg-black hover:bg-gray-800"
                 >
                   <Send className="size-4" />
                 </Button>
