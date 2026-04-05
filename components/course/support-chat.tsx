@@ -98,38 +98,48 @@ export function SupportChat() {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all duration-200 hover:scale-105"
+        className="fixed bottom-6 right-6 z-50 flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
         aria-label="Open support chat"
       >
-        {isOpen ? <X className="size-6" /> : <MessageCircle className="size-6" />}
+        {isOpen ? <X className="size-5" /> : <MessageCircle className="size-5" />}
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 rounded-xl border border-border bg-background shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50">
-            <div>
-              <h3 className="text-sm font-semibold">Support</h3>
-              <p className="text-xs text-muted-foreground">
-                {remaining > 0
-                  ? `${remaining} message${remaining !== 1 ? "s" : ""} left`
-                  : "Limit reached"}
-              </p>
+        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 rounded-2xl bg-white dark:bg-gray-900 shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                <MessageCircle className="size-4 text-white" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Support</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {remaining > 0
+                    ? `${remaining} free messages`
+                    : "Limit reached"}
+                </p>
+              </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1 rounded-md hover:bg-muted transition-colors"
+              className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
-              <X className="size-4 text-muted-foreground" />
+              <X className="size-4 text-gray-500" />
             </button>
           </div>
 
-          <div className="h-72 overflow-y-auto p-4 space-y-3 bg-muted/10">
+          <div className="h-72 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-950">
             {loading ? (
-              <p className="text-sm text-muted-foreground text-center py-8">Loading...</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Loading...</p>
             ) : messages.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No messages yet. Send us a question!
-              </p>
+              <div className="text-center py-8">
+                <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-3">
+                  <MessageCircle className="size-6 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Send us a message and we'll help!
+                </p>
+              </div>
             ) : (
               messages.map((msg) => (
                 <div
@@ -137,14 +147,14 @@ export function SupportChat() {
                   className={`flex ${msg.isAdmin ? "justify-start" : "justify-end"}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
+                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
                       msg.isAdmin
-                        ? "bg-muted text-foreground rounded-bl-sm"
-                        : "bg-primary text-primary-foreground rounded-br-sm"
+                        ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-100 dark:border-gray-700 rounded-bl-sm"
+                        : "bg-gradient-to-r from-primary to-primary/90 text-white rounded-br-sm"
                     }`}
                   >
                     <p>{msg.message}</p>
-                    <p className={`text-[10px] mt-1 ${msg.isAdmin ? "text-muted-foreground" : "text-primary-foreground/70"}`}>
+                    <p className={`text-[10px] mt-1.5 ${msg.isAdmin ? "text-gray-400" : "text-white/60"}`}>
                       {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>
@@ -154,28 +164,28 @@ export function SupportChat() {
             <div ref={bottomRef} />
           </div>
 
-          <div className="border-t border-border p-3 bg-background">
+          <div className="border-t border-gray-100 dark:border-gray-800 p-3 bg-white dark:bg-gray-900">
             {remaining > 0 ? (
               <div className="flex gap-2">
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Type a message..."
+                  placeholder="Write a message..."
                   onKeyDown={(e) => e.key === "Enter" && !sending && handleSend()}
                   disabled={sending}
-                  className="h-9 text-sm"
+                  className="h-10 text-sm bg-gray-50 dark:bg-gray-800 border-none focus:ring-2 focus:ring-primary/50"
                 />
                 <Button
                   onClick={handleSend}
                   disabled={sending || !input.trim()}
                   size="icon"
-                  className="h-9 w-9 shrink-0"
+                  className="h-10 w-10 shrink-0 bg-primary hover:bg-primary/90"
                 >
-                  <Send className="size-3.5" />
+                  <Send className="size-4" />
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2">
+              <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2.5">
                 <AlertCircle className="size-3.5 shrink-0" />
                 All 5 messages used. Contact admin directly.
               </div>
