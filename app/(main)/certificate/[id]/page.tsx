@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Award, ChevronLeft, ShieldCheck, Download } from "lucide-react"
+import { Award, ChevronLeft, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -30,15 +30,10 @@ function formatDate(dateStr: string): string {
 export default function CertificateDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const certificateRef = useRef<HTMLDivElement>(null)
   const certId = params?.id as string
   
   const [cert, setCert] = useState<Certification | null>(null)
   const [loading, setLoading] = useState(true)
-
-  const handlePrint = () => {
-    window.print()
-  }
 
   useEffect(() => {
     async function fetchCert() {
@@ -74,15 +69,6 @@ export default function CertificateDetailPage() {
     }
   }, [certId, router])
 
-  useEffect(() => {
-    if (!loading && cert) {
-      const params = new URLSearchParams(window.location.search)
-      if (params.get("download") === "true") {
-        setTimeout(() => window.print(), 500)
-      }
-    }
-  }, [loading, cert])
-
   if (loading) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-12 space-y-6">
@@ -96,8 +82,8 @@ export default function CertificateDetailPage() {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-8 space-y-4">
-      {/* Page header (Hidden on print) */}
-      <div className="flex items-center justify-between print:hidden">
+      {/* Page header */}
+      <div className="flex items-center justify-between">
         <Button 
           variant="ghost" 
           size="sm" 
@@ -112,7 +98,6 @@ export default function CertificateDetailPage() {
       {/* Certificate Frame */}
       <div className="relative group overflow-hidden">
         <div
-          ref={certificateRef}
           id="certificate-content"
           className="certificate-box"
         >
@@ -132,51 +117,68 @@ export default function CertificateDetailPage() {
             </div>
           </div>
 
-          {/* Certificate Title */}
-          <div className="cert-title">Certificate of Completion</div>
-
-          {/* Presented To */}
-          <div className="cert-presented">This certificate is proudly presented to</div>
-
-          {/* Student Name */}
-          <div className="cert-name">{cert.studentName}</div>
-
-          {/* Decorative Line */}
-          <div className="cert-line" />
-
-          {/* Course Completion Text */}
-          <div className="cert-text">
-            For successfully completing the course
+          {/* Title Area */}
+          <div className="title-section">
+            <h2 className="title-text">
+              CERTIFICATE <span className="title-of">of</span> COMPLETION
+            </h2>
+            <p className="subtitle-text">
+              NAIM ACADEMY EXPERTISE CREDENTIAL
+            </p>
           </div>
 
-          {/* Course Name */}
-          <div className="cert-course">{cert.courseTitle}</div>
-
-          {/* Score */}
-          <div className="cert-score">with a score of {cert.score}%</div>
-
-          {/* Date */}
-          <div className="cert-date">Issued on {formatDate(cert.issuedAt)}</div>
-
-          {/* Signature */}
-          <div className="cert-signature">
-            <div className="signature-line" />
-            <div className="signature-name">Yahia Naim</div>
-            <div className="signature-title">Course Instructor</div>
+          {/* Achievement Body */}
+          <div className="body-section">
+            <p className="award-label">This prestigious certificate is awarded to</p>
+            <div className="recipient-section">
+              <p className="recipient-name">{cert.studentName}</p>
+              <div className="name-line" />
+            </div>
+            <p className="course-label">for demonstrating exceptional knowledge and passing the</p>
+            <p className="course-name">{cert.courseTitle}</p>
+            <p className="exam-name">Advanced Examination: {cert.examTitle}</p>
           </div>
 
-          {/* Barcode */}
-          <div className="cert-barcode">
-            <div className="barcode-number">{cert.certificationId}</div>
+          {/* Metadata Grid */}
+          <div className="metadata-grid">
+            <div className="metadata-item metadata-left">
+              <p className="metadata-label">Date of Award</p>
+              <p className="metadata-value">{formatDate(cert.issuedAt)}</p>
+            </div>
+            <div className="metadata-item metadata-right">
+              <p className="metadata-label">Final Examination Score</p>
+              <p className="metadata-value">{cert.score}%</p>
+            </div>
           </div>
-        </div>
 
-        {/* Print Button */}
-        <div className="print:hidden flex justify-center mt-4">
-          <Button onClick={handlePrint} className="gap-2">
-            <Download className="size-4" />
-            Download / Print
-          </Button>
+          {/* Signature & Barcode Area */}
+          <div className="footer-section">
+             <div className="signature-block">
+                <div className="signature-line-area">
+                   <span className="signature-text">Naim Academy</span>
+                </div>
+                <p className="signature-label">Academic Director</p>
+             </div>
+
+             {/* Barcode representation */}
+             <div className="barcode-block">
+                <div className="barcode-bars">
+                   {[...Array(20)].map((_, i) => (
+                      <div 
+                        key={i} 
+                        className="barcode-bar" 
+                        style={{ 
+                          width: `${(i % 3 === 0 ? 2 : i % 2 === 0 ? 1 : 1.5)}px`,
+                          height: `${30 + (Math.sin(i) * 4)}px`
+                        }} 
+                      />
+                   ))}
+                </div>
+                <p className="barcode-id">
+                  {cert.certificationId}
+                </p>
+             </div>
+          </div>
         </div>
       </div>
     </div>
