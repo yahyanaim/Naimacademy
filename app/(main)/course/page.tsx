@@ -202,17 +202,8 @@ END:VEVENT
   }
 
   async function handleStartCourse(lessonId: string) {
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-    setPendingLessonId(lessonId);
-    const hasProgress = (progress?.completedLessons?.length ?? 0) > 0;
-    if (!hasSchedule && !hasProgress) {
-      setScheduleDialogOpen(true);
-    } else {
-      router.push(`/course/lesson/${lessonId}`);
-    }
+    if (percentage >= 100) return;
+    router.push(`/course/lesson/${lessonId}`);
   }
 
   async function handleScheduleSave() {
@@ -240,11 +231,6 @@ END:VEVENT
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        if (res.status === 401) {
-          toast.error("Please log in again");
-          router.push("/login");
-          return;
-        }
         toast.error(data?.error || "Failed to save schedule");
         return;
       }
@@ -338,9 +324,19 @@ END:VEVENT
               <ProgressBar percentage={percentage} />
             </div>
 
-            {ctaLesson && (
-              <Button onClick={() => handleStartCourse(ctaLesson._id)} size="lg">
-                {ctaLabel}
+            {user ? (
+              percentage < 100 && ctaLesson ? (
+                <Button onClick={() => handleStartCourse(ctaLesson._id)} size="lg">
+                  {ctaLabel}
+                </Button>
+              ) : percentage === 100 ? (
+                <Button disabled size="lg" className="bg-green-600 hover:bg-green-600">
+                  Course Completed
+                </Button>
+              ) : null
+            ) : (
+              <Button disabled size="lg" variant="outline">
+                Log in to start learning
               </Button>
             )}
           </>
@@ -383,11 +379,19 @@ END:VEVENT
                   <ul className="border-t border-border">
                     {section.lessons.map((lesson) => {
                       const isCompleted = completedLessons.includes(lesson._id);
+                      const handleLessonClick = (e: React.MouseEvent) => {
+                        if (!user) {
+                          e.preventDefault();
+                          toast.error("Please log in to access lessons");
+                          return;
+                        }
+                      };
                       return (
                         <li key={lesson._id}>
                           <Link
-                            href={`/course/lesson/${lesson._id}`}
-                            className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted/50 transition-colors"
+                            href={user ? `/course/lesson/${lesson._id}` : "#"}
+                            onClick={handleLessonClick}
+                            className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted/50 transition-colors ${!user ? "pointer-events-none opacity-60" : ""}`}
                           >
                             {isCompleted ? (
                               <CheckCircle className="size-4 text-green-500 shrink-0" />

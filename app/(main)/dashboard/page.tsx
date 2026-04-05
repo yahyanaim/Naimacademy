@@ -113,6 +113,8 @@ export default function DashboardPage() {
       ? user.examAttempts[user.examAttempts.length - 1]
       : null
   const examPassed = !!certificate
+  const courseCompleted = completionPct >= 100
+  const canDownloadCertificate = examPassed && courseCompleted
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
@@ -198,7 +200,7 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="flex flex-col gap-4 flex-1">
-            {examPassed ? (
+            {canDownloadCertificate ? (
               <>
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-medium">Certificate Available</p>

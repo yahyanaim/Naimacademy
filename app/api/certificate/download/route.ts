@@ -24,6 +24,24 @@ export const GET = withAuth(
         );
       }
 
+      const passedAttempt = user.examAttempts.find(
+        (attempt: { passed: boolean }) => attempt.passed === true
+      );
+      if (!passedAttempt) {
+        return NextResponse.json(
+          { error: "No certificate found" },
+          { status: 404 }
+        );
+      }
+
+      const completionPercentage = user.progress?.completionPercentage ?? 0;
+      if (completionPercentage < 100) {
+        return NextResponse.json(
+          { error: "No certificate found" },
+          { status: 404 }
+        );
+      }
+
       const baseUrl = req.nextUrl.origin;
       return NextResponse.redirect(
         new URL(`/certificate/${cert.certificationId}?download=true`, baseUrl)
