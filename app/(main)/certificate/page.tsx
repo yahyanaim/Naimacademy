@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Award, ChevronLeft, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -55,6 +55,15 @@ export default function CertificateDetailPage() {
     }
     fetchCert()
   }, [router])
+
+  useEffect(() => {
+    if (!loading && cert) {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get("download") === "true") {
+        setTimeout(() => window.print(), 500)
+      }
+    }
+  }, [loading, cert])
 
   if (loading) {
     return (
