@@ -165,79 +165,72 @@ export default function Navbar() {
             <SheetTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground">
               <Menu className="h-5 w-5" />
             </SheetTrigger>
-            <SheetContent side="right" className="w-72 p-0">
-              <div className="px-4 pt-12 pb-4">
-                <nav className="flex flex-col gap-1">
-                  {navLinks}
-                  {user && (
+            <SheetContent side="right" className="w-64">
+              <nav className="flex flex-col gap-2 pt-12 px-4">
+                {navLinks}
+                {user && (
+                  <Link
+                    href="/donate"
+                    className="py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Support Us
+                  </Link>
+                )}
+                {user ? (
+                  <>
                     <Link
-                      href="/donate"
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                      href="/profile"
+                      className="py-2 text-sm font-medium hover:text-primary"
                       onClick={() => setMobileOpen(false)}
                     >
-                      <Coffee className="size-5" />
-                      Support Us
+                      {user.name || user.email}
                     </Link>
-                  )}
-                  {user ? (
-                    <>
+                    <Link
+                      href="/certificates"
+                      className="py-2 text-sm font-medium hover:text-primary"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      My Certificates
+                    </Link>
+                    {user.role === "admin" && (
                       <Link
-                        href="/profile"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-muted hover:text-primary transition-colors"
+                        href="/admin"
+                        className="py-2 text-sm text-muted-foreground hover:text-foreground"
                         onClick={() => setMobileOpen(false)}
                       >
-                        <User className="size-5" />
-                        {user.name || user.email}
+                        Admin
                       </Link>
-                      <Link
-                        href="/certificates"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-muted hover:text-primary transition-colors"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        <FileBadge className="size-5" />
-                        My Certificates
-                      </Link>
-                      {user.role === "admin" && (
-                        <Link
-                          href="/admin"
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                          onClick={() => setMobileOpen(false)}
-                        >
-                          <Shield className="size-5" />
-                          Admin
-                        </Link>
-                      )}
-                      <button
-                        onClick={() => {
-                          setMobileOpen(false);
-                          handleLogout();
-                        }}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-destructive hover:bg-destructive/10"
-                      >
-                        <LogOut className="size-5" />
-                        Logout
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        href="/login"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        Login
-                      </Link>
-                      <Link
-                        href="/signup"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        Sign Up
-                      </Link>
-                    </>
-                  )}
-                </nav>
-              </div>
+                    )}
+                    <button
+                      onClick={() => {
+                        setMobileOpen(false);
+                        handleLogout();
+                      }}
+                      className="py-2 text-sm text-destructive text-left"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      className="py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
+              </nav>
             </SheetContent>
           </Sheet>
         </div>
