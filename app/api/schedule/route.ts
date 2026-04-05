@@ -95,12 +95,12 @@ export const POST = withAuth(
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
-      dbUser.set("learningSchedule", {
+      dbUser.learningSchedule = {
         lessonsPerWeek: Number(lessonsPerWeek),
         daysOfWeek: daysOfWeek || [1, 2, 3, 4, 5],
         startDate: start,
         endDate: endDate,
-      });
+      };
       dbUser.lastActivityAt = new Date();
       await dbUser.save();
 
