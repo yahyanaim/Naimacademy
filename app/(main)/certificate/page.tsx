@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Award, ChevronLeft, ShieldCheck, Download } from "lucide-react"
+import { Award, ChevronLeft, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -29,14 +29,9 @@ function formatDate(dateStr: string): string {
 
 export default function CertificateDetailPage() {
   const router = useRouter()
-  const certificateRef = useRef<HTMLDivElement>(null)
   
   const [cert, setCert] = useState<Certification | null>(null)
   const [loading, setLoading] = useState(true)
-
-  const handlePrint = () => {
-    window.print()
-  }
 
   useEffect(() => {
     async function fetchCert() {
@@ -60,15 +55,6 @@ export default function CertificateDetailPage() {
     }
     fetchCert()
   }, [router])
-
-  useEffect(() => {
-    if (!loading && cert) {
-      const params = new URLSearchParams(window.location.search)
-      if (params.get("download") === "true") {
-        setTimeout(() => window.print(), 500)
-      }
-    }
-  }, [loading, cert])
 
   if (loading) {
     return (
@@ -99,7 +85,6 @@ export default function CertificateDetailPage() {
       {/* Certificate Frame */}
       <div className="relative group overflow-hidden">
         <div
-          ref={certificateRef}
           id="certificate-content"
           className="certificate-box"
         >
