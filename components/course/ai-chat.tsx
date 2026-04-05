@@ -91,10 +91,10 @@ export function AIChat({ lessonTitle, lessonContent }: { lessonTitle?: string; l
     <>
       <button
         onClick={openChat}
-        className="fixed bottom-6 right-24 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-black text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+        className="fixed bottom-6 right-24 z-50 flex items-center justify-center w-12 h-12 rounded-full bg-black text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
         aria-label="Open AI Chat"
       >
-        <span className="text-sm font-bold">AI</span>
+        <span className="text-base font-bold">AI</span>
       </button>
 
       {isOpen && (
