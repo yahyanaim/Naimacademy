@@ -240,6 +240,11 @@ END:VEVENT
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
+        if (res.status === 401) {
+          toast.error("Please log in again");
+          router.push("/login");
+          return;
+        }
         toast.error(data?.error || "Failed to save schedule");
         return;
       }
