@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, Send, ChevronDown, ChevronRight, Mail } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { MessageSquare, Send, Search, User, Mail, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 interface Message {
@@ -20,8 +20,9 @@ interface Message {
 export default function AdminSupportPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedThreads, setExpandedThreads] = useState<Record<string, boolean>>({});
-  const [replyText, setReplyText] = useState<Record<string, string>>({});
+  const [search, setSearch] = useState("");
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
 
   useEffect(() => {
     fetchMessages();
@@ -40,30 +41,37 @@ export default function AdminSupportPage() {
     }
   }
 
-  const threads = messages.reduce<Record<string, { userId: string; messages: Message[] }>>((acc, msg) => {
+  const threads = messages.reduce<Record<string, { userId: string; userName: string; userEmail: string; messages: Message[] }>>((acc, msg) => {
     const key = msg.userId;
-    if (!acc[key]) acc[key] = { userId: msg.userId, messages: [] };
+    if (!acc[key]) acc[key] = { userId: msg.userId, userName: msg.userName, userEmail: msg.userEmail, messages: [] };
     acc[key].messages.push(msg);
     return acc;
   }, {});
 
-  function toggleThread(id: string) {
-    setExpandedThreads((prev) => ({ ...prev, [id]: !prev[id] }));
-  }
+  const filteredThreads = Object.values(threads).filter((t) => {
+    const userMsg = t.messages.find((m) => !m.isAdmin);
+    const searchLower = search.toLowerCase();
+    return (
+      t.userName.toLowerCase().includes(searchLower) ||
+      t.userEmail.toLowerCase().includes(searchLower) ||
+      userMsg?.message.toLowerCase().includes(searchLower)
+    );
+  });
 
-  async function handleReply(userId: string) {
-    const threadMsgs = threads[userId]?.messages || [];
+  const selectedThread = selectedUser ? threads[selectedUser] : null;
+
+  async function handleReply() {
+    if (!selectedUser || !replyText.trim()) return;
+
+    const threadMsgs = threads[selectedUser]?.messages || [];
     const firstUserMsg = threadMsgs.find((m) => !m.isAdmin);
     if (!firstUserMsg) return;
-
-    const text = replyText[userId]?.trim();
-    if (!text) return;
 
     try {
       const res = await fetch("/api/admin/support", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messageId: firstUserMsg._id, message: text }),
+        body: JSON.stringify({ messageId: firstUserMsg._id, message: replyText.trim() }),
       });
 
       if (!res.ok) {
@@ -72,7 +80,7 @@ export default function AdminSupportPage() {
         return;
       }
 
-      setReplyText((prev) => ({ ...prev, [userId]: "" }));
+      setReplyText("");
       toast.success("Reply sent");
       await fetchMessages();
     } catch {
@@ -82,108 +90,165 @@ export default function AdminSupportPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-[60vh]">
-        <p className="text-muted-foreground">Loading messages...</p>
-      </div>
-    );
-  }
-
-  if (messages.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-center">
-        <MessageSquare className="size-12 text-muted-foreground mb-4" />
-        <h2 className="text-xl font-semibold">No Support Messages</h2>
-        <p className="text-muted-foreground mt-1">Student messages will appear here</p>
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          Loading...
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Support Messages</h1>
-        <p className="text-muted-foreground mt-1">View and reply to student support requests</p>
-      </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Support Center</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage student support requests</p>
+        </div>
 
-      <div className="space-y-4">
-        {Object.entries(threads).map(([userId, { messages: threadMessages }]) => {
-          const userMsg = threadMessages.find((m) => !m.isAdmin);
-          const isExpanded = expandedThreads[userId];
-          return (
-            <Card key={userId}>
-              <button
-                onClick={() => toggleThread(userId)}
-                className="w-full text-left"
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-4">
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-[60vh] text-center bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-12">
+            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+              <MessageSquare className="size-8 text-gray-400" />
+            </div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">No messages yet</h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">Student messages will appear here</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Thread List */}
+            <div className="lg:col-span-1 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="p-4 border-b border-gray-100 dark:border-gray-800">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+                  <Input
+                    placeholder="Search messages..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9 bg-gray-50 dark:bg-gray-800 border-none"
+                  />
+                </div>
+              </div>
+              <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-[70vh] overflow-y-auto">
+                {filteredThreads.map((thread) => {
+                  const userMsg = thread.messages.find((m) => !m.isAdmin);
+                  const lastMsg = thread.messages[thread.messages.length - 1];
+                  const isSelected = selectedUser === thread.userId;
+                  return (
+                    <button
+                      key={thread.userId}
+                      onClick={() => setSelectedUser(thread.userId)}
+                      className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                        isSelected ? "bg-primary/5 dark:bg-primary/10" : ""
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                          isSelected ? "bg-primary text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                        }`}>
+                          <User className="size-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className={`font-medium truncate ${isSelected ? "text-primary" : "text-gray-900 dark:text-white"}`}>
+                              {thread.userName || "User"}
+                            </p>
+                            <span className="text-xs text-gray-400 shrink-0">
+                              {new Date(lastMsg.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                            {userMsg?.message || "No message"}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {thread.messages.length} message{thread.messages.length !== 1 ? "s" : ""}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Chat View */}
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col">
+              {selectedThread ? (
+                <>
+                  <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
                     <div className="flex items-center gap-3">
-                      {isExpanded ? (
-                        <ChevronDown className="size-4 text-muted-foreground shrink-0" />
-                      ) : (
-                        <ChevronRight className="size-4 text-muted-foreground shrink-0" />
-                      )}
+                      <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                        <User className="size-5 text-white" />
+                      </div>
                       <div>
-                        <CardTitle className="text-sm font-medium flex items-center gap-2">
-                          <Mail className="size-4 text-muted-foreground" />
-                          {userMsg?.userName || "User"}
-                        </CardTitle>
-                        <CardDescription className="mt-0.5">
-                          {userMsg?.userEmail || "No email"} &middot; {threadMessages.length} message{threadMessages.length !== 1 ? "s" : ""}
-                        </CardDescription>
+                        <p className="font-semibold text-gray-900 dark:text-white">{selectedThread.userName}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                          <Mail className="size-3" />
+                          {selectedThread.userEmail}
+                        </p>
                       </div>
                     </div>
-                    <span className="text-xs text-muted-foreground shrink-0">
-                      {new Date(threadMessages[0].createdAt).toLocaleDateString()}
-                    </span>
                   </div>
-                </CardHeader>
-              </button>
-
-              {isExpanded && (
-                <CardContent className="pt-0 space-y-4">
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {threadMessages.map((msg) => (
+                  
+                  <div className="flex-1 p-4 space-y-4 max-h-[50vh] overflow-y-auto">
+                    {selectedThread.messages.map((msg) => (
                       <div
                         key={msg._id}
                         className={`flex ${msg.isAdmin ? "justify-start" : "justify-end"}`}
                       >
                         <div
-                          className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                          className={`max-w-[75%] rounded-2xl px-4 py-3 ${
                             msg.isAdmin
-                              ? "bg-muted text-foreground"
-                              : "bg-primary text-primary-foreground"
+                              ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                              : "bg-primary text-white"
                           }`}
                         >
-                          <p>{msg.message}</p>
-                          <p className={`text-[10px] mt-1 ${msg.isAdmin ? "text-muted-foreground" : "text-primary-foreground/70"}`}>
-                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </p>
+                          <p className="text-sm">{msg.message}</p>
+                          <div className={`flex items-center gap-1 mt-1.5 text-[10px] ${msg.isAdmin ? "text-gray-400" : "text-white/60"}`}>
+                            <Clock className="size-3" />
+                            {new Date(msg.createdAt).toLocaleString()}
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  <div className="flex gap-2">
-                    <Textarea
-                      value={replyText[userId] || ""}
-                      onChange={(e) => setReplyText((prev) => ({ ...prev, [userId]: e.target.value }))}
-                      placeholder="Type your reply..."
-                      className="text-sm min-h-[60px]"
-                    />
-                    <Button
-                      onClick={() => handleReply(userId)}
-                      size="icon"
-                      className="shrink-0 self-end"
-                    >
-                      <Send className="size-4" />
-                    </Button>
+                  <div className="p-4 border-t border-gray-100 dark:border-gray-800">
+                    <div className="flex gap-3">
+                      <Textarea
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        placeholder="Write your reply..."
+                        className="min-h-[60px] bg-gray-50 dark:bg-gray-800 border-none resize-none"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && e.metaKey) handleReply();
+                        }}
+                      />
+                      <Button
+                        onClick={handleReply}
+                        disabled={!replyText.trim()}
+                        className="shrink-0 h-auto px-4"
+                      >
+                        <Send className="size-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">Press Cmd+Enter to send</p>
                   </div>
-                </CardContent>
+                </>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-center p-12">
+                  <div>
+                    <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
+                      <MessageSquare className="size-8 text-gray-400" />
+                    </div>
+                    <p className="text-gray-500 dark:text-gray-400">Select a conversation to view messages</p>
+                  </div>
+                </div>
               )}
-            </Card>
-          );
-        })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
