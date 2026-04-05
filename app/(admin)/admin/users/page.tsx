@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert } from "lucide-react";
+import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert, Search, Award } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface ExamAttempt {
   score: number;
@@ -84,6 +85,9 @@ export default function UsersPage() {
     load();
   }, []);
 
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newRole, setNewRole] = useState<"admin" | "student">("student");
@@ -92,6 +96,20 @@ export default function UsersPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<UserRecord | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const filteredUsers = users.filter((user) => {
+    const searchMatch = 
+      user.name.toLowerCase().includes(search.toLowerCase()) ||
+      user.email.toLowerCase().includes(search.toLowerCase());
+    const roleMatch = roleFilter === "all" || user.role === roleFilter;
+    const statusMatch = 
+      statusFilter === "all" || 
+      (statusFilter === "banned" && user.isBanned) ||
+      (statusFilter === "active" && !user.isBanned) ||
+      (statusFilter === "certified" && user.certificate?.issued) ||
+      (statusFilter === "passed" && user.examAttempts?.some(a => a.passed));
+    return searchMatch && roleMatch && statusMatch;
+  });
 
   async function handleUpdateRole() {
     if (!editingUser) return;
@@ -181,6 +199,41 @@ export default function UsersPage() {
         </p>
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by name or email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={roleFilter} onValueChange={(value) => setRoleFilter(value || "all")}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Roles</SelectItem>
+            <SelectItem value="student">Student</SelectItem>
+            <SelectItem value="admin">Admin</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value || "all")}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="banned">Banned</SelectItem>
+            <SelectItem value="passed">Passed Exam</SelectItem>
+            <SelectItem value="certified">Certified</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {loading ? (
         <div className="space-y-3">
           {[...Array(6)].map((_, i) => (
@@ -205,7 +258,7 @@ export default function UsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <TableRow key={user._id} className={user.isBanned ? "bg-destructive/5" : ""}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell className="text-muted-foreground">
@@ -224,7 +277,10 @@ export default function UsersPage() {
                   <TableCell>{bestScore(user.examAttempts)}</TableCell>
                   <TableCell className="text-center">
                     {user.certificate?.issued ? (
-                      <CheckIcon className="size-4 text-green-500 mx-auto" />
+                      <Badge className="bg-green-500 hover:bg-green-600 text-white gap-1">
+                        <Award className="size-3" />
+                        Certified
+                      </Badge>
                     ) : (
                       <MinusIcon className="size-4 text-muted-foreground mx-auto" />
                     )}

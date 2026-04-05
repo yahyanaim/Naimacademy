@@ -189,7 +189,7 @@ export default function AdminDashboardPage() {
         <Card className="p-4">
           <CardHeader className="px-2 pb-4">
             <div className="flex items-center gap-2">
-              <TrendingUp className="size-4 text-blue-500" />
+              <TrendingUp className="size-4 text-black" />
               <CardTitle className="text-sm font-semibold">User Growth</CardTitle>
             </div>
             <p className="text-xs text-muted-foreground">New registrations (Last 7 days)</p>
@@ -235,7 +235,7 @@ export default function AdminDashboardPage() {
         <Card className="p-4">
           <CardHeader className="px-2 pb-4">
             <div className="flex items-center gap-2">
-              <PieChart className="size-4 text-indigo-500" />
+              <PieChart className="size-4 text-black" />
               <CardTitle className="text-sm font-semibold">Course Completion</CardTitle>
             </div>
             <p className="text-xs text-muted-foreground">User distribution by completion tier</p>
