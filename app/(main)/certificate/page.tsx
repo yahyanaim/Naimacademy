@@ -28,9 +28,7 @@ function formatDate(dateStr: string): string {
 }
 
 export default function CertificateDetailPage() {
-  const params = useParams()
   const router = useRouter()
-  const certId = params?.id as string
   const certificateRef = useRef<HTMLDivElement>(null)
   
   const [cert, setCert] = useState<Certification | null>(null)
@@ -46,9 +44,9 @@ export default function CertificateDetailPage() {
         const res = await fetch("/api/auth/me")
         if (res.ok) {
           const json = await res.json()
-          const found = (json.user.certifications || []).find((c: any) => c.certificationId === certId)
-          if (found) {
-            setCert(found)
+          const certs = json.user.certifications || []
+          if (certs.length > 0) {
+            setCert(certs[0])
           } else {
             router.push("/certificates")
           }
@@ -60,8 +58,8 @@ export default function CertificateDetailPage() {
         setLoading(false)
       }
     }
-    if (certId) fetchCert()
-  }, [certId, router])
+    fetchCert()
+  }, [router])
 
   useEffect(() => {
     if (!loading && cert) {

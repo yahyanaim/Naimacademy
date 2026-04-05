@@ -206,29 +206,7 @@ export default function DashboardPage() {
                     You&apos;ve successfully completed the course.
                   </p>
                 </div>
-                <Button onClick={async () => {
-                  try {
-                    const res = await fetch("/api/certificate/download");
-                    if (res.ok) {
-                      const html = await res.text();
-                      const iframe = document.createElement("iframe");
-                      iframe.style.position = "fixed";
-                      iframe.style.right = "0";
-                      iframe.style.bottom = "0";
-                      iframe.style.width = "0";
-                      iframe.style.height = "0";
-                      iframe.style.border = "0";
-                      document.body.appendChild(iframe);
-                      iframe.contentWindow?.document.write(html);
-                      iframe.contentWindow?.document.close();
-                      setTimeout(() => {
-                        iframe.contentWindow?.focus();
-                        iframe.contentWindow?.print();
-                        setTimeout(() => document.body.removeChild(iframe), 1000);
-                      }, 500);
-                    }
-                  } catch {}
-                }} size="sm" className="mt-auto">
+                <Button onClick={() => window.open("/certificate?download=true", "_blank")} size="sm" className="mt-auto">
                   Download Certificate
                 </Button>
               </>
