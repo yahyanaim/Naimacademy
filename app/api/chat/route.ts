@@ -5,8 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 const MAX_QUESTIONS_PER_DAY = 5;
 const INVOKE_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-const API_KEY = "Bearer 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";
-const MODEL = "google/gemma-4-31b-it";
+const API_KEY = `Bearer ${process.env.NVIDIA_API_KEY || ""}`;
+const MODEL = process.env.NVIDIA_MODEL || "meta/llama-3.1-8b-instruct";
 
 interface ChatQuestion {
   question: string;
@@ -65,13 +65,16 @@ export const POST = withAuth(
           max_tokens: 16384,
           temperature: 1.00,
           top_p: 0.95,
+          stream: false,
+          chat_template_kwargs: { enable_thinking: false },
         }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("NVIDIA API error:", errorText);
-        return NextResponse.json({ error: "Failed to get response from AI" }, { status: 500 });
+        console.error("NVIDIA API error status:", response.status);
+        console.error("NVIDIA API error body:", errorText);
+        return NextResponse.json({ error: "Failed to get response from AI", details: errorText, status: response.status }, { status: 500 });
       }
 
       const data = await response.json();

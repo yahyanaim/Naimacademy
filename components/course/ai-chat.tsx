@@ -72,8 +72,11 @@ export function AIChat({ lessonTitle, lessonContent }: { lessonTitle?: string; l
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || "Failed to get response");
-        setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I couldn't answer that. Please try again." }]);
+        const errorMsg = data.details
+          ? `${data.error}: ${JSON.stringify(data.details).substring(0, 200)}`
+          : data.error || "Failed to get response";
+        toast.error(errorMsg);
+        setMessages((prev) => [...prev, { role: "assistant", content: `Error: ${errorMsg}` }]);
         return;
       }
 
