@@ -18,6 +18,7 @@ import {
 import { MathCaptcha } from "@/components/auth/math-captcha";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/lib/store/authSlice";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [inviteCode, setInviteCode] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [captchaValid, setCaptchaValid] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,6 +35,11 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!termsAccepted) {
+      setError("You must accept the terms and conditions");
+      return;
+    }
 
     if (!captchaValid) {
       setError("Please complete the security check");
@@ -45,7 +52,7 @@ export default function SignupPage() {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, inviteCode }),
+        body: JSON.stringify({ name, email, password, inviteCode, termsAccepted }),
       });
 
       if (!res.ok) {
@@ -133,6 +140,26 @@ export default function SignupPage() {
             />
           </div>
           <MathCaptcha onVerify={setCaptchaValid} />
+          <div className="flex items-start space-x-2 pt-2">
+            <Checkbox
+              id="terms"
+              checked={termsAccepted}
+              onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+              className="mt-0.5"
+            />
+            <div className="text-sm leading-tight">
+              <Label htmlFor="terms" className="font-normal cursor-pointer">
+                I agree to the{" "}
+                <Link href="/terms" className="text-primary hover:underline">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" className="text-primary hover:underline">
+                  Privacy Policy
+                </Link>
+              </Label>
+            </div>
+          </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -3,6 +3,7 @@ import { User } from "@/lib/models/user.model";
 import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { sendEmail, generateResetPasswordEmail } from "@/lib/email";
 
 const forgotSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -39,13 +40,19 @@ export async function POST(req: NextRequest) {
 
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://naimacademy.vercel.app"}/reset-password/${resetToken}`;
 
-    console.log(`[PASSWORD_RESET] Reset link for ${parsed.data.email}: ${resetUrl}`);
+    const emailHtml = generateResetPasswordEmail(resetUrl, user.name);
+    await sendEmail({
+      to: user.email,
+      subject: "Reset Your Password - Naim Academy",
+      html: emailHtml,
+    });
 
     return NextResponse.json(
-      { message: "If an account with that email exists, a password reset link has been sent.", resetUrl },
+      { message: "If an account with that email exists, a password reset link has been sent." },
       { status: 200 }
     );
-  } catch {
+  } catch (error) {
+    console.error("[FORGOT_PASSWORD]", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

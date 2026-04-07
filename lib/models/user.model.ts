@@ -5,9 +5,14 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
+  avatar?: string;
   role: "student";
   isBanned: boolean;
+  isEmailVerified: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
   banReason?: string;
+  termsAcceptedAt?: Date;
   lastActivityAt: Date;
   progress: {
     completedLessons: Types.ObjectId[];
@@ -57,9 +62,14 @@ const UserSchema = new Schema<IUser>(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true, index: true },
     password: { type: String, required: true },
+    avatar: { type: String, default: "" },
     role: { type: String, enum: ["student"], default: "student" },
     isBanned: { type: Boolean, default: false },
+    isEmailVerified: { type: Boolean, default: false },
+    emailVerificationToken: { type: String },
+    emailVerificationExpires: { type: Date },
     banReason: { type: String },
+    termsAcceptedAt: { type: Date },
     lastActivityAt: { type: Date, default: Date.now },
     progress: {
       completedLessons: [{ type: Schema.Types.ObjectId, ref: "Lesson" }],

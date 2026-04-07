@@ -3,12 +3,12 @@ import Footer from "@/components/layout/footer";
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="flex flex-col min-h-screen pt-14" style={{ backgroundColor: "#fefdfb" }}>
+    <div className="flex flex-col min-h-screen pt-14 overflow-hidden" style={{ backgroundColor: "#fefdfb" }}>
       <main className="flex-1 pb-16">
         <div className="max-w-3xl mx-auto px-6 py-12 space-y-10">
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight">Privacy Policy</h1>
-            <p className="text-muted-foreground">Last updated: April 4, 2026</p>
+            <h1 className="text-4xl font-bold tracking-tight">Privacy Policy & Transparency</h1>
+            <p className="text-muted-foreground">Last updated: April 7, 2026</p>
           </div>
 
           <div className="space-y-8 text-muted-foreground leading-relaxed">
@@ -29,13 +29,24 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-xl font-semibold text-foreground">3. Data Storage</h2>
-              <p>Your data is stored securely in MongoDB Atlas, a cloud-based database service. We use industry-standard encryption (bcrypt) to protect your password. We do not store payment information.</p>
+              <h2 className="text-xl font-semibold text-foreground">3. Transparency</h2>
+              <p>We believe in full transparency with our users:</p>
+              <ul className="list-disc pl-6 space-y-1">
+                <li><strong>Data Storage:</strong> Your data is stored securely in MongoDB Atlas, a cloud-based database service.</li>
+                <li><strong>Security:</strong> We use industry-standard encryption (bcrypt) to protect your password.</li>
+                <li><strong>Payments:</strong> We do NOT store payment information. All bank transfers are made directly between you and our bank account.</li>
+                <li><strong>Third Parties:</strong> We do not sell, trade, or share your personal information with third parties.</li>
+              </ul>
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-xl font-semibold text-foreground">4. Data Sharing</h2>
-              <p>We do not sell, trade, or share your personal information with third parties. Your data is only accessible to platform administrators for the purpose of managing the learning experience.</p>
+              <h2 className="text-xl font-semibold text-foreground">4. Bank Transfer Details</h2>
+              <p>For bank transfers, we use CIH Bank:</p>
+              <div className="bg-muted p-4 rounded-lg space-y-2 text-sm">
+                <p><strong>Account Number:</strong> 3505240211002500</p>
+                <p><strong>I.B.A.N:</strong> MA64 2305 9035 0524 0211 0025 0072</p>
+                <p><strong>B.I.C / SWIFT:</strong> CIHMMAMC</p>
+              </div>
             </section>
 
             <section className="space-y-3">
@@ -60,19 +71,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-xl font-semibold text-foreground">8. Transparency</h2>
-              <p>We believe in complete transparency about how we handle your data:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li><strong>No hidden data collection:</strong> We only collect data necessary for your learning experience</li>
-                <li><strong>No selling of data:</strong> We never sell or share your personal information with advertisers or third parties</li>
-                <li><strong>Open source inspiration:</strong> Our platform is designed with privacy-first principles, similar to open-source software philosophy</li>
-                <li><strong>Clear communication:</strong> Any changes to this policy will be communicated to you</li>
-                <li><strong>Community trust:</strong> We are committed to maintaining the trust you place in us</li>
-              </ul>
-            </section>
-
-            <section className="space-y-3">
-              <h2 className="text-xl font-semibold text-foreground">9. Contact</h2>
+              <h2 className="text-xl font-semibold text-foreground">8. Contact</h2>
               <p>If you have questions about this policy, please contact us through the platform.</p>
             </section>
           </div>

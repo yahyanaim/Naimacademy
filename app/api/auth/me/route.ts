@@ -50,6 +50,7 @@ export const GET = withAuth(
             id: user._id.toString(),
             name: user.name,
             email: user.email,
+            avatar: user.avatar || "",
             role: user.role,
             isBanned: user.isBanned,
             createdAt: user.createdAt?.toISOString(),

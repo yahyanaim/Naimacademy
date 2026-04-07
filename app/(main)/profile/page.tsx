@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, User as UserIcon, Lock, Save, Trash2, AlertTriangle } from "lucide-react";
+import { Loader2, User as UserIcon, Lock, Save, Trash2, AlertTriangle, Camera, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -22,11 +22,14 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [avatar, setAvatar] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -35,11 +38,55 @@ export default function ProfilePage() {
         if (data?.user) {
           setName(data.user.name || "");
           setEmail(data.user.email || "");
+          setAvatar(data.user.avatar || "");
         }
         setLoading(false);
       })
       .catch(() => router.push("/login"));
   }, [router]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File too large. Maximum size is 5MB.");
+      return;
+    }
+
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.");
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/user/avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Upload failed");
+      }
+
+      const data = await res.json();
+      setAvatar(data.url);
+      toast.success("Profile photo updated successfully!");
+      router.refresh();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Upload failed";
+      toast.error(message);
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,6 +147,61 @@ export default function ProfilePage() {
         <h1 className="text-2xl font-bold tracking-tight">Profile Settings</h1>
         <p className="text-muted-foreground text-sm mt-1">Manage your account information</p>
       </div>
+
+      <Card className="border-border/50 shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Camera className="size-4 text-primary" />
+            Profile Photo
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-6">
+            <div className="relative">
+              {avatar ? (
+                <img
+                  src={avatar}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full object-cover border-2 border-border"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-2 border-border">
+                  <UserIcon className="w-10 h-10 text-muted-foreground" />
+                </div>
+              )}
+              {uploadingAvatar && (
+                <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 animate-spin text-white" />
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={handleAvatarUpload}
+                className="hidden"
+                id="avatar-upload"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                className="gap-2"
+              >
+                <Upload className="size-4" />
+                {uploadingAvatar ? "Uploading..." : "Upload Photo"}
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                JPG, PNG, GIF, or WebP. Max 5MB.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <form onSubmit={handleSubmit}>
         <Card className="border-border/50 shadow-sm">

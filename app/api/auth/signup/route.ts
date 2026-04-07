@@ -1,4 +1,4 @@
-  import { connectDB } from "@/lib/db/mongoose";
+import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/lib/models/user.model";
 import { InviteCode } from "@/lib/models/invite-code.model";
 import { Notification } from "@/lib/models/notification.model";
@@ -7,14 +7,17 @@ import { setSessionCookie } from "@/lib/auth/session";
 import { PASSWORD } from "@/lib/constants";
 import { sanitizeInput } from "@/lib/utils/sanitize";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
+import { sendEmail, generateVerificationEmail } from "@/lib/email";
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required").transform((val) => sanitizeInput(val)),
   email: z.string().email("Invalid email address").transform((val) => sanitizeInput(val).toLowerCase()),
   password: z.string().min(PASSWORD.MIN_LENGTH, `Password must be at least ${PASSWORD.MIN_LENGTH} characters`),
   inviteCode: z.string().min(1, "Invite code is required").transform((val) => sanitizeInput(val)),
+  termsAccepted: z.boolean().refine((val) => val === true, "You must accept the terms"),
 });
 
 export async function POST(req: NextRequest) {
@@ -28,7 +31,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { name, email, password, inviteCode } = parsed.data;
+  const { name, email, password, inviteCode, termsAccepted } = parsed.data;
 
   await connectDB();
 
@@ -51,7 +54,17 @@ export async function POST(req: NextRequest) {
   await invite.save();
 
   const hashedPassword = await bcrypt.hash(password, PASSWORD.BCRYPT_ROUNDS);
-  const user = await User.create({ name, email, password: hashedPassword });
+  const verificationToken = crypto.randomBytes(32).toString("hex");
+  const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  
+  const user = await User.create({
+    name,
+    email,
+    password: hashedPassword,
+    termsAcceptedAt: termsAccepted ? new Date() : undefined,
+    emailVerificationToken: verificationToken,
+    emailVerificationExpires: verificationExpires,
+  });
 
   const token = await signToken({ userId: user._id.toString(), role: user.role });
 
@@ -74,6 +87,14 @@ export async function POST(req: NextRequest) {
     title: "Welcome to Naim Academy!",
     message: "Welcome to Naim Academy! Start your n8n automation journey today.",
     type: "new_user",
+  });
+
+  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://naimacademy.vercel.app"}/api/auth/verify-email?token=${verificationToken}`;
+  const emailHtml = generateVerificationEmail(verifyUrl, name);
+  await sendEmail({
+    to: email,
+    subject: "Verify Your Email - Naim Academy",
+    html: emailHtml,
   });
 
   return response;
