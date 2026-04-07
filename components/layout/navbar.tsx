@@ -101,7 +101,7 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-6">{desktopNavLinks}</nav>
 
         {/* Right side – desktop */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-3">
           {user && (
             <Link
               href="/donate"
@@ -111,7 +111,7 @@ export default function Navbar() {
               Support
             </Link>
           )}
-          {user && <NotificationBell />}
+          {user && <div className="ml-1"><NotificationBell /></div>}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost" }), "font-semibold text-base")}>
@@ -214,9 +214,8 @@ export default function Navbar() {
                     </Link>
                     <div className="my-1 border-t mx-4" />
                     <div className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2">
-                      <Bell className="size-5" />
-                      <span className="flex-1">Notifications</span>
                       <NotificationBell />
+                      <span>Notifications</span>
                     </div>
                     {user && (
                     <Link

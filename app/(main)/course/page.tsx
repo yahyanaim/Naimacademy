@@ -114,7 +114,24 @@ export default function CoursePage() {
         const courseJson = courseRes.ok ? await courseRes.json() : null;
         const progressJson = progressRes.ok ? await progressRes.json() : null;
         const userJson = userRes.ok ? await userRes.json() : null;
-        const scheduleJson = scheduleRes.ok ? await scheduleRes.json() : null;
+        
+        let hasScheduleValue = false;
+        if (scheduleRes.ok) {
+          const scheduleJson = await scheduleRes.json();
+          hasScheduleValue = !!scheduleJson?.schedule;
+        } else if (progressRes.ok) {
+          hasScheduleValue = !!progressJson?.learningSchedule;
+        }
+
+        console.log("Data loaded:", {
+          course: !!courseJson?.course,
+          progress: !!progressJson?.progress,
+          user: !!userJson?.user,
+          hasSchedule: hasScheduleValue,
+          scheduleResOk: scheduleRes.ok,
+          scheduleStatus: scheduleRes.status,
+          progressLearningSchedule: progressJson?.learningSchedule
+        });
 
         const courseData: CourseData | null = courseJson?.course ?? null;
         const progressData: ProgressData | null = progressJson?.progress ?? null;
@@ -123,7 +140,7 @@ export default function CoursePage() {
         setCourse(courseData);
         setProgress(progressData);
         setUser(userData);
-        setHasSchedule(!!scheduleJson?.schedule);
+        setHasSchedule(hasScheduleValue);
 
         if (courseData) {
           const initial: Record<string, boolean> = {};
