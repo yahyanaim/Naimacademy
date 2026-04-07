@@ -25,7 +25,7 @@ export default function NotificationsPage() {
   
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
-  const [type, setType] = useState("general");
+  const [type, setType] = useState<string>("general");
 
   useEffect(() => {
     loadNotifications();
