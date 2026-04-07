@@ -237,19 +237,26 @@ export default function AIStatsPage() {
           ) : filteredQuestions.length === 0 ? (
             <p className="text-sm text-muted-foreground">No questions found.</p>
           ) : (
-            <div className="space-y-3">
-              {filteredQuestions.map((q, i) => (
-                <div key={i} className="p-3 bg-muted/30 rounded-lg">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium">{q.name}</span>
-                    <span className="text-xs text-muted-foreground">
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 bg-background border-b">
+                <tr>
+                  <th className="text-left py-2 px-2 font-medium">Student Name</th>
+                  <th className="text-left py-2 px-2 font-medium">Question</th>
+                  <th className="text-right py-2 px-2 font-medium">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredQuestions.map((q, i) => (
+                  <tr key={i} className="border-b last:border-0">
+                    <td className="py-2 px-2 align-top">{q.name}</td>
+                    <td className="py-2 px-2 text-muted-foreground">{q.question}</td>
+                    <td className="py-2 px-2 text-right text-muted-foreground text-xs">
                       {new Date(q.answeredAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{q.question}</p>
-                </div>
-              ))}
-            </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </CardContent>
       </Card>
