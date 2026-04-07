@@ -209,9 +209,6 @@ END:VEVENT
       return;
     }
     
-    const hasProgress = (progress?.completedLessons?.length ?? 0) > 0;
-    console.log("handleStartCourse:", { hasProgress, hasSchedule, percentage, hasProgressBool: hasProgress > 0 });
-    
     if (!hasSchedule) {
       setScheduleDialogOpen(true);
       return;
