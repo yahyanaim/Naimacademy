@@ -61,14 +61,14 @@ export default function Navbar() {
     <>
       <Link
         href="/course"
-        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 hover:-translate-y-0.5"
+        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
       >
         Course
       </Link>
       {user && (
         <Link
           href="/certificates"
-          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 hover:-translate-y-0.5"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           Certificates
         </Link>
@@ -76,7 +76,7 @@ export default function Navbar() {
       {user && (
         <Link
           href={user.role === "admin" ? "/admin" : "/dashboard"}
-          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 hover:-translate-y-0.5"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           {user.role === "admin" ? "Admin" : "Dashboard"}
         </Link>
@@ -105,25 +105,15 @@ export default function Navbar() {
           {user && (
             <Link
               href="/donate"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 flex items-center gap-1.5 hover:-translate-y-0.5"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               <Coffee className="size-4" />
-              <span>Support</span>
             </Link>
           )}
           {user && (
-            <Link
-              href={user.role === "admin" ? "/admin" : "/dashboard"}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 flex items-center gap-1.5 hover:-translate-y-0.5"
-            >
-              <LayoutDashboard className="size-4" />
-              <span>{user.role === "admin" ? "Admin" : "Dashboard"}</span>
-            </Link>
-          )}
-          {user && (
-            <button className="text-muted-foreground hover:text-foreground transition-all duration-300 hover:-translate-y-0.5 p-1">
+            <div className="flex items-center">
               <NotificationBell />
-            </button>
+            </div>
           )}
           {user ? (
             <DropdownMenu>
