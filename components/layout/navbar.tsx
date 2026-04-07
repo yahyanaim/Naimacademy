@@ -162,8 +162,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile hamburger */}
-        <div className="md:hidden flex items-center gap-1">
-          {user && <NotificationBell />}
+        <div className="md:hidden">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground">
               <Menu className="h-5 w-5" />
@@ -207,6 +206,10 @@ export default function Navbar() {
                       <FileBadge className="size-5" />
                       My Certificates
                     </Link>
+                    <div className="my-2 border-t" />
+                    <div className="flex items-center gap-3 px-4 py-3 text-sm font-medium">
+                      <NotificationBell />
+                    </div>
                     {user && (
                     <Link
                       href="/donate"
