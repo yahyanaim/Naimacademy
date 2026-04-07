@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, GraduationCap, BarChart3, Award, TrendingUp, PieChart, UserPlus } from "lucide-react";
+import { Users, GraduationCap, BarChart3, Award, TrendingUp, PieChart, UserPlus, Clock } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -37,11 +37,13 @@ interface UserRecord {
   }[];
   certificateIssued?: boolean;
   createdAt?: string;
+  lastActivityAt?: string;
 }
 
 interface Stats {
   totalUsers: number;
   newUsersThisWeek: number;
+  activeUsersThisWeek: number;
   avgExamScore: number;
   avgCompletionRate: number;
   certificatesIssued: number;
@@ -76,6 +78,12 @@ function computeStats(users: UserRecord[]): Stats {
   const newUsersThisWeek = users.filter(
     (u) => u.createdAt && new Date(u.createdAt) >= sevenDaysAgo
   ).length;
+  
+  const sevenDaysAgoActivity = new Date();
+  sevenDaysAgoActivity.setDate(sevenDaysAgoActivity.getDate() - 7);
+  const activeUsersThisWeek = users.filter(
+    (u) => u.lastActivityAt && new Date(u.lastActivityAt) >= sevenDaysAgoActivity
+  ).length;
 
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
@@ -98,6 +106,7 @@ function computeStats(users: UserRecord[]): Stats {
   return { 
     totalUsers, 
     newUsersThisWeek,
+    activeUsersThisWeek,
     avgExamScore, 
     avgCompletionRate, 
     certificatesIssued,
@@ -145,6 +154,12 @@ export default function AdminDashboardPage() {
       description: "Students joined recently",
     },
     {
+      title: "Active This Week",
+      value: stats?.activeUsersThisWeek ?? 0,
+      icon: Clock,
+      description: "Students active recently",
+    },
+    {
       title: "Avg. Exam Score",
       value: stats ? `${stats.avgExamScore}%` : "—",
       icon: GraduationCap,
@@ -173,7 +188,7 @@ export default function AdminDashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map(({ title, value, icon: Icon, description }) => (
           <Card key={title}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
