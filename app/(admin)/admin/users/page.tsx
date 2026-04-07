@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert, Search, Award } from "lucide-react";
+import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert, Search, Award, Clock, UserPlus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -53,6 +53,22 @@ interface UserRecord {
     issued: boolean;
     issuedAt?: string;
   } | null;
+  createdAt?: string;
+  lastActivityAt?: string;
+}
+
+function isNewUser(user: UserRecord): boolean {
+  if (!user.createdAt) return false;
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  return new Date(user.createdAt) >= sevenDaysAgo;
+}
+
+function isActive(user: UserRecord): boolean {
+  if (!user.lastActivityAt) return false;
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  return new Date(user.lastActivityAt) >= sevenDaysAgo;
 }
 
 function bestScore(attempts: ExamAttempt[] | undefined): string {
@@ -260,7 +276,21 @@ export default function UsersPage() {
             <TableBody>
               {filteredUsers.map((user) => (
                 <TableRow key={user._id} className={user.isBanned ? "bg-destructive/5" : ""}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      {user.name}
+                      {isNewUser(user) && (
+                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                          <UserPlus className="size-3 mr-1" />New
+                        </Badge>
+                      )}
+                      {isActive(user) && !isNewUser(user) && (
+                        <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                          <Clock className="size-3 mr-1" />Active
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-muted-foreground">
                     {user.email}
                   </TableCell>

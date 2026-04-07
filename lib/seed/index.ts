@@ -17,20 +17,29 @@ import {
   QUESTIONS_DATA,
 } from "./data";
 
-export async function seed() {
+export async function seed(force = false) {
   await connectDB();
 
-  // Clear all collections
-  await Promise.all([
-    User.deleteMany({}),
-    Admin.deleteMany({}),
-    Course.deleteMany({}),
-    Section.deleteMany({}),
-    Lesson.deleteMany({}),
-    Exam.deleteMany({}),
-    Question.deleteMany({}),
-    InviteCode.deleteMany({}),
-  ]);
+  // Check if data already exists (unless force is true)
+  if (!force) {
+    const existingCourse = await Course.findOne();
+    if (existingCourse) {
+      console.log("Data already exists, skipping seed.");
+      return null;
+    }
+  } else {
+    // Clear all collections if force is true
+    await Promise.all([
+      User.deleteMany({}),
+      Admin.deleteMany({}),
+      Course.deleteMany({}),
+      Section.deleteMany({}),
+      Lesson.deleteMany({}),
+      Exam.deleteMany({}),
+      Question.deleteMany({}),
+      InviteCode.deleteMany({}),
+    ]);
+  }
 
   // Create admin in Admin collection
   const hashedPassword = await bcrypt.hash(ADMIN_USER.password, PASSWORD.BCRYPT_ROUNDS);

@@ -33,7 +33,7 @@ export default function NotificationsPage() {
 
   async function loadNotifications() {
     try {
-      const res = await fetch("/api/admin/notifications");
+      const res = await fetch("/api/admin/notifications", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setNotifications(data);
@@ -50,6 +50,7 @@ export default function NotificationsPage() {
       const res = await fetch("/api/admin/notifications", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ notificationId }),
       });
       if (res.ok) {
@@ -74,19 +75,22 @@ export default function NotificationsPage() {
       const res = await fetch("/api/admin/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ title, message, type }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
-        toast.success("Notification sent!");
+        toast.success(`Notification sent to ${data.count} students!`);
         setTitle("");
         setMessage("");
         loadNotifications();
       } else {
-        toast.error("Failed to send notification");
+        toast.error(data.error || "Failed to send notification");
       }
-    } catch {
-      toast.error("Error sending notification");
+    } catch (err) {
+      toast.error("Network error. Please try again.");
     } finally {
       setSending(false);
     }

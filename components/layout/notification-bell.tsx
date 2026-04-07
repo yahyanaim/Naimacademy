@@ -95,53 +95,55 @@ export function NotificationBell() {
       {open && (
         <div className="fixed inset-0 bg-black/50 z-50 md:absolute md:inset-auto md:right-0 md:mt-2 md:w-80 md:bg-background md:border md:rounded-lg md:shadow-lg">
           <div className="h-full md:h-auto flex flex-col bg-background md:border md:rounded-lg overflow-hidden">
-            <div className="p-3 border-b flex items-center justify-between sticky top-0 bg-background">
-              <h3 className="font-semibold">Notifications</h3>
-              <button onClick={() => setOpen(false)} className="p-1 hover:bg-muted rounded md:hidden">
+            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-background z-10">
+              <h3 className="font-semibold text-lg">Notifications</h3>
+              <button onClick={() => setOpen(false)} className="p-2 hover:bg-muted rounded-md md:hidden">
                 <X className="size-5" />
               </button>
             </div>
             
             <div className="flex-1 overflow-y-auto">
               {loading ? (
-                <div className="p-4 text-center text-muted-foreground">Loading...</div>
+                <div className="p-6 text-center text-muted-foreground">Loading...</div>
               ) : notifications.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground text-sm">
+                <div className="p-6 text-center text-muted-foreground text-sm">
                   No notifications
                 </div>
               ) : (
                 notifications.slice(0, 10).map((n) => (
                   <div
                     key={n._id}
-                    className={`p-3 border-b last:border-0 ${!n.read ? "bg-muted/50" : ""}`}
+                    className={`p-4 border-b last:border-0 ${!n.read ? "bg-muted/50" : ""}`}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="font-medium text-sm line-clamp-1 flex-1">{n.title}</p>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm line-clamp-1">{n.title}</p>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                          {n.message}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {new Date(n.createdAt).toLocaleString()}
+                        </p>
+                      </div>
                       <div className="flex items-center gap-1 shrink-0">
                         {!n.read && (
                           <button
                             onClick={() => markAsRead(n._id)}
-                            className="p-1 hover:bg-muted rounded"
+                            className="p-1.5 hover:bg-muted rounded-md"
                             title="Mark as read"
                           >
-                            <Check className="size-3" />
+                            <Check className="size-4" />
                           </button>
                         )}
                         <button
                           onClick={() => deleteNotification(n._id)}
-                          className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-red-500"
+                          className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-red-500"
                           title="Delete"
                         >
-                          <X className="size-3" />
+                          <X className="size-4" />
                         </button>
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {n.message}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(n.createdAt).toLocaleString()}
-                    </p>
                   </div>
                 ))
               )}

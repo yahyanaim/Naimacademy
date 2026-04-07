@@ -7,7 +7,7 @@ export async function POST() {
   try {
     await connectDB();
 
-    await seed();
+    await seed(true);
 
     return NextResponse.json({ success: true, message: "Database seeded successfully" });
   } catch (error) {

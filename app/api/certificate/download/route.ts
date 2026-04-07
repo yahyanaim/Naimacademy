@@ -9,6 +9,8 @@ export const GET = withAuth(
     req: NextRequest,
     ctx: { params: Promise<Record<string, string>>; user: { userId: string; role: string } }
   ) => {
+    await connectDB();
+
     try {
       await connectDB();
 
