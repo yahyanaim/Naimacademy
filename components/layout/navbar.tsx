@@ -171,7 +171,7 @@ export default function Navbar() {
             <SheetTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground">
               <Menu className="h-5 w-5" />
             </SheetTrigger>
-            <SheetContent side="right" className="w-72 bg-background">
+            <SheetContent side="right" className="w-72 bg-background" showCloseButton={false}>
               <div className="flex flex-col gap-1 pt-6">
                 {user && (
                   <div className="px-4 py-4 border-b mb-2 bg-muted/30 rounded-lg mx-2">
