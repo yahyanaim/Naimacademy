@@ -11,14 +11,15 @@ import {
   Shield,
   LogOut,
   MessageSquare,
+  Bot,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/content", label: "Content", icon: BookOpen },
   { href: "/admin/exam", label: "Exam", icon: FileQuestion },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/ai", label: "AI Stats", icon: Bot },
   { href: "/admin/support", label: "Support", icon: MessageSquare },
 ];
 
