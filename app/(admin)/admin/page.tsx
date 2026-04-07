@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, GraduationCap, BarChart3, Award, TrendingUp, PieChart, UserPlus, Clock, RefreshCw } from "lucide-react";
+import { Users, GraduationCap, BarChart3, Award, TrendingUp, PieChart, UserPlus, Clock } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -182,35 +181,11 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Overview of platform activity
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={async () => {
-            try {
-              const res = await fetch("/api/admin/seed?mode=update", { 
-                method: "POST",
-                credentials: "include" 
-              });
-              if (res.ok) {
-                alert("Course content updated successfully!");
-              } else {
-                alert("Failed to update. Make sure you're logged in as admin.");
-              }
-            } catch {
-              alert("Error updating course content");
-            }
-          }}
-        >
-          <RefreshCw className="size-4 mr-2" />
-          Update Course Content
-        </Button>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          Overview of platform activity
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
