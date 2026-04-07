@@ -101,17 +101,30 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-6">{desktopNavLinks}</nav>
 
         {/* Right side – desktop */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-4">
           {user && (
             <Link
               href="/donate"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 flex items-center gap-1 hover:-translate-y-0.5"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 flex items-center gap-1.5 hover:-translate-y-0.5"
             >
               <Coffee className="size-4" />
-              Support
+              <span>Support</span>
             </Link>
           )}
-          {user && <div className="ml-1"><NotificationBell /></div>}
+          {user && (
+            <Link
+              href={user.role === "admin" ? "/admin" : "/dashboard"}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 flex items-center gap-1.5 hover:-translate-y-0.5"
+            >
+              <LayoutDashboard className="size-4" />
+              <span>{user.role === "admin" ? "Admin" : "Dashboard"}</span>
+            </Link>
+          )}
+          {user && (
+            <button className="text-muted-foreground hover:text-foreground transition-all duration-300 hover:-translate-y-0.5 p-1">
+              <NotificationBell />
+            </button>
+          )}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost" }), "font-semibold text-base")}>
@@ -213,11 +226,6 @@ export default function Navbar() {
                       My Certificates
                     </Link>
                     <div className="my-1 border-t mx-4" />
-                    <div className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2">
-                      <NotificationBell />
-                      <span>Notifications</span>
-                    </div>
-                    {user && (
                     <Link
                       href="/donate"
                       onClick={() => setMobileOpen(false)}
@@ -226,7 +234,6 @@ export default function Navbar() {
                       <Coffee className="size-5" />
                       Support Us
                     </Link>
-                    )}
                     {user?.role === "admin" && (
                       <Link
                         href="/admin"
