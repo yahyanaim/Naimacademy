@@ -29,7 +29,6 @@ import {
   Sheet,
   SheetContent,
   SheetTrigger,
-  SheetClose,
 } from "@/components/ui/sheet";
 import { NotificationBell } from "./notification-bell";
 
@@ -175,116 +174,106 @@ export default function Navbar() {
             <SheetContent side="right" className="w-72 bg-background">
               <div className="flex flex-col gap-1 pt-6">
                 {user && (
-                  <div className="px-4 py-4 border-b mb-2 bg-muted/30 rounded-lg mx-2 flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-base">{user.name || user.email}</p>
-                      <p className="text-xs text-muted-foreground capitalize mt-1">{user.role}</p>
-                    </div>
+                  <div className="px-4 py-4 border-b mb-2 bg-muted/30 rounded-lg mx-2">
+                    <p className="font-semibold text-base">{user.name || user.email}</p>
+                    <p className="text-xs text-muted-foreground capitalize mt-1">{user.role}</p>
                   </div>
                 )}
-                <SheetClose asChild>
-                  <Link
-                    href="/course"
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
-                  >
-                    <GraduationCap className="size-5" />
-                    Course
-                  </Link>
-                </SheetClose>
+                <Link
+                  href="/course"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
+                >
+                  <GraduationCap className="size-5" />
+                  Course
+                </Link>
                 
                 <div className="my-1 border-t mx-4" />
                 
                 {user ? (
                   <>
-                    <SheetClose asChild>
-                      <Link
-                        href="/dashboard"
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
-                      >
-                        <LayoutDashboard className="size-5" />
-                        Dashboard
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link
-                        href="/profile"
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
-                      >
-                        <User className="size-5" />
-                        Profile
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link
-                        href="/certificates"
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
-                      >
-                        <FileBadge className="size-5" />
-                        My Certificates
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link
-                        href="/donate"
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
-                      >
-                        <Coffee className="size-5" />
-                        <span>Support Us</span>
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link
-                        href="#"
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
-                      >
-                        <span className="size-5 flex items-center justify-center"><NotificationBell /></span>
-                        <span>Notifications</span>
-                      </Link>
-                    </SheetClose>
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
+                    >
+                      <LayoutDashboard className="size-5" />
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/profile"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
+                    >
+                      <User className="size-5" />
+                      Profile
+                    </Link>
+                    <Link
+                      href="/certificates"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
+                    >
+                      <FileBadge className="size-5" />
+                      My Certificates
+                    </Link>
+                    <Link
+                      href="/donate"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
+                    >
+                      <Coffee className="size-5" />
+                      <span>Support Us</span>
+                    </Link>
+                    <Link
+                      href="#"
+                      onClick={(e) => { e.preventDefault(); }}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
+                    >
+                      <span className="size-5 flex items-center justify-center"><NotificationBell /></span>
+                      <span>Notifications</span>
+                    </Link>
                     {user?.role === "admin" && (
-                      <SheetClose asChild>
-                        <Link
-                          href="/admin"
-                          className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
-                        >
-                          <Shield className="size-5" />
-                          Admin
-                        </Link>
-                      </SheetClose>
+                      <Link
+                        href="/admin"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
+                      >
+                        <Shield className="size-5" />
+                        Admin
+                      </Link>
                     )}
                     
                     <div className="my-1 border-t mx-4" />
                     
-                    <SheetClose asChild>
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-destructive hover:bg-destructive/10 transition-all duration-200 mx-2 text-left"
-                      >
-                        <LogOut className="size-5" />
-                        Logout
-                      </button>
-                    </SheetClose>
+                    <button
+                      onClick={() => {
+                        setMobileOpen(false);
+                        handleLogout();
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-destructive hover:bg-destructive/10 transition-all duration-200 mx-2 text-left"
+                    >
+                      <LogOut className="size-5" />
+                      Logout
+                    </button>
                   </>
                 ) : (
                   <>
-                    <SheetClose asChild>
-                      <Link
-                        href="/login"
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
-                      >
-                        <LogIn className="size-5" />
-                        Login
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link
-                        href="/signup"
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
-                      >
-                        <UserPlus className="size-5" />
-                        Sign Up
-                      </Link>
-                    </SheetClose>
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
+                    >
+                      <LogIn className="size-5" />
+                      Login
+                    </Link>
+                    <Link
+                      href="/signup"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
+                    >
+                      <UserPlus className="size-5" />
+                      Sign Up
+                    </Link>
                   </>
                 )}
               </div>
