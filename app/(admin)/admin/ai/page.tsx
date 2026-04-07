@@ -8,27 +8,27 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MessageSquare, Users, TrendingUp, Calendar } from "lucide-react";
+import { MessageSquare, Users, TrendingUp, Calendar, Search } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
   Line,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
 } from "recharts";
 
+interface ChatQuestion {
+  question: string;
+  answeredAt: string;
+}
+
 interface UserRecord {
   _id: string;
   name: string;
   email: string;
-  chatQuestions?: {
-    question: string;
-    answeredAt: string;
-  }[];
+  chatQuestions?: ChatQuestion[];
 }
 
 interface AIStats {
@@ -38,7 +38,7 @@ interface AIStats {
   dailyData: { date: string; questions: number }[];
 }
 
-function computeAIStats(users: UserRecord[]): AIStats {
+function computeAIStats(users: UserRecord[]) {
   const totalQuestions = users.reduce(
     (sum, u) => sum + (u.chatQuestions?.length ?? 0),
     0
@@ -49,6 +49,14 @@ function computeAIStats(users: UserRecord[]): AIStats {
   const avgQuestionsPerUser = usersWithAIUsage > 0 
     ? Math.round(totalQuestions / usersWithAIUsage * 10) / 10 
     : 0;
+
+  const allQuestions = users.flatMap(u => 
+    (u.chatQuestions || []).map(q => ({
+      name: u.name || u.email,
+      question: q.question,
+      answeredAt: q.answeredAt,
+    }))
+  ).sort((a, b) => new Date(b.answeredAt).getTime() - new Date(a.answeredAt).getTime());
 
   const last14Days = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
@@ -74,12 +82,14 @@ function computeAIStats(users: UserRecord[]): AIStats {
     usersWithAIUsage,
     avgQuestionsPerUser,
     dailyData,
+    allQuestions,
   };
 }
 
 export default function AIStatsPage() {
-  const [stats, setStats] = useState<AIStats | null>(null);
+  const [stats, setStats] = useState<ReturnType<typeof computeAIStats> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -96,6 +106,11 @@ export default function AIStatsPage() {
     }
     load();
   }, []);
+
+  const filteredQuestions = stats?.allQuestions.filter(q => 
+    q.name.toLowerCase().includes(search.toLowerCase()) ||
+    q.question.toLowerCase().includes(search.toLowerCase())
+  ) ?? [];
 
   const cards = [
     {
@@ -193,6 +208,48 @@ export default function AIStatsPage() {
                 />
               </LineChart>
             </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="size-4" />
+              <CardTitle className="text-sm font-semibold">All Questions</CardTitle>
+            </div>
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8 pr-3 py-1.5 text-sm border rounded-md w-48"
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="max-h-[400px] overflow-y-auto">
+          {loading ? (
+            <Skeleton className="h-20 w-full" />
+          ) : filteredQuestions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No questions found.</p>
+          ) : (
+            <div className="space-y-3">
+              {filteredQuestions.map((q, i) => (
+                <div key={i} className="p-3 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium">{q.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(q.answeredAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{q.question}</p>
+                </div>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
