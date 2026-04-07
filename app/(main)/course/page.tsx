@@ -209,7 +209,8 @@ END:VEVENT
       return;
     }
     
-    if (!hasSchedule) {
+    const hasProgress = (progress?.completedLessons?.length ?? 0) > 0;
+    if (!hasSchedule && !hasProgress) {
       setScheduleDialogOpen(true);
       return;
     }

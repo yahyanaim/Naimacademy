@@ -207,16 +207,10 @@ export default function Navbar() {
                       My Certificates
                     </Link>
                     <div className="my-2 border-t" />
-                    <button
-                      onClick={() => {
-                        setMobileOpen(false);
-                      }}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors w-full"
-                    >
-                      <Bell className="size-5" />
-                      <span>Notifications</span>
+                    <div className="flex items-center justify-between px-4 py-3">
+                      <span className="text-sm font-medium">Notifications</span>
                       <NotificationBell />
-                    </button>
+                    </div>
                     {user && (
                     <Link
                       href="/donate"
