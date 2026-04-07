@@ -202,6 +202,8 @@ END:VEVENT
   }
 
   async function handleStartCourse(lessonId: string) {
+    console.log("Start course clicked:", { percentage, hasSchedule, user: !!user });
+    
     if (percentage >= 100) return;
     
     if (!user) {
@@ -210,7 +212,10 @@ END:VEVENT
     }
     
     const hasProgress = (progress?.completedLessons?.length ?? 0) > 0;
+    console.log("Schedule check:", { hasSchedule, hasProgress });
+    
     if (!hasSchedule && !hasProgress) {
+      console.log("Opening dialog because no schedule and no progress");
       setScheduleDialogOpen(true);
       return;
     }

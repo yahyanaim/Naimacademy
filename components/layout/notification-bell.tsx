@@ -81,7 +81,10 @@ export function NotificationBell() {
   return (
     <div ref={containerRef} className="relative">
       <button
-        onClick={() => setOpen(!open)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(!open);
+        }}
         className="relative p-2 hover:bg-muted rounded-full transition-colors"
       >
         <Bell className="size-5" />
@@ -93,7 +96,12 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 bg-black/50 z-50 md:absolute md:inset-auto md:right-0 md:mt-2 md:w-80 md:bg-background md:border md:rounded-lg md:shadow-lg">
+        <div 
+          className="fixed inset-0 bg-black/50 z-[100] md:absolute md:inset-auto md:right-0 md:mt-2 md:w-80 md:bg-background md:border md:rounded-lg md:shadow-lg"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setOpen(false);
+          }}
+        >
           <div className="h-full md:h-auto flex flex-col bg-background md:border md:rounded-lg overflow-hidden">
             <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-background z-10">
               <h3 className="font-semibold text-lg">Notifications</h3>
