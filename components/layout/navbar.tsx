@@ -167,31 +167,31 @@ export default function Navbar() {
             <SheetTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground">
               <Menu className="h-5 w-5" />
             </SheetTrigger>
-            <SheetContent side="right" className="w-72">
-              <div className="flex flex-col gap-1 pt-8">
+            <SheetContent side="right" className="w-72 bg-background">
+              <div className="flex flex-col gap-1 pt-6">
                 {user && (
-                  <div className="px-4 py-3 border-b mb-2">
-                    <p className="font-semibold text-sm">{user.name || user.email}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
+                  <div className="px-4 py-4 border-b mb-2 bg-muted/30 rounded-lg mx-2">
+                    <p className="font-semibold text-base">{user.name || user.email}</p>
+                    <p className="text-xs text-muted-foreground capitalize mt-1">{user.role}</p>
                   </div>
                 )}
                 <Link
                   href="/course"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
                 >
                   <GraduationCap className="size-5" />
                   Course
                 </Link>
                 
-                <div className="my-2 border-t" />
+                <div className="my-1 border-t mx-4" />
                 
                 {user ? (
                   <>
                     <Link
                       href="/dashboard"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
                     >
                       <LayoutDashboard className="size-5" />
                       Dashboard
@@ -199,7 +199,7 @@ export default function Navbar() {
                     <Link
                       href="/profile"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
                     >
                       <User className="size-5" />
                       Profile
@@ -207,22 +207,22 @@ export default function Navbar() {
                     <Link
                       href="/certificates"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
                     >
                       <FileBadge className="size-5" />
                       My Certificates
                     </Link>
-                    <div className="my-2 border-t" />
-                    {user && (
-                      <div className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors">
-                        <NotificationBell />
-                      </div>
-                    )}
+                    <div className="my-1 border-t mx-4" />
+                    <div className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2">
+                      <Bell className="size-5" />
+                      <span className="flex-1">Notifications</span>
+                      <NotificationBell />
+                    </div>
                     {user && (
                     <Link
                       href="/donate"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
                     >
                       <Coffee className="size-5" />
                       Support Us
@@ -232,21 +232,21 @@ export default function Navbar() {
                       <Link
                         href="/admin"
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
+                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
                       >
                         <Shield className="size-5" />
                         Admin
                       </Link>
                     )}
                     
-                    <div className="my-2 border-t" />
+                    <div className="my-1 border-t mx-4" />
                     
                     <button
                       onClick={() => {
                         setMobileOpen(false);
                         handleLogout();
                       }}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md text-destructive hover:bg-destructive/10 transition-colors text-left"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-destructive hover:bg-destructive/10 transition-all duration-200 mx-2 text-left"
                     >
                       <LogOut className="size-5" />
                       Logout
@@ -257,7 +257,7 @@ export default function Navbar() {
                     <Link
                       href="/login"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
                     >
                       <LogIn className="size-5" />
                       Login
@@ -265,7 +265,7 @@ export default function Navbar() {
                     <Link
                       href="/signup"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
                     >
                       <UserPlus className="size-5" />
                       Sign Up
