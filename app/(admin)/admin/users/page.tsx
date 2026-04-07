@@ -53,6 +53,11 @@ interface UserRecord {
     issued: boolean;
     issuedAt?: string;
   } | null;
+  certifications?: {
+    examTitle: string;
+    score: number;
+    issuedAt: string;
+  }[];
   createdAt?: string;
   lastActivityAt?: string;
 }
@@ -329,7 +334,16 @@ export default function UsersPage() {
                   <TableCell>{completionPct(user)}</TableCell>
                   <TableCell>{bestScore(user.examAttempts)}</TableCell>
                   <TableCell className="text-center">
-                    {user.certificate?.issued ? (
+                    {user.certifications && user.certifications.length > 0 ? (
+                      <div className="flex flex-col gap-1 items-center">
+                        {user.certifications.map((cert, idx) => (
+                          <Badge key={idx} className="bg-green-500 hover:bg-green-600 text-white gap-1 text-xs">
+                            <Award className="size-3" />
+                            {cert.examTitle}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : user.certificate?.issued ? (
                       <Badge className="bg-green-500 hover:bg-green-600 text-white gap-1">
                         <Award className="size-3" />
                         Certified
