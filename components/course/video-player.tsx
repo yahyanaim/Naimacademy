@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { MessageCircle } from "lucide-react";
 
 // Dynamically imported to avoid SSR issues
 const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
@@ -83,6 +84,15 @@ export function VideoPlayer({ url, onProgress, onPause, initialTimestamp = 0 }: 
             {rate}x
           </button>
         ))}
+      </div>
+
+      <div className="mt-4 p-4 rounded-lg border border-dashed bg-muted/30">
+        <div className="flex items-center justify-center gap-2 text-muted-foreground">
+          <MessageCircle className="size-4" />
+          <p className="text-sm text-center">
+            Comments section is under coding 💻
+          </p>
+        </div>
       </div>
     </div>
   );

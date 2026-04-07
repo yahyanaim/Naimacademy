@@ -28,9 +28,8 @@ export async function seed(force = false) {
       return null;
     }
   } else {
-    // Clear all collections if force is true
+    // Clear collections but keep users (do NOT delete users)
     await Promise.all([
-      User.deleteMany({}),
       Admin.deleteMany({}),
       Course.deleteMany({}),
       Section.deleteMany({}),
