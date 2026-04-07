@@ -50,6 +50,7 @@ interface LessonRecord {
   order: number;
   duration: string;
   transcript: string;
+  isLocked?: boolean;
 }
 
 interface SectionRecord {
@@ -478,6 +479,34 @@ export default function ContentManagementPage() {
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex items-center justify-end gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onClick={async () => {
+                                      try {
+                                        const res = await fetch(`/api/admin/lessons/${lesson._id}`, {
+                                          method: "PATCH",
+                                          headers: { "Content-Type": "application/json" },
+                                          body: JSON.stringify({ isLocked: !lesson.isLocked }),
+                                        });
+                                        if (res.ok) {
+                                          toast.success(lesson.isLocked ? "Lesson unlocked" : "Lesson locked");
+                                          fetchData();
+                                        } else {
+                                          toast.error("Failed to update lesson lock");
+                                        }
+                                      } catch {
+                                        toast.error("Failed to update lesson lock");
+                                      }
+                                    }}
+                                    title={lesson.isLocked ? "Unlock lesson" : "Lock lesson"}
+                                  >
+                                    {lesson.isLocked ? (
+                                      <Lock className="text-amber-500 size-4" />
+                                    ) : (
+                                      <Unlock className="text-green-500 size-4" />
+                                    )}
+                                  </Button>
                                   <Button
                                     variant="ghost"
                                     size="icon-sm"
