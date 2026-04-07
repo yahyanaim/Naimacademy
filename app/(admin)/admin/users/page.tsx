@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert, Search, Award, Clock, UserPlus, RefreshCw } from "lucide-react";
+import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert, Search, Award, Clock, UserPlus, RefreshCw, User } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +41,7 @@ interface UserRecord {
   _id: string;
   name: string;
   email: string;
+  avatar?: string;
   role: "admin" | "student";
   isBanned: boolean;
   banReason?: string;
@@ -295,29 +296,42 @@ export default function UsersPage() {
               {filteredUsers.map((user) => (
                 <TableRow key={user._id} className={user.isBanned ? "bg-destructive/5" : ""}>
                   <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      {user.name}
-                      {isNewUser(user) && (
-                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                          <UserPlus className="size-3 mr-1" />New
-                        </Badge>
+                    <div className="flex items-center gap-3">
+                      {user.avatar ? (
+                        <img
+                          src={user.avatar}
+                          alt={user.name}
+                          className="w-10 h-10 rounded-full object-cover border border-border"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border border-border">
+                          <User className="size-5 text-muted-foreground" />
+                        </div>
                       )}
-                      {isActive(user) && !isNewUser(user) && (
-                        <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                          <Clock className="size-3 mr-1" />Active
-                        </Badge>
-                      )}
+                      <div className="flex flex-col">
+                        <span className="font-medium">{user.name}</span>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          {isNewUser(user) && (
+                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                              <UserPlus className="size-3 mr-1" />New
+                            </Badge>
+                          )}
+                          {isActive(user) && !isNewUser(user) && (
+                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                              <Clock className="size-3 mr-1" />Active
+                            </Badge>
+                          )}
+                        </div>
+                        {user.lastActivityAt && (
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            Last: {new Date(user.lastActivityAt).toLocaleDateString("en-US", { 
+                              month: "short", 
+                              day: "numeric"
+                            })}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    {user.lastActivityAt && (
-                      <p className="text-[10px] text-muted-foreground mt-1">
-                        Last enter: {new Date(user.lastActivityAt).toLocaleDateString("en-US", { 
-                          month: "short", 
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit"
-                        })}
-                      </p>
-                    )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {user.email}
