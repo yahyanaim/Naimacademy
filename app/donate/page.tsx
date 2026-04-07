@@ -10,18 +10,17 @@ export default function DonatePage() {
   const router = useRouter();
   
   return (
-    <div className="flex flex-col min-h-screen pt-14" style={{ backgroundColor: "#f5f5f5" }}>
-      <div className="flex-1 overflow-y-hidden">
-        <main className="flex flex-col items-center px-4 lg:px-8 max-w-md mx-auto py-8">
-          <button 
-            onClick={() => router.back()} 
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#C41E3A] transition-colors mb-4"
-          >
-            <ArrowLeft className="size-4" />
-            Back
-          </button>
+    <div className="flex flex-col min-h-screen pt-14 overflow-hidden" style={{ backgroundColor: "#f5f5f5" }}>
+      <main className="flex-1 flex flex-col items-center px-4 lg:px-8 max-w-md mx-auto py-8">
+        <button 
+          onClick={() => router.back()} 
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#C41E3A] transition-colors mb-4"
+        >
+          <ArrowLeft className="size-4" />
+          Back
+        </button>
 
-          <div className="w-full">
+        <div className="w-full">
           {/* Header Card */}
           <div className="bg-gradient-to-br from-[#C41E3A] to-[#a01830] rounded-2xl p-6 text-white mb-5 shadow-lg">
             <div className="flex items-center justify-center gap-2 mb-3">
