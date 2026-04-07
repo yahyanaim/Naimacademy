@@ -52,6 +52,12 @@ export function AIChat({ lessonTitle, lessonContent }: { lessonTitle?: string; l
 
   async function handleSend() {
     if (!input.trim() || remaining === 0) return;
+    
+    const fileMatch = input.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i);
+    if (fileMatch || input.includes('data:image') || input.includes('file://')) {
+      toast.error("This AI assistant only supports text questions. Images are not supported yet.");
+      return;
+    }
 
     const userMessage = input.trim();
     setInput("");

@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Naim Academy - Online Learning Platform
+
+A comprehensive online learning platform for mastering n8n automation, built with Next.js, MongoDB, and Tailwind CSS.
+
+## Features
+
+- **Course Management** - Structured lessons with video content, explanations, resources, and links
+- **Progress Tracking** - Track student progress through the course
+- **AI Chat Assistant** - NVIDIA-powered AI helper for answering questions
+- **Certificate System** - Earn certificates upon course completion
+- **Admin Dashboard** - Manage users, content, and view analytics
+- **Scheduling System** - Students can plan their learning schedule
+- **Notifications** - Admin can send notifications to all students
+- **Responsive Design** - Works on desktop and mobile devices
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, React, Tailwind CSS, shadcn/ui
+- **Backend**: Next.js API Routes
+- **Database**: MongoDB with Mongoose
+- **Authentication**: JWT-based auth
+- **AI**: NVIDIA AI API (Llama model)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+
+- MongoDB (local or Atlas)
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yahyanaim/Naimacademy.git
+cd Naimacademy
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create `.env.local` file:
+```env
+MONGODB_URI=mongodb://localhost:27017/naimacademy
+JWT_SECRET=your-secret-key
+NVIDIA_API_KEY=your-nvidia-api-key
+NVIDIA_MODEL=meta/llama-3.1-8b-instruct
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open http://localhost:3000
 
-To learn more about Next.js, take a look at the following resources:
+### Admin Access
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Default admin credentials (change in production):
+- Email: admin@n8n-course.com
+- Password: admin123
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+├── app/                    # Next.js app router
+│   ├── (admin)/           # Admin routes
+│   ├── (main)/           # Main user routes
+│   ├── api/              # API routes
+│   └── donate/           # Donation page
+├── components/            # React components
+│   ├── admin/            # Admin components
+│   ├── course/           # Course components
+│   ├── layout/           # Layout components
+│   └── ui/               # UI components
+├── lib/                   # Libraries and utilities
+│   ├── auth/             # Authentication
+│   ├── db/               # Database connection
+│   ├── models/           # Mongoose models
+│   ├── seed/             # Seed data
+│   └── constants.ts      # Constants
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## API Endpoints
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Authentication
+- `POST /api/auth/signup` - Register new user
+- `POST /api/auth/login` - Login
+- `GET /api/auth/me` - Get current user
+
+### Course
+- `GET /api/course` - Get course data
+- `GET /api/progress` - Get user progress
+
+### Admin
+- `GET /api/admin/users` - List all users
+- `POST /api/admin/seed` - Seed database
+- `POST /api/admin/notifications` - Send notifications
+- `PATCH /api/admin/sections` - Lock/unlock sections
+- `PUT /api/admin/lessons` - Update lessons
+
+## License
+
+MIT License
+
+## Support
+
+For questions or issues, please contact through the platform.
