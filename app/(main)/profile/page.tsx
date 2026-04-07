@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, User as UserIcon, Mail, Lock, Save, Trash2, AlertTriangle } from "lucide-react";
+import { Loader2, User as UserIcon, Lock, Save, Trash2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -96,97 +95,93 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container max-w-3xl mx-auto py-12 px-6 space-y-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
-        <p className="text-muted-foreground mt-2">Manage your personal information and security credentials.</p>
+    <div className="container max-w-2xl mx-auto py-8 px-4 space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Profile Settings</h1>
+        <p className="text-muted-foreground text-sm mt-1">Manage your account information</p>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <Card className="shadow-sm border-border overflow-hidden">
-          <CardHeader className="bg-muted/30 border-b border-border pb-6">
-            <CardTitle className="text-xl flex items-center gap-2">
-              <UserIcon className="size-5 text-primary" />
-              General Profile
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base flex items-center gap-2">
+              <UserIcon className="size-4 text-primary" />
+              Personal Information
             </CardTitle>
-            <CardDescription>
-              This information will be displayed on your certificate.
-            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6 pt-6">
-            <div className="grid sm:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <Label htmlFor="name" className="text-sm font-semibold">Full Name</Label>
-                <div className="relative">
-                  <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="pl-9 h-11"
-                    placeholder="John Doe"
-                  />
-                </div>
+          <CardContent className="space-y-4">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm">Full Name</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="h-10"
+                  placeholder="John Doe"
+                />
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="email" className="text-sm font-semibold">Email Address</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="pl-9 h-11"
-                    placeholder="m@example.com"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="h-10"
+                  placeholder="m@example.com"
+                />
               </div>
             </div>
 
-            <Separator className="my-6" />
-
-            <div className="space-y-3 max-w-sm">
-              <Label htmlFor="password" className="text-sm font-semibold flex items-center gap-2">
+            <div className="space-y-2 pt-2">
+              <Label htmlFor="password" className="text-sm flex items-center gap-2">
                 <Lock className="size-4" />
                 Change Password
               </Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Leave blank to keep current password"
+                placeholder="New password (min 8 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 minLength={8}
-                className="h-11"
+                className="h-10"
               />
-              <p className="text-[0.8rem] text-muted-foreground">Must be at least 8 characters long.</p>
             </div>
           </CardContent>
-          <CardFooter className="bg-muted/30 border-t border-border px-6 py-4 flex justify-end">
-            <Button type="submit" size="lg" disabled={saving} className="px-8 font-medium">
-              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-              {saving ? "Saving Changes..." : "Save Changes"}
+          <CardFooter className="border-t border-border/50 py-4 justify-end">
+            <Button type="submit" size="sm" disabled={saving} className="gap-2">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {saving ? "Saving..." : "Save Changes"}
             </Button>
           </CardFooter>
         </Card>
       </form>
 
       {/* Danger Zone */}
-      <div className="border border-red-200 rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-red-600 mb-3">Danger Zone</h3>
-        <Button
-          onClick={() => setDeleteDialogOpen(true)}
-          variant="outline"
-          className="w-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
-        >
-          <Trash2 className="size-4 mr-2" />
-          Delete Account
-        </Button>
-      </div>
+      <Card className="border-red-200/50 bg-red-50/30">
+        <CardContent className="py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-red-600">Delete Account</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Permanently remove your account and data</p>
+            </div>
+            <Button
+              onClick={() => setDeleteDialogOpen(true)}
+              variant="outline"
+              size="sm"
+              className="text-red-600 border-red-300 hover:bg-red-100 hover:text-red-700"
+            >
+              <Trash2 className="size-4 mr-1" />
+              Delete
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
