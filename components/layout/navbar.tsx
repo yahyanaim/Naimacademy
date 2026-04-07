@@ -207,9 +207,11 @@ export default function Navbar() {
                       My Certificates
                     </Link>
                     <div className="my-2 border-t" />
-                    <div className="px-4 py-2">
-                      <NotificationBell />
-                    </div>
+                    {user && (
+                      <div className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md hover:bg-muted transition-colors">
+                        <NotificationBell />
+                      </div>
+                    )}
                     {user && (
                     <Link
                       href="/donate"
