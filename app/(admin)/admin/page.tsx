@@ -93,8 +93,6 @@ function computeStats(users: UserRecord[]): Stats {
     avgExamScore, 
     avgCompletionRate, 
     certificatesIssued,
-    totalAIQuestions,
-    usersWithAIUsage,
     registrationData,
     distribution
   };
