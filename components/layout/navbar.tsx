@@ -101,13 +101,14 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-6">{desktopNavLinks}</nav>
 
         {/* Right side – desktop */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-3">
           {user && (
             <Link
               href="/donate"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               <Coffee className="size-4" />
+              <span>Support Us</span>
             </Link>
           )}
           {user && (
@@ -215,7 +216,6 @@ export default function Navbar() {
                       <FileBadge className="size-5" />
                       My Certificates
                     </Link>
-                    <div className="my-1 border-t mx-4" />
                     <Link
                       href="/donate"
                       onClick={() => setMobileOpen(false)}
@@ -224,6 +224,10 @@ export default function Navbar() {
                       <Coffee className="size-5" />
                       Support Us
                     </Link>
+                    <div className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2">
+                      <NotificationBell />
+                      <span>Notifications</span>
+                    </div>
                     {user?.role === "admin" && (
                       <Link
                         href="/admin"
