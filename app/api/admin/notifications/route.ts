@@ -44,13 +44,18 @@ export async function POST(req: NextRequest) {
   await connectDB();
 
   try {
-    const { title, message, type } = await req.json();
+    const { title, message, type, userIds } = await req.json();
 
     if (!title || !message) {
       return NextResponse.json({ error: "Title and message are required" }, { status: 400 });
     }
 
-    const students = await User.find({ role: "student" }).select("_id");
+    let students;
+    if (userIds && userIds.length > 0) {
+      students = await User.find({ _id: { $in: userIds } }).select("_id");
+    } else {
+      students = await User.find({ role: "student" }).select("_id");
+    }
     
     if (students.length === 0) {
       return NextResponse.json({ error: "No students found" }, { status: 400 });

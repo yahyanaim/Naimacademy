@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bell, Send, Users, Award, BookOpen, Info, CheckCircle, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Bell, Send, Users, Award, BookOpen, Info, CheckCircle, X, User, Search } from "lucide-react";
 import { toast } from "sonner";
 
 interface Notification {
@@ -18,17 +20,30 @@ interface Notification {
   createdAt: string;
 }
 
+interface UserRecord {
+  _id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role: string;
+}
+
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [students, setStudents] = useState<UserRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [type, setType] = useState<string>("general");
+  const [sendToAll, setSendToAll] = useState(true);
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [studentSearch, setStudentSearch] = useState("");
 
   useEffect(() => {
     loadNotifications();
+    loadStudents();
   }, []);
 
   async function loadNotifications() {
@@ -42,6 +57,18 @@ export default function NotificationsPage() {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadStudents() {
+    try {
+      const res = await fetch("/api/admin/users", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setStudents(data.filter((u: UserRecord) => u.role === "student"));
+      }
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -70,21 +97,32 @@ export default function NotificationsPage() {
       return;
     }
 
+    if (!sendToAll && selectedStudents.length === 0) {
+      toast.error("Please select at least one student");
+      return;
+    }
+
     setSending(true);
     try {
       const res = await fetch("/api/admin/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ title, message, type }),
+        body: JSON.stringify({ 
+          title, 
+          message, 
+          type,
+          userIds: sendToAll ? undefined : selectedStudents 
+        }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        toast.success(`Notification sent to ${data.count} students!`);
+        toast.success(`Notification sent to ${data.count} student${data.count !== 1 ? "s" : ""}!`);
         setTitle("");
         setMessage("");
+        setSelectedStudents([]);
         loadNotifications();
       } else {
         toast.error(data.error || "Failed to send notification");
@@ -95,6 +133,27 @@ export default function NotificationsPage() {
       setSending(false);
     }
   }
+
+  function toggleStudent(studentId: string) {
+    setSelectedStudents(prev => 
+      prev.includes(studentId)
+        ? prev.filter(id => id !== studentId)
+        : [...prev, studentId]
+    );
+  }
+
+  function toggleAll() {
+    if (selectedStudents.length === filteredStudents.length) {
+      setSelectedStudents([]);
+    } else {
+      setSelectedStudents(filteredStudents.map(s => s._id));
+    }
+  }
+
+  const filteredStudents = students.filter(s => 
+    s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+    s.email.toLowerCase().includes(studentSearch.toLowerCase())
+  );
 
   const typeIcons = {
     new_user: Users,
@@ -155,8 +214,74 @@ export default function NotificationsPage() {
               />
             </div>
 
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="sendAll"
+                  checked={sendToAll}
+                  onCheckedChange={(checked) => {
+                    setSendToAll(checked === true);
+                    if (checked) setSelectedStudents([]);
+                  }}
+                />
+                <Label htmlFor="sendAll" className="font-normal cursor-pointer">
+                  Send to all students ({students.length})
+                </Label>
+              </div>
+
+              {!sendToAll && (
+                <div className="border rounded-lg p-3 space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search students..."
+                      value={studentSearch}
+                      onChange={(e) => setStudentSearch(e.target.value)}
+                      className="pl-9 h-9"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 border-b pb-2">
+                    <Checkbox
+                      id="selectAll"
+                      checked={selectedStudents.length === filteredStudents.length && filteredStudents.length > 0}
+                      onCheckedChange={() => toggleAll()}
+                    />
+                    <Label htmlFor="selectAll" className="font-normal text-sm cursor-pointer">
+                      Select all ({filteredStudents.length})
+                    </Label>
+                  </div>
+
+                  <ScrollArea className="h-[200px]">
+                    <div className="space-y-2">
+                      {filteredStudents.map((student) => (
+                        <div key={student._id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`student-${student._id}`}
+                            checked={selectedStudents.includes(student._id)}
+                            onCheckedChange={() => toggleStudent(student._id)}
+                          />
+                          <Label 
+                            htmlFor={`student-${student._id}`} 
+                            className="font-normal cursor-pointer flex-1 text-sm"
+                          >
+                            <span className="font-medium">{student.name}</span>
+                            <span className="text-muted-foreground ml-2">{student.email}</span>
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+
+                  <p className="text-xs text-muted-foreground">
+                    {selectedStudents.length} student{selectedStudents.length !== 1 ? "s" : ""} selected
+                  </p>
+                </div>
+              )}
+            </div>
+
             <Button onClick={handleSend} disabled={sending} className="w-full">
-              {sending ? "Sending..." : "Send to All Students"}
+              {sending ? "Sending..." : sendToAll ? "Send to All Students" : `Send to ${selectedStudents.length} Student${selectedStudents.length !== 1 ? "s" : ""}`}
             </Button>
           </CardContent>
         </Card>
@@ -168,7 +293,7 @@ export default function NotificationsPage() {
               Recent Notifications
             </CardTitle>
           </CardHeader>
-          <CardContent className="max-h-[400px] overflow-y-auto">
+          <CardContent className="max-h-[500px] overflow-y-auto">
             {loading ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (

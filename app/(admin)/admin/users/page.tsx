@@ -129,12 +129,15 @@ export default function UsersPage() {
       user.name.toLowerCase().includes(search.toLowerCase()) ||
       user.email.toLowerCase().includes(search.toLowerCase());
     const roleMatch = roleFilter === "all" || user.role === roleFilter;
+    const pct = user.progress?.completionPercentage ?? 0;
     const statusMatch = 
       statusFilter === "all" || 
       (statusFilter === "banned" && user.isBanned) ||
       (statusFilter === "active" && !user.isBanned) ||
-      (statusFilter === "certified" && user.certificate?.issued) ||
-      (statusFilter === "passed" && user.examAttempts?.some(a => a.passed));
+      (statusFilter === "certified" && (user.certifications?.length ?? 0) > 0) ||
+      (statusFilter === "passed" && user.examAttempts?.some(a => a.passed)) ||
+      (statusFilter === "try" && pct === 0) ||
+      (statusFilter === "inactive" && !user.lastActivityAt);
     return searchMatch && roleMatch && statusMatch;
   });
 
@@ -265,6 +268,8 @@ export default function UsersPage() {
             <SelectItem value="banned">Banned</SelectItem>
             <SelectItem value="passed">Passed Exam</SelectItem>
             <SelectItem value="certified">Certified</SelectItem>
+            <SelectItem value="try">Haven&apos;t Started (0%)</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
           </SelectContent>
         </Select>
       </div>
