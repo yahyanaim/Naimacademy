@@ -29,6 +29,7 @@ import {
   ChevronRight,
   Lock,
   Unlock,
+  RefreshCw,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -328,10 +329,35 @@ export default function ContentManagementPage() {
             Manage course sections and lessons
           </p>
         </div>
-        <Button onClick={openAddSection} disabled={!courseId || loading}>
-          <Plus />
-          Add Section
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              try {
+                const res = await fetch("/api/admin/seed?mode=update", { 
+                  method: "POST",
+                  credentials: "include" 
+                });
+                if (res.ok) {
+                  toast.success("Course content updated!");
+                  fetchData();
+                } else {
+                  toast.error("Failed to update. Make sure you're logged in as admin.");
+                }
+              } catch {
+                toast.error("Error updating course content");
+              }
+            }}
+          >
+            <RefreshCw className="size-4 mr-2" />
+            Update Content
+          </Button>
+          <Button onClick={openAddSection} disabled={!courseId || loading}>
+            <Plus />
+            Add Section
+          </Button>
+        </div>
       </div>
 
       {/* Sections */}
