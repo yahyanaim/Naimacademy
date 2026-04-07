@@ -29,6 +29,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { NotificationBell } from "./notification-bell";
 
 interface User {
   id: string;
@@ -109,6 +110,7 @@ export default function Navbar() {
               Support
             </Link>
           )}
+          {user && <NotificationBell />}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost" }), "font-semibold text-base")}>

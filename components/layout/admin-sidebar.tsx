@@ -13,6 +13,7 @@ import {
   LogOut,
   MessageSquare,
   Bot,
+  Bell,
 } from "lucide-react";
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { href: "/admin/exam", label: "Exam", icon: FileQuestion },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/ai", label: "AI Stats", icon: Bot },
+  { href: "/admin/notifications", label: "Notifications", icon: Bell },
   { href: "/admin/support", label: "Support", icon: MessageSquare },
 ];
 

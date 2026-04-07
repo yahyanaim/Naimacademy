@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Exam } from "@/lib/models/exam.model";
 import { Question } from "@/lib/models/question.model";
 import { User } from "@/lib/models/user.model";
+import { Notification } from "@/lib/models/notification.model";
 import { withAuth } from "@/lib/auth/guards";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
@@ -145,6 +146,23 @@ export const POST = withAuth(
         }
 
         await User.findByIdAndUpdate(ctx.user.userId, updateData);
+
+        // Send notification based on result
+        if (passed) {
+          await Notification.create({
+            userId: ctx.user.userId,
+            title: "Exam Passed!",
+            message: `Congratulations! You passed the ${exam.title} with a score of ${score}%`,
+            type: "certificate",
+          });
+        } else {
+          await Notification.create({
+            userId: ctx.user.userId,
+            title: "Exam Result",
+            message: `You scored ${score}% in ${exam.title}. Keep practicing to pass!`,
+            type: "general",
+          });
+        }
       } catch {
         return NextResponse.json(
           { error: "Failed to save progress" },

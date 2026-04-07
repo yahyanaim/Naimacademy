@@ -1,6 +1,7 @@
-import { connectDB } from "@/lib/db/mongoose";
+  import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/lib/models/user.model";
 import { InviteCode } from "@/lib/models/invite-code.model";
+import { Notification } from "@/lib/models/notification.model";
 import { signToken } from "@/lib/auth/jwt";
 import { setSessionCookie } from "@/lib/auth/session";
 import { PASSWORD } from "@/lib/constants";
@@ -65,7 +66,15 @@ export async function POST(req: NextRequest) {
     },
     { status: 201 }
   );
-
   setSessionCookie(response, token);
+
+  // Create notification for new user
+  await Notification.create({
+    userId: user._id,
+    title: "Welcome to Naim Academy!",
+    message: "Welcome to Naim Academy! Start your n8n automation journey today.",
+    type: "new_user",
+  });
+
   return response;
 }
