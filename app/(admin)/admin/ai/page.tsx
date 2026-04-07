@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MessageSquare, Users, TrendingUp, Calendar, Search } from "lucide-react";
+import { MessageSquare, Users, TrendingUp, Calendar, Send, RefreshCw, User, MessageCircle } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -31,11 +31,11 @@ interface UserRecord {
   chatQuestions?: ChatQuestion[];
 }
 
-interface AIStats {
-  totalQuestions: number;
-  usersWithAIUsage: number;
-  avgQuestionsPerUser: number;
-  dailyData: { date: string; questions: number }[];
+interface ChatMessage {
+  id: string;
+  studentName: string;
+  question: string;
+  answeredAt: string;
 }
 
 function computeAIStats(users: UserRecord[]) {
@@ -52,7 +52,8 @@ function computeAIStats(users: UserRecord[]) {
 
   const allQuestions = users.flatMap(u => 
     (u.chatQuestions || []).map(q => ({
-      name: u.name || u.email,
+      id: `${u._id}-${q.answeredAt}`,
+      studentName: u.name || u.email,
       question: q.question,
       answeredAt: q.answeredAt,
     }))
@@ -89,33 +90,32 @@ function computeAIStats(users: UserRecord[]) {
 export default function AIStatsPage() {
   const [stats, setStats] = useState<ReturnType<typeof computeAIStats> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  async function load() {
+    try {
+      const res = await fetch("/api/admin/users");
+      if (!res.ok) throw new Error("Failed to fetch users");
+      const users: UserRecord[] = await res.json();
+      setStats(computeAIStats(users));
+      setLastUpdate(new Date().toLocaleTimeString());
+    } catch {
+      // Fallback or empty state
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/admin/users");
-        if (!res.ok) throw new Error("Failed to fetch users");
-        const users: UserRecord[] = await res.json();
-        setStats(computeAIStats(users));
-        setLastUpdate(new Date().toLocaleTimeString());
-      } catch {
-        // Fallback or empty state
-      } finally {
-        setLoading(false);
-      }
-    }
     load();
-    
     const interval = setInterval(load, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const filteredQuestions = stats?.allQuestions.filter(q => 
-    q.name.toLowerCase().includes(search.toLowerCase()) ||
-    q.question.toLowerCase().includes(search.toLowerCase())
-  ) ?? [];
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [stats?.allQuestions]);
 
   const cards = [
     {
@@ -143,7 +143,12 @@ export default function AIStatsPage() {
       <div>
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight">AI Assistant Statistics</h1>
-          {lastUpdate && <span className="text-xs text-muted-foreground">Updated: {lastUpdate}</span>}
+          <div className="flex items-center gap-2">
+            {lastUpdate && <span className="text-xs text-muted-foreground">Updated: {lastUpdate}</span>}
+            <button onClick={load} className="p-1 hover:bg-muted rounded">
+              <RefreshCw className="size-4" />
+            </button>
+          </div>
         </div>
         <p className="text-muted-foreground text-sm mt-1">
           Track AI chat usage and engagement
@@ -175,99 +180,89 @@ export default function AIStatsPage() {
         ))}
       </div>
 
-      <Card className="p-4">
-        <CardHeader className="px-2 pb-4">
-          <div className="flex items-center gap-2">
-            <Calendar className="size-4 text-black" />
-            <CardTitle className="text-sm font-semibold">Questions Over Time</CardTitle>
-          </div>
-          <p className="text-xs text-muted-foreground">Last 14 days</p>
-        </CardHeader>
-        <CardContent className="h-[300px] p-0">
-          {loading ? (
-            <Skeleton className="h-full w-full" />
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={stats?.dailyData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis 
-                  dataKey="date" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  fontSize={12} 
-                  tick={{ fill: "#64748b" }}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  fontSize={12} 
-                  tick={{ fill: "#64748b" }}
-                />
-                <Tooltip 
-                  contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="questions" 
-                  stroke="#000000" 
-                  strokeWidth={2.5} 
-                  dot={{ fill: "#000000", strokeWidth: 2, r: 4 }} 
-                  activeDot={{ r: 6, strokeWidth: 0 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="p-4">
+          <CardHeader className="px-2 pb-4">
             <div className="flex items-center gap-2">
-              <MessageSquare className="size-4" />
-              <CardTitle className="text-sm font-semibold">All Questions</CardTitle>
+              <Calendar className="size-4 text-black" />
+              <CardTitle className="text-sm font-semibold">Questions Over Time</CardTitle>
             </div>
-            <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 text-sm border rounded-md w-48"
-              />
+            <p className="text-xs text-muted-foreground">Last 14 days</p>
+          </CardHeader>
+          <CardContent className="h-[250px] p-0">
+            {loading ? (
+              <Skeleton className="h-full w-full" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={stats?.dailyData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis 
+                    dataKey="date" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    fontSize={12} 
+                    tick={{ fill: "#64748b" }}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    fontSize={12} 
+                    tick={{ fill: "#64748b" }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="questions" 
+                    stroke="#000000" 
+                    strokeWidth={2.5} 
+                    dot={{ fill: "#000000", strokeWidth: 2, r: 4 }} 
+                    activeDot={{ r: 6, strokeWidth: 0 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="flex flex-col h-[350px]">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="size-4" />
+              <CardTitle className="text-sm font-semibold">AI Questions</CardTitle>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="max-h-[400px] overflow-y-auto">
-          {loading ? (
-            <Skeleton className="h-20 w-full" />
-          ) : filteredQuestions.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No questions found.</p>
-          ) : (
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-background border-b">
-                <tr>
-                  <th className="text-left py-2 px-2 font-medium">Student Name</th>
-                  <th className="text-left py-2 px-2 font-medium">Question</th>
-                  <th className="text-right py-2 px-2 font-medium">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredQuestions.map((q, i) => (
-                  <tr key={i} className="border-b last:border-0">
-                    <td className="py-2 px-2 align-top">{q.name}</td>
-                    <td className="py-2 px-2 text-muted-foreground">{q.question}</td>
-                    <td className="py-2 px-2 text-right text-muted-foreground text-xs">
-                      {new Date(q.answeredAt).toLocaleDateString()}
-                    </td>
-                  </tr>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-hidden p-0">
+            {loading ? (
+              <div className="p-4 space-y-3">
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            ) : stats?.allQuestions.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                No questions yet
+              </div>
+            ) : (
+              <div className="h-full overflow-y-auto p-4 space-y-3">
+                {stats?.allQuestions.map((msg, i) => (
+                  <div key={i} className="bg-muted/30 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <User className="size-3.5 text-muted-foreground" />
+                      <span className="text-xs font-medium">{msg.studentName}</span>
+                      <span className="text-xs text-muted-foreground ml-auto">
+                        {new Date(msg.answeredAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{msg.question}</p>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
+                <div ref={bottomRef} />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
