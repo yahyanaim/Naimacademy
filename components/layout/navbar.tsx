@@ -225,7 +225,7 @@ export default function Navbar() {
                       Support Us
                     </Link>
                     <div className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2">
-                      <NotificationBell />
+                      <div className="size-5"><NotificationBell /></div>
                       <span>Notifications</span>
                     </div>
                     {user?.role === "admin" && (
