@@ -194,7 +194,10 @@ export default function AdminDashboardPage() {
           size="sm"
           onClick={async () => {
             try {
-              const res = await fetch("/api/admin/seed?mode=update", { method: "POST" });
+              const res = await fetch("/api/admin/seed?mode=update", { 
+                method: "POST",
+                credentials: "include" 
+              });
               if (res.ok) {
                 alert("Course content updated successfully!");
               } else {
