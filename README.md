@@ -1,25 +1,26 @@
-# Naim Academy - Online Learning Platform
+# Naim Academy
 
-A comprehensive online learning platform for mastering n8n automation, built with Next.js, MongoDB, and Tailwind CSS.
+A modern online learning platform for n8n automation courses, built with Next.js, MongoDB, and Tailwind CSS.
 
 ## Features
 
-- **Course Management** - Structured lessons with video content, explanations, resources, and links
-- **Progress Tracking** - Track student progress through the course
-- **AI Chat Assistant** - NVIDIA-powered AI helper for answering questions
-- **Certificate System** - Earn certificates upon course completion
-- **Admin Dashboard** - Manage users, content, and view analytics
-- **Scheduling System** - Students can plan their learning schedule
-- **Notifications** - Admin can send notifications to all students
-- **Responsive Design** - Works on desktop and mobile devices
+- 📚 **Course Management** - Structured lessons with videos, explanations, resources, and links
+- 🤖 **AI Assistant** - NVIDIA-powered chatbot to help students with course questions
+- 📊 **Admin Dashboard** - Manage users, content, notifications, and view analytics
+- 📅 **Learning Schedule** - Calendar planning for students to organize their learning
+- 🎓 **Certificates** - Auto-generated certificates upon course completion
+- 🔔 **Notifications** - Push notifications for students and admins
+- 🔒 **Lock/Unlock Content** - Admins can lock sections or individual lessons
+- 📱 **Mobile Responsive** - Works on all devices
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14, React, Tailwind CSS, shadcn/ui
+- **Frontend**: Next.js 14 (App Router), React, Tailwind CSS
 - **Backend**: Next.js API Routes
 - **Database**: MongoDB with Mongoose
-- **Authentication**: JWT-based auth
-- **AI**: NVIDIA AI API (Llama model)
+- **Authentication**: JWT-based with bcrypt
+- **AI**: NVIDIA NIM API (Llama 3.1)
+- **Deployment**: Vercel
 
 ## Getting Started
 
@@ -27,61 +28,44 @@ A comprehensive online learning platform for mastering n8n automation, built wit
 
 - Node.js 18+
 - MongoDB (local or Atlas)
+- NVIDIA API key (for AI features)
 
 ### Installation
 
-1. Clone the repository:
 ```bash
+# Clone the repository
 git clone https://github.com/yahyanaim/Naimacademy.git
 cd Naimacademy
-```
 
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
-```
 
-3. Create `.env.local` file:
-```env
-MONGODB_URI=mongodb://localhost:27017/naimacademy
-JWT_SECRET=your-secret-key
-NVIDIA_API_KEY=your-nvidia-api-key
-NVIDIA_MODEL=meta/llama-3.1-8b-instruct
-```
+# Create .env.local file
+cp .env.example .env.local
 
-4. Run the development server:
-```bash
+# Add your environment variables:
+# MONGODB_URI=your_mongodb_connection_string
+# JWT_SECRET=your_jwt_secret
+# NVIDIA_API_KEY=your_nvidia_api_key
+
+# Run development server
 npm run dev
 ```
 
-5. Open http://localhost:3000
+### Environment Variables
 
-### Admin Access
+```
+MONGODB_URI=mongodb://localhost:27017/naimacademy
+JWT_SECRET=your-super-secret-key
+NVIDIA_API_KEY=nvapi-xxx
+NVIDIA_MODEL=meta/llama-3.1-8b-instruct
+```
 
-Default admin credentials (change in production):
+## Admin Credentials
+
+Default admin (after seeding):
 - Email: admin@n8n-course.com
 - Password: admin123
-
-## Project Structure
-
-```
-├── app/                    # Next.js app router
-│   ├── (admin)/           # Admin routes
-│   ├── (main)/           # Main user routes
-│   ├── api/              # API routes
-│   └── donate/           # Donation page
-├── components/            # React components
-│   ├── admin/            # Admin components
-│   ├── course/           # Course components
-│   ├── layout/           # Layout components
-│   └── ui/               # UI components
-├── lib/                   # Libraries and utilities
-│   ├── auth/             # Authentication
-│   ├── db/               # Database connection
-│   ├── models/           # Mongoose models
-│   ├── seed/             # Seed data
-│   └── constants.ts      # Constants
-```
 
 ## API Endpoints
 
@@ -92,19 +76,44 @@ Default admin credentials (change in production):
 
 ### Course
 - `GET /api/course` - Get course data
+- `GET /api/course/lessons/:id` - Get lesson details
+
+### Progress
 - `GET /api/progress` - Get user progress
+- `POST /api/progress` - Update progress
+
+### Schedule
+- `GET /api/schedule` - Get learning schedule
+- `POST /api/schedule` - Create/update schedule
 
 ### Admin
-- `GET /api/admin/users` - List all users
-- `POST /api/admin/seed` - Seed database
+- `GET /api/admin/users` - Get all users
+- `POST /api/admin/seed?mode=update` - Update course content
 - `POST /api/admin/notifications` - Send notifications
-- `PATCH /api/admin/sections` - Lock/unlock sections
-- `PUT /api/admin/lessons` - Update lessons
+
+## Project Structure
+
+```
+├── app/                    # Next.js app router pages
+│   ├── (admin)/           # Admin panel pages
+│   ├── (main)/            # Main user pages
+│   ├── api/               # API routes
+│   └── donate/            # Donation page
+├── components/             # React components
+│   ├── admin/             # Admin components
+│   ├── course/           # Course components
+│   └── layout/           # Layout components
+├── lib/                   # Utilities and models
+│   ├── models/           # Mongoose models
+│   ├── seed/             # Database seeding
+│   └── auth/             # Authentication
+└── public/               # Static assets
+```
 
 ## License
 
-MIT License
+MIT License - Feel free to use this project for learning purposes.
 
-## Support
+## Contact
 
-For questions or issues, please contact through the platform.
+For questions or support, use the platform's support feature.

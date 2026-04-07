@@ -55,10 +55,10 @@ export default function DonatePage() {
                   <CreditCard className="size-4 text-[#C41E3A]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-gray-500 uppercase tracking-wider">RIB</p>
-                  <p className="text-xs font-mono font-bold text-gray-800 break-all">007090000355600016002100</p>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wider">Account Number</p>
+                  <p className="text-sm font-mono font-bold text-gray-800">3505240211002500</p>
                 </div>
-                <CopyButton text="007090000355600016002100" />
+                <CopyButton text="3505240211002500" />
               </div>
 
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
@@ -66,10 +66,21 @@ export default function DonatePage() {
                   <CreditCard className="size-4 text-[#C41E3A]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-gray-500 uppercase tracking-wider">Account Number</p>
-                  <p className="text-sm font-mono font-bold text-gray-800">0355600016002100</p>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wider">I.B.A.N.</p>
+                  <p className="text-xs font-mono font-bold text-gray-800 break-all">MA64 2305 9035 0524 0211 0025 0072</p>
                 </div>
-                <CopyButton text="0355600016002100" />
+                <CopyButton text="MA64230590350524021100250072" />
+              </div>
+
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="w-9 h-9 bg-[#C41E3A]/10 rounded-lg flex items-center justify-center">
+                  <CreditCard className="size-4 text-[#C41E3A]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wider">B.I.C / SWIFT</p>
+                  <p className="text-sm font-mono font-bold text-gray-800">CIHMMAMC</p>
+                </div>
+                <CopyButton text="CIHMMAMC" />
               </div>
             </div>
           </div>

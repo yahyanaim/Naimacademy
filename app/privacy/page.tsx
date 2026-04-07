@@ -4,19 +4,14 @@ import Footer from "@/components/layout/footer";
 export default function PrivacyPolicyPage() {
   return (
     <div className="flex flex-col min-h-screen pt-14" style={{ backgroundColor: "#fefdfb" }}>
-      <main className="flex-1 pb-16 overflow-hidden">
+      <main className="flex-1 pb-16">
         <div className="max-w-3xl mx-auto px-6 py-12 space-y-10">
           <div className="space-y-4">
             <h1 className="text-4xl font-bold tracking-tight">Privacy Policy</h1>
-            <p className="text-muted-foreground">Last updated: April 7, 2026</p>
+            <p className="text-muted-foreground">Last updated: April 4, 2026</p>
           </div>
 
           <div className="space-y-8 text-muted-foreground leading-relaxed">
-            <section className="space-y-3">
-              <h2 className="text-xl font-semibold text-foreground">Transparency Statement</h2>
-              <p>At Naim Academy, we believe in complete transparency about how we handle your data. This policy outlines exactly what information we collect, how we use it, and your rights regarding your data.</p>
-            </section>
-
             <section className="space-y-3">
               <h2 className="text-xl font-semibold text-foreground">1. Information We Collect</h2>
               <p>We collect information you provide directly, including your name, email address, and course progress. We also collect usage data such as lesson completion, exam results, and video playback timestamps.</p>
@@ -35,7 +30,7 @@ export default function PrivacyPolicyPage() {
 
             <section className="space-y-3">
               <h2 className="text-xl font-semibold text-foreground">3. Data Storage</h2>
-              <p>Your data is stored securely in MongoDB, a cloud-based database service. We use industry-standard encryption (bcrypt) to protect your password. We do not store payment information.</p>
+              <p>Your data is stored securely in MongoDB Atlas, a cloud-based database service. We use industry-standard encryption (bcrypt) to protect your password. We do not store payment information.</p>
             </section>
 
             <section className="space-y-3">
@@ -65,7 +60,19 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-xl font-semibold text-foreground">8. Contact</h2>
+              <h2 className="text-xl font-semibold text-foreground">8. Transparency</h2>
+              <p>We believe in complete transparency about how we handle your data:</p>
+              <ul className="list-disc pl-6 space-y-1">
+                <li><strong>No hidden data collection:</strong> We only collect data necessary for your learning experience</li>
+                <li><strong>No selling of data:</strong> We never sell or share your personal information with advertisers or third parties</li>
+                <li><strong>Open source inspiration:</strong> Our platform is designed with privacy-first principles, similar to open-source software philosophy</li>
+                <li><strong>Clear communication:</strong> Any changes to this policy will be communicated to you</li>
+                <li><strong>Community trust:</strong> We are committed to maintaining the trust you place in us</li>
+              </ul>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-xl font-semibold text-foreground">9. Contact</h2>
               <p>If you have questions about this policy, please contact us through the platform.</p>
             </section>
           </div>
