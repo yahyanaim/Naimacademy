@@ -210,7 +210,7 @@ END:VEVENT
     }
     
     const hasProgress = (progress?.completedLessons?.length ?? 0) > 0;
-    if (!hasSchedule && !hasProgress) {
+    if (!hasSchedule && percentage === 0) {
       setScheduleDialogOpen(true);
       return;
     }

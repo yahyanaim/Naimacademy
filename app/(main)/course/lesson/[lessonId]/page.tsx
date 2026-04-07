@@ -269,15 +269,17 @@ export default function LessonPage() {
           </div>
 
           {/* Lesson Content */}
-          <LessonContent 
-            description={lesson.description}
-            summary={lesson.summary}
-            explanation={lesson.explanation}
-            images={lesson.images}
-            resources={lesson.resources}
-            links={lesson.links}
-            transcript={lesson.transcript}
-          />
+          <div className="overflow-y-auto max-h-[600px] px-1">
+            <LessonContent 
+              description={lesson.description}
+              summary={lesson.summary}
+              explanation={lesson.explanation}
+              images={lesson.images}
+              resources={lesson.resources}
+              links={lesson.links}
+              transcript={lesson.transcript}
+            />
+          </div>
 
           {/* Navigation */}
           <div className="pt-4 border-t border-border flex items-center justify-between gap-4">
