@@ -39,6 +39,7 @@ const LessonSchema = new Schema<ILesson>({
   order: { type: Number, required: true },
   duration: { type: String, default: "0:00" },
   transcript: { type: String, default: "" },
+  isLocked: { type: Boolean, default: false },
 });
 
 export const Lesson =

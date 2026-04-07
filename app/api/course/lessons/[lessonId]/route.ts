@@ -26,6 +26,10 @@ export const GET = withAuth(
         return NextResponse.json({ error: "This section is locked" }, { status: 403 });
       }
 
+      if (lesson.isLocked && ctx.user.role !== "admin") {
+        return NextResponse.json({ error: "This lesson is locked" }, { status: 403 });
+      }
+
       const dbUser = await User.findById(ctx.user.userId).select("progress");
 
       const completedLessons: string[] = dbUser?.progress?.completedLessons?.map(String) ?? [];
