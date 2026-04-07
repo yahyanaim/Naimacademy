@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bell, Send, Users, Award, BookOpen, Info, CheckCircle } from "lucide-react";
+import { Bell, Send, Users, Award, BookOpen, Info, CheckCircle, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface Notification {
@@ -42,6 +42,24 @@ export default function NotificationsPage() {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(notificationId: string) {
+    try {
+      const res = await fetch("/api/admin/notifications", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificationId }),
+      });
+      if (res.ok) {
+        toast.success("Notification deleted");
+        loadNotifications();
+      } else {
+        toast.error("Failed to delete notification");
+      }
+    } catch {
+      toast.error("Error deleting notification");
     }
   }
 
@@ -165,11 +183,19 @@ export default function NotificationsPage() {
                       className={`p-3 rounded-lg border ${n.read ? "bg-muted/30" : "bg-muted/60"}`}
                     >
                       <div className="flex items-start gap-2">
-                        <Icon className="size-4 mt-0.5 text-muted-foreground" />
+                        <Icon className="size-4 mt-0.5 text-muted-foreground shrink-0" />
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
                             <p className="font-medium text-sm">{n.title}</p>
-                            {n.read && <CheckCircle className="size-3 text-green-500" />}
+                            <div className="flex items-center gap-2">
+                              {n.read && <CheckCircle className="size-3 text-green-500" />}
+                              <button
+                                onClick={() => handleDelete(n._id)}
+                                className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-red-500"
+                              >
+                                <X className="size-3" />
+                              </button>
+                            </div>
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">{n.message}</p>
                           <p className="text-xs text-muted-foreground mt-2">
