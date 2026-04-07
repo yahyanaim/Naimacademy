@@ -104,16 +104,23 @@ export default function NotificationsPage() {
 
     setSending(true);
     try {
+      const payload: Record<string, unknown> = { 
+        title, 
+        message, 
+        type 
+      };
+      
+      if (sendToAll) {
+        payload.userIds = [];
+      } else {
+        payload.userIds = selectedStudents;
+      }
+
       const res = await fetch("/api/admin/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ 
-          title, 
-          message, 
-          type,
-          userIds: sendToAll ? undefined : selectedStudents 
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();

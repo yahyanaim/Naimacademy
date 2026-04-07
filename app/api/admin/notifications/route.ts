@@ -50,11 +50,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Title and message are required" }, { status: 400 });
     }
 
+    console.log("[NOTIFICATIONS] Request received:", { 
+      title, 
+      type, 
+      userIdsCount: userIds?.length,
+      userIds: userIds
+    });
+
     let students;
-    if (userIds && userIds.length > 0) {
+    
+    if (Array.isArray(userIds) && userIds.length > 0) {
       students = await User.find({ _id: { $in: userIds } }).select("_id");
+      console.log("[NOTIFICATIONS] Sending to specific users:", students.length);
     } else {
       students = await User.find({ role: "student" }).select("_id");
+      console.log("[NOTIFICATIONS] Sending to all students:", students.length);
     }
     
     if (students.length === 0) {
