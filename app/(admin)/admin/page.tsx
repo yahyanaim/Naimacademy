@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, GraduationCap, BarChart3, Award, TrendingUp, PieChart } from "lucide-react";
+import { Users, GraduationCap, BarChart3, Award, TrendingUp, PieChart, MessageSquare } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -36,6 +36,10 @@ interface UserRecord {
     passed: boolean;
   }[];
   certificateIssued?: boolean;
+  chatQuestions?: {
+    question: string;
+    answeredAt: string;
+  }[];
   createdAt?: string;
 }
 
@@ -44,6 +48,8 @@ interface Stats {
   avgExamScore: number;
   avgCompletionRate: number;
   certificatesIssued: number;
+  totalAIQuestions: number;
+  usersWithAIUsage: number;
   registrationData?: { date: string; users: number }[];
   distribution?: { name: string; count: number; color: string }[];
 }
@@ -70,6 +76,14 @@ function computeStats(users: UserRecord[]): Stats {
 
   const certificatesIssued = users.filter((u) => u.certificateIssued).length;
 
+  const totalAIQuestions = users.reduce(
+    (sum, u) => sum + (u.chatQuestions?.length ?? 0),
+    0
+  );
+  const usersWithAIUsage = users.filter(
+    (u) => u.chatQuestions && u.chatQuestions.length > 0
+  ).length;
+
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - i);
@@ -93,6 +107,8 @@ function computeStats(users: UserRecord[]): Stats {
     avgExamScore, 
     avgCompletionRate, 
     certificatesIssued,
+    totalAIQuestions,
+    usersWithAIUsage,
     registrationData,
     distribution
   };
@@ -101,6 +117,8 @@ function computeStats(users: UserRecord[]): Stats {
 interface DashboardStats extends Stats {
   registrationData: { date: string; users: number }[];
   distribution: { name: string; count: number; color: string }[];
+  totalAIQuestions: number;
+  usersWithAIUsage: number;
 }
 
 export default function AdminDashboardPage() {
@@ -147,6 +165,12 @@ export default function AdminDashboardPage() {
       value: stats?.certificatesIssued ?? 0,
       icon: Award,
       description: "Students who passed",
+    },
+    {
+      title: "AI Questions",
+      value: stats?.totalAIQuestions ?? 0,
+      icon: MessageSquare,
+      description: `${stats?.usersWithAIUsage ?? 0} users used AI assistant`,
     },
   ];
 
