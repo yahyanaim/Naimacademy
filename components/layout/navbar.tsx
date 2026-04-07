@@ -174,7 +174,7 @@ export default function Navbar() {
             <SheetContent side="right" className="w-72 bg-background" showCloseButton={false}>
               <div className="flex flex-col gap-1 pt-6">
                 {user && (
-                  <div className="px-4 py-4 border border-border rounded-lg mx-2 mb-2">
+                  <div className="px-4 py-4 border border-border rounded-lg mx-2 mb-2 bg-muted">
                     <p className="font-semibold text-base">{user.name || user.email}</p>
                     <p className="text-xs text-muted-foreground capitalize mt-1">{user.role}</p>
                   </div>
