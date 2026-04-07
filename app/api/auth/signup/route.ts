@@ -89,13 +89,20 @@ export async function POST(req: NextRequest) {
     type: "new_user",
   });
 
+  // Send verification email (non-blocking - don't fail registration if email fails)
   const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://naimacademy.vercel.app"}/api/auth/verify-email?token=${verificationToken}`;
   const emailHtml = generateVerificationEmail(verifyUrl, name);
-  await sendEmail({
-    to: email,
-    subject: "Verify Your Email - Naim Academy",
-    html: emailHtml,
-  });
+  
+  try {
+    await sendEmail({
+      to: email,
+      subject: "Verify Your Email - Naim Academy",
+      html: emailHtml,
+    });
+    console.log(`[SIGNUP] Verification email sent to ${email}`);
+  } catch (emailError) {
+    console.error(`[SIGNUP] Failed to send verification email to ${email}:`, emailError);
+  }
 
   return response;
 }

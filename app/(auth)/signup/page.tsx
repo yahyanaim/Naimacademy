@@ -147,11 +147,11 @@ export default function SignupPage() {
               onCheckedChange={(checked) => setTermsAccepted(checked === true)}
               className="mt-0.5"
             />
-            <div className="text-sm leading-tight">
-              <Label htmlFor="terms" className="font-normal cursor-pointer">
-                I agree to the{" "}
+            <div className="text-sm leading-tight text-muted-foreground">
+              <Label htmlFor="terms" className="font-normal cursor-pointer text-xs">
+                I accept the{" "}
                 <Link href="/terms" className="text-primary hover:underline">
-                  Terms of Service
+                  Terms
                 </Link>{" "}
                 and{" "}
                 <Link href="/privacy" className="text-primary hover:underline">
