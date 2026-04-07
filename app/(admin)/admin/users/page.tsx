@@ -334,19 +334,10 @@ export default function UsersPage() {
                   <TableCell>{completionPct(user)}</TableCell>
                   <TableCell>{bestScore(user.examAttempts)}</TableCell>
                   <TableCell className="text-center">
-                    {user.certifications && user.certifications.length > 0 ? (
-                      <div className="flex flex-col gap-1 items-center">
-                        {user.certifications.map((cert, idx) => (
-                          <Badge key={idx} className="bg-green-500 hover:bg-green-600 text-white gap-1 text-xs">
-                            <Award className="size-3" />
-                            {cert.examTitle}
-                          </Badge>
-                        ))}
-                      </div>
-                    ) : user.certificate?.issued ? (
-                      <Badge className="bg-green-500 hover:bg-green-600 text-white gap-1">
-                        <Award className="size-3" />
-                        Certified
+                    {(user.certifications && user.certifications.length > 0) || user.certificate?.issued ? (
+                      <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs">
+                        <Award className="size-3 mr-1" />
+                        n8n Certificate
                       </Badge>
                     ) : (
                       <MinusIcon className="size-4 text-muted-foreground mx-auto" />
