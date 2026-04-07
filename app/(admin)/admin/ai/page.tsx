@@ -90,6 +90,7 @@ export default function AIStatsPage() {
   const [stats, setStats] = useState<ReturnType<typeof computeAIStats> | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -98,6 +99,7 @@ export default function AIStatsPage() {
         if (!res.ok) throw new Error("Failed to fetch users");
         const users: UserRecord[] = await res.json();
         setStats(computeAIStats(users));
+        setLastUpdate(new Date().toLocaleTimeString());
       } catch {
         // Fallback or empty state
       } finally {
@@ -105,6 +107,9 @@ export default function AIStatsPage() {
       }
     }
     load();
+    
+    const interval = setInterval(load, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const filteredQuestions = stats?.allQuestions.filter(q => 
@@ -136,7 +141,10 @@ export default function AIStatsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">AI Assistant Statistics</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold tracking-tight">AI Assistant Statistics</h1>
+          {lastUpdate && <span className="text-xs text-muted-foreground">Updated: {lastUpdate}</span>}
+        </div>
         <p className="text-muted-foreground text-sm mt-1">
           Track AI chat usage and engagement
         </p>
