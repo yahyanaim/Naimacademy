@@ -65,8 +65,6 @@ export const POST = withAuth(
           max_tokens: 16384,
           temperature: 1.00,
           top_p: 0.95,
-          stream: false,
-          chat_template_kwargs: { enable_thinking: false },
         }),
       });
 
