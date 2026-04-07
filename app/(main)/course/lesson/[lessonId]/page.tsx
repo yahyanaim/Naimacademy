@@ -24,12 +24,21 @@ interface Resource {
   url: string;
 }
 
+interface LinkItem {
+  name: string;
+  url: string;
+}
+
 interface LessonData {
   _id: string;
   title: string;
   videoUrl: string;
   description: string;
+  summary: string;
+  explanation: string;
+  images: string[];
   resources: Resource[];
+  links: LinkItem[];
   sectionId: string;
   order: number;
   duration: string;
@@ -261,8 +270,12 @@ export default function LessonPage() {
 
           {/* Lesson Content */}
           <LessonContent 
-            description={lesson.description} 
-            resources={lesson.resources} 
+            description={lesson.description}
+            summary={lesson.summary}
+            explanation={lesson.explanation}
+            images={lesson.images}
+            resources={lesson.resources}
+            links={lesson.links}
             transcript={lesson.transcript}
           />
 

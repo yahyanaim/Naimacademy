@@ -31,16 +31,21 @@ export const POST = withAdmin(
       await connectDB();
 
       const body = await req.json();
-      const { title, videoUrl, description, resources, sectionId, order, duration } = body;
+      const { title, videoUrl, description, summary, explanation, images, resources, links, sectionId, order, duration, transcript } = body;
 
       const lesson = await Lesson.create({
         title,
         videoUrl,
         description,
+        summary,
+        explanation,
+        images,
         resources,
+        links,
         sectionId,
         order,
         duration,
+        transcript,
       });
 
       const section = await Section.findByIdAndUpdate(sectionId, {

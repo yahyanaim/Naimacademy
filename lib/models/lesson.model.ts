@@ -5,7 +5,11 @@ export interface ILesson extends Document {
   title: string;
   videoUrl: string;
   description: string;
+  summary: string;
+  explanation: string;
+  images: string[];
   resources: { name: string; url: string }[];
+  links: { name: string; url: string }[];
   sectionId: Types.ObjectId;
   order: number;
   duration: string;
@@ -16,7 +20,16 @@ const LessonSchema = new Schema<ILesson>({
   title: { type: String, required: true },
   videoUrl: { type: String, required: true },
   description: { type: String, default: "" },
+  summary: { type: String, default: "" },
+  explanation: { type: String, default: "" },
+  images: [{ type: String }],
   resources: [
+    {
+      name: { type: String, required: true },
+      url: { type: String, required: true },
+    },
+  ],
+  links: [
     {
       name: { type: String, required: true },
       url: { type: String, required: true },

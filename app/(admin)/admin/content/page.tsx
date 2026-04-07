@@ -40,6 +40,11 @@ interface LessonRecord {
   title: string;
   videoUrl: string;
   description: string;
+  summary: string;
+  explanation: string;
+  images: string[];
+  resources: { name: string; url: string }[];
+  links: { name: string; url: string }[];
   sectionId: string;
   order: number;
   duration: string;
