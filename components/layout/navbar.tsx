@@ -222,12 +222,16 @@ export default function Navbar() {
                       className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
                     >
                       <Coffee className="size-5" />
-                      Support Us
+                      <span>Support Us</span>
                     </Link>
-                    <div className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2">
-                      <div className="size-5"><NotificationBell /></div>
+                    <Link
+                      href="#"
+                      onClick={(e) => { e.preventDefault(); }}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
+                    >
+                      <span className="size-5 flex items-center justify-center"><NotificationBell /></span>
                       <span>Notifications</span>
-                    </div>
+                    </Link>
                     {user?.role === "admin" && (
                       <Link
                         href="/admin"
