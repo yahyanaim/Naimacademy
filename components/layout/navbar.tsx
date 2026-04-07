@@ -168,7 +168,13 @@ export default function Navbar() {
               <Menu className="h-5 w-5" />
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
-              <div className="flex flex-col gap-1 pt-12">
+              <div className="flex flex-col gap-1 pt-8">
+                {user && (
+                  <div className="px-4 py-3 border-b mb-2">
+                    <p className="font-semibold text-sm">{user.name || user.email}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
+                  </div>
+                )}
                 <Link
                   href="/course"
                   onClick={() => setMobileOpen(false)}
