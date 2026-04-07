@@ -14,6 +14,7 @@ export interface ILesson extends Document {
   order: number;
   duration: string;
   transcript: string;
+  isLocked?: boolean;
 }
 
 const LessonSchema = new Schema<ILesson>({
