@@ -283,7 +283,6 @@ export default function UsersPage() {
                 <TableHead className="w-32">Best Exam Score</TableHead>
                 <TableHead className="w-24 text-center">Certificate</TableHead>
                 <TableHead className="w-32">Status</TableHead>
-                <TableHead className="w-32">Last Enter</TableHead>
                 <TableHead className="w-24 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -304,6 +303,16 @@ export default function UsersPage() {
                         </Badge>
                       )}
                     </div>
+                    {user.lastActivityAt && (
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        Last enter: {new Date(user.lastActivityAt).toLocaleDateString("en-US", { 
+                          month: "short", 
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit"
+                        })}
+                      </p>
+                    )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {user.email}
@@ -351,23 +360,6 @@ export default function UsersPage() {
                         {user.banReason}
                       </p>
                     )}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-xs">
-                    {user.lastActivityAt 
-                      ? new Date(user.lastActivityAt).toLocaleDateString("en-US", { 
-                          month: "short", 
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit"
-                        })
-                      : user.createdAt
-                      ? new Date(user.createdAt).toLocaleDateString("en-US", { 
-                          month: "short", 
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit"
-                        })
-                      : "-"}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
