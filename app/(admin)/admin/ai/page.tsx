@@ -92,6 +92,11 @@ export default function AIStatsPage() {
       const data: UserRecord[] = await res.json();
       setUsers(data);
       setLastUpdate(new Date().toLocaleTimeString());
+      
+      const newThreads = computeThreads(data);
+      if (newThreads.length > 0 && !selectedUser) {
+        setSelectedUser(newThreads[0].userId);
+      }
     } catch {
       // ignore
     } finally {
