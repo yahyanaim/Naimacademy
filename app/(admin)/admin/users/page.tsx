@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert, Search, Award, Clock, UserPlus } from "lucide-react";
+import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert, Search, Award, Clock, UserPlus, RefreshCw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -84,21 +84,26 @@ function completionPct(user: UserRecord): string {
 export default function UsersPage() {
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
+
+  async function load() {
+    try {
+      const res = await fetch("/api/admin/users");
+      if (!res.ok) throw new Error("Failed to fetch users");
+      const data: UserRecord[] = await res.json();
+      setUsers(data);
+      setLastUpdate(new Date().toLocaleTimeString());
+    } catch {
+      toast.error("Failed to load users.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/admin/users");
-        if (!res.ok) throw new Error("Failed to fetch users");
-        const data: UserRecord[] = await res.json();
-        setUsers(data);
-      } catch {
-        toast.error("Failed to load users.");
-      } finally {
-        setLoading(false);
-      }
-    }
     load();
+    const interval = setInterval(load, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const [search, setSearch] = useState("");
@@ -208,11 +213,19 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Users</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          All registered accounts and their progress
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Users</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            All registered accounts and their progress
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {lastUpdate && <span className="text-xs text-muted-foreground">Updated: {lastUpdate}</span>}
+          <Button variant="outline" size="sm" onClick={load}>
+            <RefreshCw className="size-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
