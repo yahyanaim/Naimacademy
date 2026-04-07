@@ -81,12 +81,22 @@ export const POST = withAuth(
       if (!user.chatQuestions) {
         user.chatQuestions = [];
       }
+      
+      const oneHourAgo = new Date();
+      oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+      const recentDuplicate = user.chatQuestions.find(
+        (q: ChatQuestion) => q.question === question && new Date(q.answeredAt) >= oneHourAgo
+      );
+      if (recentDuplicate) {
+        return NextResponse.json({ error: "Duplicate question asked recently. Please try again later." }, { status: 400 });
+      }
+      
       user.chatQuestions.push({ question, answeredAt: new Date() });
       
-      const oneDayAgo = new Date();
-      oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       user.chatQuestions = user.chatQuestions.filter(
-        (q: ChatQuestion) => new Date(q.answeredAt) >= oneDayAgo
+        (q: ChatQuestion) => new Date(q.answeredAt) >= thirtyDaysAgo
       );
       
       await user.save();
