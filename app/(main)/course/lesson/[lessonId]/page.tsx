@@ -235,7 +235,7 @@ export default function LessonPage() {
           <span className="text-sm font-medium truncate">{course?.title}</span>
         </div>
 
-        <div className="flex-1 px-4 py-6 space-y-6 max-w-4xl w-full mx-auto lg:mx-0 lg:max-w-none lg:px-6">
+        <div className="flex-1 px-4 py-4 space-y-4 max-w-4xl w-full mx-auto lg:mx-0 lg:max-w-none lg:px-6">
           {/* Video */}
           <VideoPlayer
             url={lesson.videoUrl}

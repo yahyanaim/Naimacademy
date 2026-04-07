@@ -119,7 +119,9 @@ export function CourseSidebar({ sections, completedLessons, currentLessonId }: C
                               <PlayCircle className={`size-4 shrink-0 ${isCurrent ? "text-yellow-600" : "text-muted-foreground"}`} />
                             )}
                             <span className="flex-1 min-w-0 truncate">{lesson.title}</span>
-                            <span className="text-xs text-muted-foreground shrink-0">{lesson.duration}</span>
+                            <span className="text-xs text-muted-foreground shrink-0">
+                              {lesson.duration.includes(':') ? lesson.duration.split(':')[0] + 'm' : lesson.duration}
+                            </span>
                           </Link>
                         </li>
                       );
