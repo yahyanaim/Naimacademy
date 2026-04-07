@@ -14,6 +14,7 @@ import {
   Coffee,
   LogIn,
   UserPlus,
+  Bell,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -205,6 +206,11 @@ export default function Navbar() {
                       <FileBadge className="size-5" />
                       My Certificates
                     </Link>
+                    <div className="my-2 border-t" />
+                    <div className="flex items-center gap-3 px-4 py-3 text-sm font-medium">
+                      <NotificationBell />
+                    </div>
+                    {user && (
                     <Link
                       href="/donate"
                       onClick={() => setMobileOpen(false)}
@@ -213,7 +219,8 @@ export default function Navbar() {
                       <Coffee className="size-5" />
                       Support Us
                     </Link>
-                    {user.role === "admin" && (
+                    )}
+                    {user?.role === "admin" && (
                       <Link
                         href="/admin"
                         onClick={() => setMobileOpen(false)}

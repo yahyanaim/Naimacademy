@@ -23,9 +23,12 @@ export default function AdminSupportPage() {
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMessages();
+    const interval = setInterval(fetchMessages, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   async function fetchMessages() {
@@ -34,6 +37,17 @@ export default function AdminSupportPage() {
       if (!res.ok) throw new Error();
       const data = await res.json();
       setMessages(data.messages || []);
+      setLastUpdate(new Date().toLocaleTimeString());
+      
+      if (!selectedUser && data.messages && data.messages.length > 0) {
+        const latestMsg = data.messages.reduce((latest: Message | null, msg: Message) => {
+          if (!latest) return msg;
+          return new Date(msg.createdAt) > new Date(latest.createdAt) ? msg : latest;
+        }, null);
+        if (latestMsg) {
+          setSelectedUser(latestMsg.userId);
+        }
+      }
     } catch {
       toast.error("Failed to load messages");
     } finally {
