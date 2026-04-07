@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, GraduationCap, BarChart3, Award, TrendingUp, PieChart, UserPlus, Clock } from "lucide-react";
+import { Users, GraduationCap, BarChart3, Award, TrendingUp, PieChart, UserPlus, Clock, BookOpen, MessageSquare, Shield } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -145,162 +145,286 @@ export default function AdminDashboardPage() {
       title: "Total Users",
       value: stats?.totalUsers ?? 0,
       icon: Users,
-      description: "Registered accounts",
+      description: "All registered accounts",
+      detail: "This includes all students and admins who have created accounts on the platform.",
     },
     {
       title: "New This Week",
       value: stats?.newUsersThisWeek ?? 0,
       icon: UserPlus,
       description: "Students joined recently",
+      detail: "New users who registered in the last 7 days. Track your marketing effectiveness and growth.",
     },
     {
       title: "Active This Week",
       value: stats?.activeUsersThisWeek ?? 0,
       icon: Clock,
       description: "Students active recently",
+      detail: "Users who logged in and engaged with the platform in the past 7 days.",
     },
     {
       title: "Avg. Exam Score",
       value: stats ? `${stats.avgExamScore}%` : "—",
       icon: GraduationCap,
       description: "Based on best attempts",
+      detail: "Average of each student's highest exam score. Shows overall learning effectiveness.",
     },
     {
       title: "Avg. Completion Rate",
       value: stats ? `${stats.avgCompletionRate}%` : "—",
       icon: BarChart3,
       description: "Course progress across users",
+      detail: "Average percentage of lessons completed by all students.",
     },
     {
       title: "Certificates Issued",
       value: stats?.certificatesIssued ?? 0,
       icon: Award,
       description: "Students who passed",
+      detail: "Number of students who passed the exam and received their certificate.",
     },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Overview of platform activity
+          Monitor your learning platform performance and student engagement
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {cards.map(({ title, value, icon: Icon, description }) => (
-          <Card key={title}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {title}
-              </CardTitle>
-              <Icon className="size-4 text-muted-foreground" />
+      {/* Quick Overview Section */}
+      <div>
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <BarChart3 className="size-5" />
+            Quick Overview
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Key metrics showing the current state of your platform at a glance.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {cards.map(({ title, value, icon: Icon, description, detail }) => (
+            <Card key={title}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {title}
+                </CardTitle>
+                <Icon className="size-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <Skeleton className="h-8 w-24" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">{value}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {description}
+                    </p>
+                    <p className="text-xs text-muted-foreground/70 mt-2 italic">
+                      {detail}
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div>
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <TrendingUp className="size-5" />
+            Analytics & Trends
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Visualize user growth and course completion patterns over time.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Registration Chart */}
+          <Card className="p-4">
+            <CardHeader className="px-2 pb-4">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="size-4 text-black" />
+                <CardTitle className="text-sm font-semibold">User Growth</CardTitle>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                New registrations over the last 7 days. Watch your community grow day by day.
+              </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="h-[300px] p-0">
               {loading ? (
-                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-full w-full" />
               ) : (
-                <>
-                  <div className="text-2xl font-bold">{value}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {description}
-                  </p>
-                </>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={stats?.registrationData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis 
+                      dataKey="date" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      fontSize={12} 
+                      tick={{ fill: "#64748b" }}
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      fontSize={12} 
+                      tick={{ fill: "#64748b" }}
+                    />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="users" 
+                      stroke="#000000" 
+                      strokeWidth={2.5} 
+                      dot={{ fill: "#000000", strokeWidth: 2, r: 4 }} 
+                      activeDot={{ r: 6, strokeWidth: 0 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               )}
             </CardContent>
           </Card>
-        ))}
+
+          {/* Completion Chart */}
+          <Card className="p-4">
+            <CardHeader className="px-2 pb-4">
+              <div className="flex items-center gap-2">
+                <PieChart className="size-4 text-black" />
+                <CardTitle className="text-sm font-semibold">Course Completion</CardTitle>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Distribution of students by their course progress. Identify engagement levels.
+              </p>
+            </CardHeader>
+            <CardContent className="h-[300px] p-0">
+              {loading ? (
+                <Skeleton className="h-full w-full" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats?.distribution} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+                    <XAxis type="number" hide />
+                    <YAxis 
+                      dataKey="name" 
+                      type="category" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      fontSize={12} 
+                      tick={{ fill: "#64748b" }}
+                      width={70}
+                    />
+                    <Tooltip 
+                      cursor={{ fill: "transparent" }}
+                      contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }}
+                    />
+                    <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                      {stats?.distribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Registration Chart */}
-        <Card className="p-4">
-          <CardHeader className="px-2 pb-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="size-4 text-black" />
-              <CardTitle className="text-sm font-semibold">User Growth</CardTitle>
-            </div>
-            <p className="text-xs text-muted-foreground">New registrations (Last 7 days)</p>
-          </CardHeader>
-          <CardContent className="h-[300px] p-0">
-            {loading ? (
-              <Skeleton className="h-full w-full" />
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={stats?.registrationData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis 
-                    dataKey="date" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    fontSize={12} 
-                    tick={{ fill: "#64748b" }}
-                  />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    fontSize={12} 
-                    tick={{ fill: "#64748b" }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="users" 
-                    stroke="#000000" 
-                    strokeWidth={2.5} 
-                    dot={{ fill: "#000000", strokeWidth: 2, r: 4 }} 
-                    activeDot={{ r: 6, strokeWidth: 0 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
+      {/* Quick Actions Section */}
+      <div>
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Shield className="size-5" />
+            Quick Navigation
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Access different sections of the admin panel to manage your platform.
+          </p>
+        </div>
 
-        {/* Completion Chart */}
-        <Card className="p-4">
-          <CardHeader className="px-2 pb-4">
-            <div className="flex items-center gap-2">
-              <PieChart className="size-4 text-black" />
-              <CardTitle className="text-sm font-semibold">Course Completion</CardTitle>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="p-4 border-dashed">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-100">
+                <Users className="size-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-sm">Manage Users</h3>
+                <p className="text-xs text-muted-foreground">View, edit, or ban accounts</p>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">User distribution by completion tier</p>
-          </CardHeader>
-          <CardContent className="h-[300px] p-0">
-            {loading ? (
-              <Skeleton className="h-full w-full" />
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats?.distribution} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                  <XAxis type="number" hide />
-                  <YAxis 
-                    dataKey="name" 
-                    type="category" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    fontSize={12} 
-                    tick={{ fill: "#64748b" }}
-                    width={70}
-                  />
-                  <Tooltip 
-                    cursor={{ fill: "transparent" }}
-                    contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }}
-                  />
-                  <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-                    {stats?.distribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
+          </Card>
+          
+          <Card className="p-4 border-dashed">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-100">
+                <BookOpen className="size-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-sm">Course Content</h3>
+                <p className="text-xs text-muted-foreground">Manage lessons & sections</p>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="p-4 border-dashed">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-100">
+                <MessageSquare className="size-5 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-sm">Notifications</h3>
+                <p className="text-xs text-muted-foreground">Send messages to students</p>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="p-4 border-dashed">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-orange-100">
+                <Award className="size-5 text-orange-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-sm">Support</h3>
+                <p className="text-xs text-muted-foreground">View student messages</p>
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
+
+      {/* Help Section */}
+      <Card className="bg-muted/30 border-dashed">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-amber-100 shrink-0">
+              <BookOpen className="size-5 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-medium text-sm">Dashboard Guide</h3>
+              <ul className="text-xs text-muted-foreground mt-2 space-y-1 list-disc list-inside">
+                <li><strong>Total Users</strong> - All registered accounts on the platform</li>
+                <li><strong>New This Week</strong> - Users who joined in the last 7 days</li>
+                <li><strong>Active This Week</strong> - Users who logged in recently</li>
+                <li><strong>Avg. Exam Score</strong> - Average of each student&apos;s best exam attempt</li>
+                <li><strong>Avg. Completion</strong> - How far along students are in the course</li>
+                <li><strong>Certificates</strong> - Students who passed the final exam</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
