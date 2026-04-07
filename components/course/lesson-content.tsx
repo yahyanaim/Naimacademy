@@ -38,7 +38,7 @@ export function LessonContent({
             <FileText className="size-4 text-gray-700" />
             <h3 className="font-semibold text-gray-700 text-sm">Detailed Explanation</h3>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto p-4">
             <table className="w-full text-sm border-collapse min-w-[500px]">
               <tbody>
                 {explanation.split('\n').filter(Boolean).map((line, i) => {
@@ -49,7 +49,7 @@ export function LessonContent({
                   if (isHeader) {
                     return (
                       <tr key={i}>
-                        <td colSpan={2} className="py-2 font-bold text-base text-gray-900">
+                        <td colSpan={2} className="py-1 font-bold text-base text-gray-900">
                           {line.replace(/^#+\s*/, '')}
                         </td>
                       </tr>
@@ -69,14 +69,14 @@ export function LessonContent({
                     if (key && value) {
                       return (
                         <tr key={i} className="border-b border-gray-100">
-                          <td className="py-2 pr-4 font-medium text-gray-900 align-top w-1/4">{key}</td>
-                          <td className="py-2 text-gray-700">{value}</td>
+                          <td className="py-1 pr-4 font-medium text-gray-900 align-top w-1/4">{key}</td>
+                          <td className="py-1 text-gray-700">{value}</td>
                         </tr>
                       );
                     }
                     return (
                       <tr key={i}>
-                        <td colSpan={2} className="py-2 text-gray-700">{line}</td>
+                        <td colSpan={2} className="py-1 text-gray-700">{line}</td>
                       </tr>
                     );
                   }
