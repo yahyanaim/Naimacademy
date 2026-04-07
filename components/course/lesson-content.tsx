@@ -30,7 +30,7 @@ export function LessonContent({
   }
 
   return (
-    <div className="space-y-4 mt-8">
+    <div className="space-y-4 mt-4">
       {/* Detailed Explanation with Table */}
       {explanation && (
         <div className="rounded-lg border border-gray-200 overflow-hidden">
@@ -38,8 +38,8 @@ export function LessonContent({
             <FileText className="size-4 text-gray-700" />
             <h3 className="font-semibold text-gray-700 text-sm">Detailed Explanation</h3>
           </div>
-          <div className="p-4 overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse min-w-[500px]">
               <tbody>
                 {explanation.split('\n').filter(Boolean).map((line, i) => {
                   const isHeader = line.startsWith('###') || line.startsWith('##');
