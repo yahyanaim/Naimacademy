@@ -37,6 +37,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  createdAt?: string;
 }
 
 export default function Navbar() {
@@ -177,6 +178,11 @@ export default function Navbar() {
                   <div className="px-4 py-4 border border-border rounded-lg mx-2 mb-2 bg-muted">
                     <p className="font-semibold text-base">{user.name || user.email}</p>
                     <p className="text-xs text-muted-foreground capitalize mt-1">{user.role}</p>
+                    {user.createdAt && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Member since {new Date(user.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                      </p>
+                    )}
                   </div>
                 )}
                 <Link

@@ -52,6 +52,7 @@ export const GET = withAuth(
             email: user.email,
             role: user.role,
             isBanned: user.isBanned,
+            createdAt: user.createdAt?.toISOString(),
             examAttempts: user.examAttempts.map(
               (a: Record<string, unknown>) => ({
                 score: a.score,
