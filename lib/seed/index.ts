@@ -17,89 +17,157 @@ import {
   QUESTIONS_DATA,
 } from "./data";
 
-export async function seed(force = false) {
+export async function seed(mode: "create" | "update" = "create") {
   await connectDB();
 
-  // Check if course already exists - skip if it does (never delete anything)
+  // Check if course already exists
   const existingCourse = await Course.findOne();
-  if (existingCourse) {
-    console.log("Data already exists, skipping seed.");
-    return null;
+  
+  if (mode === "create") {
+    if (existingCourse) {
+      console.log("Data already exists, skipping seed.");
+      return null;
+    }
   }
 
-  // Only create data if nothing exists
+  // Ensure admin exists
+  let admin = await Admin.findOne({ email: ADMIN_USER.email });
+  if (!admin) {
+    const hashedPassword = await bcrypt.hash(ADMIN_USER.password, PASSWORD.BCRYPT_ROUNDS);
+    admin = await Admin.create({
+      name: ADMIN_USER.name,
+      email: ADMIN_USER.email,
+      password: hashedPassword,
+    });
+    console.log("Created admin user");
+  }
 
-  // Create admin in Admin collection
-  const hashedPassword = await bcrypt.hash(ADMIN_USER.password, PASSWORD.BCRYPT_ROUNDS);
-  const admin = await Admin.create({
-    name: ADMIN_USER.name,
-    email: ADMIN_USER.email,
-    password: hashedPassword,
-  });
+  // Ensure invite code exists
+  const invite = await InviteCode.findOne({ code: "NAIM2026" });
+  if (!invite) {
+    await InviteCode.create({
+      code: "NAIM2025",
+      maxUses: 500,
+      usedCount: 0,
+    });
+  }
 
-  // Create invite code
-  const invite = await InviteCode.create({
-    code: "NAIM2026",
-    maxUses: 500,
-    usedCount: 0,
-  });
-
-  // Create course
-  const course = await Course.create(COURSE_DATA);
-
-  // Create sections and lessons
+  let course = existingCourse;
   let totalLessons = 0;
 
-  for (const sectionData of SECTIONS_DATA) {
-    const { lessons: lessonsData, ...sectionFields } = sectionData;
-    const isFirst = sectionData.order === 1;
+  if (mode === "update" && course) {
+    // Update mode - update existing lessons without deleting
+    console.log("Updating existing course data...");
+    
+    for (const sectionData of SECTIONS_DATA) {
+      const { lessons: lessonsData, ...sectionFields } = sectionData;
+      
+      // Find or create section
+      let section = await Section.findOne({ title: sectionFields.title, courseId: course._id });
+      
+      if (!section) {
+        const isFirst = sectionData.order === 1;
+        section = await Section.create({
+          ...sectionFields,
+          courseId: course._id,
+          lessons: [],
+          isLocked: !isFirst,
+        });
+        course.sections.push(section._id);
+      }
 
-    const section = await Section.create({
-      ...sectionFields,
-      courseId: course._id,
-      lessons: [],
-      isLocked: !isFirst,
-    });
+      // Update or create lessons
+      for (const lessonData of lessonsData) {
+        const existingLesson = await Lesson.findOne({ 
+          title: lessonData.title, 
+          sectionId: section._id 
+        });
 
-    const lessons = await Lesson.insertMany(
-      lessonsData.map((lesson) => ({ ...lesson, sectionId: section._id }))
-    );
+        if (existingLesson) {
+          // Update existing lesson fields
+          await Lesson.findByIdAndUpdate(existingLesson._id, {
+            videoUrl: lessonData.videoUrl,
+            description: lessonData.description,
+            explanation: lessonData.explanation,
+            duration: lessonData.duration,
+            resources: lessonData.resources,
+            links: lessonData.links,
+          });
+        } else {
+          // Create new lesson
+          await Lesson.create({
+            ...lessonData,
+            sectionId: section._id,
+          });
+        }
+      }
 
-    const lessonIds = lessons.map((l) => l._id);
-    section.lessons = lessonIds;
-    await section.save();
+      // Update section lessons array
+      const sectionLessons = await Lesson.find({ sectionId: section._id }).select("_id");
+      section.lessons = sectionLessons.map((l) => l._id);
+      await section.save();
 
-    course.sections.push(section._id);
-    totalLessons += lessons.length;
+      totalLessons += sectionLessons.length;
+    }
+
+    course.totalLessons = totalLessons;
+    await course.save();
+    console.log("Course updated successfully!");
+  } else {
+    // Create mode - fresh install
+    course = await Course.create(COURSE_DATA);
+
+    for (const sectionData of SECTIONS_DATA) {
+      const { lessons: lessonsData, ...sectionFields } = sectionData;
+      const isFirst = sectionData.order === 1;
+
+      const section = await Section.create({
+        ...sectionFields,
+        courseId: course._id,
+        lessons: [],
+        isLocked: !isFirst,
+      });
+
+      const lessons = await Lesson.insertMany(
+        lessonsData.map((lesson) => ({ ...lesson, sectionId: section._id }))
+      );
+
+      const lessonIds = lessons.map((l) => l._id);
+      section.lessons = lessonIds;
+      await section.save();
+
+      course.sections.push(section._id);
+      totalLessons += lessons.length;
+    }
+
+    course.totalLessons = totalLessons;
+    await course.save();
   }
 
-  // Update total lesson count and save course
-  course.totalLessons = totalLessons;
-  await course.save();
+  // Ensure exam exists
+  let exam = await Exam.findOne({ courseId: course._id });
+  
+  if (!exam) {
+    exam = await Exam.create({
+      ...EXAM_DATA,
+      courseId: course._id,
+      questions: [],
+    });
 
-  // Create exam
-  const exam = await Exam.create({
-    ...EXAM_DATA,
-    courseId: course._id,
-    questions: [],
-  });
+    const questions = await Question.insertMany(
+      QUESTIONS_DATA.map((q) => ({ ...q, examId: exam._id }))
+    );
 
-  // Create questions
-  const questions = await Question.insertMany(
-    QUESTIONS_DATA.map((q) => ({ ...q, examId: exam._id }))
-  );
-
-  exam.questions = questions.map((q) => q._id);
-  await exam.save();
+    exam.questions = questions.map((q) => q._id);
+    await exam.save();
+    console.log(`Created exam with ${questions.length} questions`);
+  }
 
   console.log("Seed complete:");
   console.log(`  Admin user: ${admin.email}`);
-  console.log(`  Invite code: ${invite.code}`);
   console.log(`  Course: ${course.title}`);
   console.log(`  Sections: ${course.sections.length}`);
   console.log(`  Total lessons: ${totalLessons}`);
-  console.log(`  Exam: ${exam.title}`);
-  console.log(`  Questions: ${questions.length}`);
 
-  return { admin, course, exam, questions };
+  return { admin, course, exam };
 }
