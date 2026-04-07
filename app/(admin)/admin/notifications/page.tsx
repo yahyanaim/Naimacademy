@@ -101,7 +101,7 @@ export default function NotificationsPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Notification Type</Label>
-              <Select value={type} onValueChange={setType}>
+              <Select value={type} onValueChange={(value) => setType(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
