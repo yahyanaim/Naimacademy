@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Bell, Check, X } from "lucide-react";
-import { toast } from "sonner";
 
 interface Notification {
   _id: string;
@@ -60,24 +59,20 @@ export function NotificationBell() {
         prev.map(n => n._id === notificationId ? { ...n, read: true } : n)
       );
     } catch {
-      toast.error("Failed to mark as read");
+      // ignore
     }
   }
 
-  async function deleteNotification(notificationId: string, e: React.MouseEvent) {
-    e.stopPropagation();
+  async function deleteNotification(notificationId: string) {
     try {
-      const res = await fetch("/api/admin/notifications", {
+      await fetch("/api/admin/notifications", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ notificationId }),
       });
-      if (res.ok) {
-        setNotifications(prev => prev.filter(n => n._id !== notificationId));
-        toast.success("Notification deleted");
-      }
+      setNotifications(prev => prev.filter(n => n._id !== notificationId));
     } catch {
-      toast.error("Failed to delete");
+      // ignore
     }
   }
 
@@ -87,78 +82,73 @@ export function NotificationBell() {
     <div ref={containerRef} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="relative flex items-center justify-center w-9 h-9 hover:bg-muted rounded-full transition-colors"
-        aria-label="Notifications"
+        className="relative p-2 hover:bg-muted rounded-full transition-colors"
       >
         <Bell className="size-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-xs font-medium rounded-full flex items-center justify-center px-1">
-            {unreadCount > 9 ? "9+" : unreadCount}
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+            {unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setOpen(false)} />
-      )}
-
-      <div className={`
-        absolute right-0 mt-2 bg-background border rounded-lg shadow-lg z-50
-        w-[calc(100vw-2rem)] max-w-sm md:w-80
-        ${open ? "animate-in fade-in slide-in-from-top-2" : ""}
-      `}>
-        <div className="flex items-center justify-between p-3 border-b">
-          <h3 className="font-semibold text-sm">Notifications</h3>
-          <button onClick={() => setOpen(false)} className="md:hidden p-1 hover:bg-muted rounded">
-            <X className="size-4" />
-          </button>
-        </div>
-        
-        <div className="max-h-[60vh] md:max-h-96 overflow-y-auto">
-          {loading ? (
-            <div className="p-4 text-center text-muted-foreground text-sm">Loading...</div>
-          ) : notifications.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground text-sm">
-              No notifications yet
+        <div className="fixed inset-0 bg-black/50 z-50 md:absolute md:inset-auto md:right-0 md:mt-2 md:w-80 md:bg-background md:border md:rounded-lg md:shadow-lg">
+          <div className="h-full md:h-auto flex flex-col bg-background md:border md:rounded-lg overflow-hidden">
+            <div className="p-3 border-b flex items-center justify-between sticky top-0 bg-background">
+              <h3 className="font-semibold">Notifications</h3>
+              <button onClick={() => setOpen(false)} className="p-1 hover:bg-muted rounded md:hidden">
+                <X className="size-5" />
+              </button>
             </div>
-          ) : (
-            notifications.slice(0, 10).map((n) => (
-              <div
-                key={n._id}
-                className={`p-3 border-b last:border-0 hover:bg-muted/30 transition-colors ${!n.read ? "bg-muted/50" : ""}`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-medium text-sm line-clamp-1">{n.title}</p>
-                  <div className="flex items-center gap-1 shrink-0">
-                    {!n.read && (
-                      <button
-                        onClick={() => markAsRead(n._id)}
-                        className="p-1.5 hover:bg-muted rounded"
-                        title="Mark as read"
-                      >
-                        <Check className="size-3" />
-                      </button>
-                    )}
-                    <button
-                      onClick={(e) => deleteNotification(n._id, e)}
-                      className="p-1.5 hover:bg-muted rounded text-destructive"
-                      title="Delete"
-                    >
-                      <X className="size-3" />
-                    </button>
-                  </div>
+            
+            <div className="flex-1 overflow-y-auto">
+              {loading ? (
+                <div className="p-4 text-center text-muted-foreground">Loading...</div>
+              ) : notifications.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">
+                  No notifications
                 </div>
-                <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
-                  {n.message}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {new Date(n.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-            ))
-          )}
+              ) : (
+                notifications.slice(0, 10).map((n) => (
+                  <div
+                    key={n._id}
+                    className={`p-3 border-b last:border-0 ${!n.read ? "bg-muted/50" : ""}`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-medium text-sm line-clamp-1 flex-1">{n.title}</p>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {!n.read && (
+                          <button
+                            onClick={() => markAsRead(n._id)}
+                            className="p-1 hover:bg-muted rounded"
+                            title="Mark as read"
+                          >
+                            <Check className="size-3" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => deleteNotification(n._id)}
+                          className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-red-500"
+                          title="Delete"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {n.message}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(n.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
