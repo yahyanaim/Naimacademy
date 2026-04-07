@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, GraduationCap, BarChart3, Award, TrendingUp, PieChart } from "lucide-react";
+import { Users, GraduationCap, BarChart3, Award, TrendingUp, PieChart, UserPlus } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -41,6 +41,7 @@ interface UserRecord {
 
 interface Stats {
   totalUsers: number;
+  newUsersThisWeek: number;
   avgExamScore: number;
   avgCompletionRate: number;
   certificatesIssued: number;
@@ -70,6 +71,12 @@ function computeStats(users: UserRecord[]): Stats {
 
   const certificatesIssued = users.filter((u) => u.certificateIssued).length;
 
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const newUsersThisWeek = users.filter(
+    (u) => u.createdAt && new Date(u.createdAt) >= sevenDaysAgo
+  ).length;
+
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - i);
@@ -90,6 +97,7 @@ function computeStats(users: UserRecord[]): Stats {
 
   return { 
     totalUsers, 
+    newUsersThisWeek,
     avgExamScore, 
     avgCompletionRate, 
     certificatesIssued,
@@ -131,6 +139,12 @@ export default function AdminDashboardPage() {
       description: "Registered accounts",
     },
     {
+      title: "New This Week",
+      value: stats?.newUsersThisWeek ?? 0,
+      icon: UserPlus,
+      description: "Students joined recently",
+    },
+    {
       title: "Avg. Exam Score",
       value: stats ? `${stats.avgExamScore}%` : "—",
       icon: GraduationCap,
@@ -159,7 +173,7 @@ export default function AdminDashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {cards.map(({ title, value, icon: Icon, description }) => (
           <Card key={title}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
