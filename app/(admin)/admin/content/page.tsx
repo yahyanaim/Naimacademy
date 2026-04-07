@@ -485,7 +485,7 @@ export default function ContentManagementPage() {
                                     onClick={async () => {
                                       try {
                                         const res = await fetch(`/api/admin/lessons/${lesson._id}`, {
-                                          method: "PATCH",
+                                          method: "PUT",
                                           headers: { "Content-Type": "application/json" },
                                           body: JSON.stringify({ isLocked: !lesson.isLocked }),
                                         });
