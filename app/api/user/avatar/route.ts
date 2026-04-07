@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/auth/guards";
 import { User } from "@/lib/models/user.model";
 import { connectDB } from "@/lib/db/mongoose";
-import cloudinary from "cloudinary";
+import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -42,11 +42,9 @@ export const POST = withAuth(
       }
 
       const buffer = Buffer.from(await file.arrayBuffer());
-      const base64 = buffer.toString("base64");
-      const dataUri = `data:${file.type};base64,${base64}`;
 
-      const result = await new Promise<cloudinary.UploadApiResponse>((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
+      const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
           {
             folder: "naim-academy/avatars",
             width: 200,
@@ -57,10 +55,11 @@ export const POST = withAuth(
           },
           (error, result) => {
             if (error) reject(error);
-            else if (result) resolve(result);
+            else if (result) resolve({ secure_url: result.secure_url });
             else reject(new Error("Upload failed"));
           }
-        ).end(buffer);
+        );
+        uploadStream.end(buffer);
       });
 
       await User.findByIdAndUpdate(ctx.user.userId, { avatar: result.secure_url });
