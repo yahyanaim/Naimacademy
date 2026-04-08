@@ -185,14 +185,14 @@ export default function AIStatsPage() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="flex flex-col overflow-hidden">
+        <Card className="flex flex-col overflow-hidden" style={{ maxHeight: "500px" }}>
           <CardHeader className="pb-2 shrink-0">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input placeholder="Search students..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-8" />
             </div>
           </CardHeader>
-          <CardContent className="flex-1 overflow-y-auto p-2">
+          <CardContent className="flex-1 overflow-y-auto p-2" style={{ maxHeight: "400px" }}>
             {loading ? (
               <div className="space-y-2">
                 {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
@@ -222,7 +222,7 @@ export default function AIStatsPage() {
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2 flex flex-col overflow-hidden">
+        <Card className="md:col-span-2 flex flex-col overflow-hidden" style={{ maxHeight: "500px" }}>
           {selectedThread ? (
             <>
               <CardHeader className="pb-2 border-b shrink-0">
@@ -235,7 +235,7 @@ export default function AIStatsPage() {
                   {selectedThread.userEmail}
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+              <CardContent className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: "400px" }}>
                 {selectedThread.questions.map((q, i) => (
                   <div key={i} className="bg-muted/30 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
