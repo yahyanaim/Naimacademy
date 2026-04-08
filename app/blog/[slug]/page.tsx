@@ -77,11 +77,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     author: post.author || "Naim Academy",
   });
   
-  if (post.coverImage) {
-    ogParams.set("image", post.coverImage);
-  }
-  
-  const ogImageUrl = `${baseUrl}/api/og/blog?${ogParams.toString()}`;
+  const ogImageUrl = post.coverImage 
+    ? post.coverImage 
+    : `${baseUrl}/api/og/blog?${ogParams.toString()}`;
 
   return {
     title: post.title,
@@ -91,7 +89,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       url: articleUrl,
       title: post.title,
       description: `Read "${post.title}" on Naim Academy`,
-      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
       siteName: "Naim Academy",
       locale: "en_US",
     },
