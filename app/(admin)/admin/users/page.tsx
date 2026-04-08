@@ -31,6 +31,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ExamAttempt {
   score: number;
@@ -126,6 +127,23 @@ export default function UsersPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<UserRecord | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+
+  function toggleUserSelection(userId: string) {
+    setSelectedUsers(prev =>
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  }
+
+  function toggleAllUsers() {
+    if (selectedUsers.length === paginatedUsers.length) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(paginatedUsers.map(u => u._id));
+    }
+  }
 
   const sortedUsers = users
     .filter((user) => {
@@ -344,6 +362,12 @@ export default function UsersPage() {
             <Table>
               <TableHeader className="sticky top-0 bg-background z-10">
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={paginatedUsers.length > 0 && selectedUsers.length === paginatedUsers.length}
+                      onCheckedChange={() => toggleAllUsers()}
+                    />
+                  </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead className="w-24">Role</TableHead>
@@ -356,7 +380,13 @@ export default function UsersPage() {
               </TableHeader>
               <TableBody>
                 {paginatedUsers.map((user) => (
-                <TableRow key={user._id} className={user.isBanned ? "bg-destructive/5" : ""}>
+                <TableRow key={user._id} className={`${user.isBanned ? "bg-destructive/5" : ""} ${selectedUsers.includes(user._id) ? "bg-primary/5" : ""}`}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedUsers.includes(user._id)}
+                      onCheckedChange={() => toggleUserSelection(user._id)}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
                       {user.avatar ? (

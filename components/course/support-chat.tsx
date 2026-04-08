@@ -59,6 +59,22 @@ export function SupportChat() {
   }, [isOpen, fetched]);
 
   useEffect(() => {
+    if (!isOpen) return;
+    
+    const interval = setInterval(() => {
+      fetch("/api/support")
+        .then((res) => res.ok ? res.json() : Promise.reject())
+        .then((data) => {
+          setMessages(data.messages || []);
+          setRemaining(data.remaining ?? 5);
+        })
+        .catch(() => {});
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [isOpen]);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 

@@ -221,14 +221,6 @@ export default function NotificationsPage() {
     }
   }
 
-  function selectAllStudents() {
-    setSelectedStudents(filteredStudents.map(s => s._id));
-  }
-
-  function deselectAllStudents() {
-    setSelectedStudents([]);
-  }
-
   function getStudentsByType(typeFilter: string): StudentRecord[] {
     switch (typeFilter) {
       case "certificate":
@@ -365,25 +357,6 @@ export default function NotificationsPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={selectAllStudents}
-                      className="text-xs h-8"
-                    >
-                      Select All
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={deselectAllStudents}
-                      className="text-xs h-8 text-muted-foreground"
-                    >
-                      Clear
-                    </Button>
-                  </div>
-
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                     <Input
@@ -392,6 +365,17 @@ export default function NotificationsPage() {
                       onChange={(e) => setStudentSearch(e.target.value)}
                       className="pl-9 h-9"
                     />
+                  </div>
+
+                  <div className="flex items-center space-x-2 border-b pb-2">
+                    <Checkbox
+                      id="selectAll"
+                      checked={selectedStudents.length === filteredStudents.length && filteredStudents.length > 0}
+                      onCheckedChange={() => toggleAll()}
+                    />
+                    <Label htmlFor="selectAll" className="font-normal text-sm cursor-pointer">
+                      Select all ({filteredStudents.length})
+                    </Label>
                   </div>
 
                   <ScrollArea className="h-[200px]">
