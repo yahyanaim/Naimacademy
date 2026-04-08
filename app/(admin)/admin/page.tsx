@@ -98,10 +98,10 @@ function computeStats(users: UserRecord[]): Stats {
   }));
 
   const distribution = [
-    { name: "0-25%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) <= 25).length, color: "#ef4444" }, 
-    { name: "26-50%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 25 && (u.progress?.completionPercentage ?? 0) <= 50).length, color: "#f97316" }, 
-    { name: "51-75%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 50 && (u.progress?.completionPercentage ?? 0) <= 75).length, color: "#eab308" }, 
-    { name: "76-100%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 75).length, color: "#22c55e" }, 
+    { name: "0-25%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) <= 25).length, color: "#374151" }, 
+    { name: "26-50%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 25 && (u.progress?.completionPercentage ?? 0) <= 50).length, color: "#6b7280" }, 
+    { name: "51-75%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 50 && (u.progress?.completionPercentage ?? 0) <= 75).length, color: "#9ca3af" }, 
+    { name: "76-100%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 75).length, color: "#1f2937" }, 
   ];
 
   return { 
@@ -209,7 +209,7 @@ export default function AdminDashboardPage() {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {cards.map(({ title, value, icon: Icon, description, detail }) => (
-            <Card key={title}>
+            <Card key={title} className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50 cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {title}
@@ -250,7 +250,7 @@ export default function AdminDashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Registration Chart */}
-          <Card className="p-4">
+          <Card className="p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/50">
             <CardHeader className="px-2 pb-4">
               <div className="flex items-center gap-2">
                 <TrendingUp className="size-4 text-black" />
@@ -298,7 +298,7 @@ export default function AdminDashboardPage() {
           </Card>
 
           {/* Completion Chart */}
-          <Card className="p-4">
+          <Card className="p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/50">
             <CardHeader className="px-2 pb-4">
               <div className="flex items-center gap-2">
                 <PieChartIcon className="size-4 text-black" />
