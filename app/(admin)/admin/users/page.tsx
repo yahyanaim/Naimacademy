@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert, Search, Award, Clock, UserPlus, RefreshCw, User } from "lucide-react";
+import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert, Search, Award, Clock, UserPlus, RefreshCw, User, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -115,6 +115,7 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name">("newest");
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newRole, setNewRole] = useState<"admin" | "student">("student");
@@ -124,22 +125,35 @@ export default function UsersPage() {
   const [userToDelete, setUserToDelete] = useState<UserRecord | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const filteredUsers = users.filter((user) => {
-    const searchMatch = 
-      user.name.toLowerCase().includes(search.toLowerCase()) ||
-      user.email.toLowerCase().includes(search.toLowerCase());
-    const roleMatch = roleFilter === "all" || user.role === roleFilter;
-    const pct = user.progress?.completionPercentage ?? 0;
-    const statusMatch = 
-      statusFilter === "all" || 
-      (statusFilter === "banned" && user.isBanned) ||
-      (statusFilter === "active" && !user.isBanned) ||
-      (statusFilter === "certified" && (user.certifications?.length ?? 0) > 0) ||
-      (statusFilter === "passed" && user.examAttempts?.some(a => a.passed)) ||
-      (statusFilter === "try" && pct === 0) ||
-      (statusFilter === "inactive" && !user.lastActivityAt);
-    return searchMatch && roleMatch && statusMatch;
-  });
+  const filteredUsers = users
+    .filter((user) => {
+      const searchMatch = 
+        user.name.toLowerCase().includes(search.toLowerCase()) ||
+        user.email.toLowerCase().includes(search.toLowerCase());
+      const roleMatch = roleFilter === "all" || user.role === roleFilter;
+      const pct = user.progress?.completionPercentage ?? 0;
+      const statusMatch = 
+        statusFilter === "all" || 
+        (statusFilter === "banned" && user.isBanned) ||
+        (statusFilter === "active" && !user.isBanned) ||
+        (statusFilter === "certified" && (user.certifications?.length ?? 0) > 0) ||
+        (statusFilter === "passed" && user.examAttempts?.some(a => a.passed)) ||
+        (statusFilter === "try" && pct === 0) ||
+        (statusFilter === "inactive" && !user.lastActivityAt);
+      return searchMatch && roleMatch && statusMatch;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        case "oldest":
+          return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+        case "name":
+          return a.name.localeCompare(b.name);
+        default:
+          return 0;
+      }
+    });
 
   async function handleUpdateRole() {
     if (!editingUser) return;
@@ -270,6 +284,34 @@ export default function UsersPage() {
             <SelectItem value="certified">Certified</SelectItem>
             <SelectItem value="try">Haven&apos;t Started (0%)</SelectItem>
             <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={(value) => setSortBy(value as "newest" | "oldest" | "name")}>
+          <SelectTrigger className="w-[140px]">
+            <div className="flex items-center gap-2">
+              <ArrowUpDown className="size-4" />
+              <SelectValue placeholder="Sort" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">
+              <div className="flex items-center gap-2">
+                <ArrowDown className="size-4" />
+                Newest First
+              </div>
+            </SelectItem>
+            <SelectItem value="oldest">
+              <div className="flex items-center gap-2">
+                <ArrowUp className="size-4" />
+                Oldest First
+              </div>
+            </SelectItem>
+            <SelectItem value="name">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="size-4" />
+                Name (A-Z)
+              </div>
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
