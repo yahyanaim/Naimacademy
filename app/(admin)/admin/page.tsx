@@ -8,18 +8,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, GraduationCap, BarChart3, Award, TrendingUp, PieChart, UserPlus, Clock, BookOpen, MessageSquare, Shield } from "lucide-react";
+import { Users, GraduationCap, BarChart3, Award, TrendingUp, PieChart as PieChartIcon, UserPlus, Clock, BookOpen, MessageSquare, Shield } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
   Line,
-  BarChart,
-  Bar,
+  CartesianGrid,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
+  PieChart,
+  Pie,
   Cell,
+  Tooltip,
+  Legend,
 } from "recharts";
 
 interface UserRecord {
@@ -97,10 +98,10 @@ function computeStats(users: UserRecord[]): Stats {
   }));
 
   const distribution = [
-    { name: "0-25%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) <= 25).length, color: "#000000" }, 
-    { name: "26-50%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 25 && (u.progress?.completionPercentage ?? 0) <= 50).length, color: "#000000" }, 
-    { name: "51-75%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 50 && (u.progress?.completionPercentage ?? 0) <= 75).length, color: "#000000" }, 
-    { name: "76-100%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 75).length, color: "#000000" }, 
+    { name: "0-25%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) <= 25).length, color: "#ef4444" }, 
+    { name: "26-50%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 25 && (u.progress?.completionPercentage ?? 0) <= 50).length, color: "#f97316" }, 
+    { name: "51-75%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 50 && (u.progress?.completionPercentage ?? 0) <= 75).length, color: "#eab308" }, 
+    { name: "76-100%", count: users.filter(u => (u.progress?.completionPercentage ?? 0) > 75).length, color: "#22c55e" }, 
   ];
 
   return { 
@@ -300,7 +301,7 @@ export default function AdminDashboardPage() {
           <Card className="p-4">
             <CardHeader className="px-2 pb-4">
               <div className="flex items-center gap-2">
-                <PieChart className="size-4 text-black" />
+                <PieChartIcon className="size-4 text-black" />
                 <CardTitle className="text-sm font-semibold">Course Completion</CardTitle>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -312,28 +313,30 @@ export default function AdminDashboardPage() {
                 <Skeleton className="h-full w-full" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats?.distribution} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                    <XAxis type="number" hide />
-                    <YAxis 
-                      dataKey="name" 
-                      type="category" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      fontSize={12} 
-                      tick={{ fill: "#64748b" }}
-                      width={70}
-                    />
-                    <Tooltip 
-                      cursor={{ fill: "transparent" }}
-                      contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }}
-                    />
-                    <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                  <PieChart>
+                    <Pie
+                      data={stats?.distribution}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={2}
+                      dataKey="count"
+                      nameKey="name"
+                    >
                       {stats?.distribution.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
-                    </Bar>
-                  </BarChart>
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }}
+                    />
+                    <Legend 
+                      verticalAlign="bottom" 
+                      height={36}
+                      formatter={(value) => <span className="text-xs text-muted-foreground">{value}</span>}
+                    />
+                  </PieChart>
                 </ResponsiveContainer>
               )}
             </CardContent>
