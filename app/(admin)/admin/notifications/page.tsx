@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, Send, Users, Award, BookOpen, Info, CheckCircle, X, User, Search } from "lucide-react";
+import { Bell, Send, Users, Award, BookOpen, Info, CheckCircle, X, User, Search, Filter } from "lucide-react";
 import { toast } from "sonner";
 
 interface Notification {
@@ -26,11 +26,27 @@ interface UserRecord {
   email: string;
   avatar?: string;
   role: string;
+  progress?: {
+    completionPercentage?: number;
+  };
+  examAttempts?: {
+    score: number;
+    passed: boolean;
+  }[];
+  certifications?: unknown[];
+  createdAt?: string;
+}
+
+interface StudentRecord extends UserRecord {
+  hasCertificate: boolean;
+  hasPassed: boolean;
+  hasCompleted: boolean;
+  isNew: boolean;
 }
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [students, setStudents] = useState<UserRecord[]>([]);
+  const [allStudents, setAllStudents] = useState<StudentRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   
@@ -65,10 +81,57 @@ export default function NotificationsPage() {
       const res = await fetch("/api/admin/users", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
-        setStudents(data.filter((u: UserRecord) => u.role === "student"));
+        const students = data
+          .filter((u: UserRecord) => u.role === "student")
+          .map((u: UserRecord): StudentRecord => {
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            return {
+              ...u,
+              hasCertificate: (u.certifications?.length ?? 0) > 0,
+              hasPassed: u.examAttempts?.some((a) => a.passed) ?? false,
+              hasCompleted: (u.progress?.completionPercentage ?? 0) >= 100,
+              isNew: u.createdAt ? new Date(u.createdAt) >= sevenDaysAgo : false,
+            };
+          });
+        setAllStudents(students);
       }
     } catch (error) {
       console.error(error);
+    }
+  }
+
+  function handleTypeChange(value: string | null) {
+    if (!value) return;
+    setType(value);
+    
+    let filtered: StudentRecord[] = allStudents;
+    let autoSelected: string[] = [];
+    
+    switch (value) {
+      case "certificate":
+        filtered = allStudents.filter(s => s.hasCertificate);
+        autoSelected = allStudents.filter(s => s.hasCertificate).map(s => s._id);
+        break;
+      case "course_completed":
+        filtered = allStudents.filter(s => s.hasCompleted);
+        autoSelected = allStudents.filter(s => s.hasCompleted).map(s => s._id);
+        break;
+      case "new_user":
+        filtered = allStudents.filter(s => s.isNew);
+        autoSelected = allStudents.filter(s => s.isNew).map(s => s._id);
+        break;
+      default:
+        filtered = allStudents;
+        autoSelected = [];
+    }
+    
+    if (value !== "general" && filtered.length > 0) {
+      setSendToAll(false);
+      setSelectedStudents(autoSelected);
+    } else {
+      setSendToAll(true);
+      setSelectedStudents([]);
     }
   }
 
@@ -130,6 +193,7 @@ export default function NotificationsPage() {
         setTitle("");
         setMessage("");
         setSelectedStudents([]);
+        setSendToAll(true);
         loadNotifications();
       } else {
         toast.error(data.error || "Failed to send notification");
@@ -157,7 +221,24 @@ export default function NotificationsPage() {
     }
   }
 
-  const filteredStudents = students.filter(s => 
+  function getStudentsByType(typeFilter: string): StudentRecord[] {
+    switch (typeFilter) {
+      case "certificate":
+        return allStudents.filter(s => s.hasCertificate);
+      case "course_completed":
+        return allStudents.filter(s => s.hasCompleted);
+      case "new_user":
+        return allStudents.filter(s => s.isNew);
+      default:
+        return allStudents;
+    }
+  }
+
+  function getStudentCountByType(typeFilter: string): number {
+    return getStudentsByType(typeFilter).length;
+  }
+
+  const filteredStudents = getStudentsByType(type).filter(s => 
     s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
     s.email.toLowerCase().includes(studentSearch.toLowerCase())
   );
@@ -189,17 +270,42 @@ export default function NotificationsPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Notification Type</Label>
-              <Select value={type} onValueChange={(value) => setType(value || "general")}>
+              <Select value={type} onValueChange={handleTypeChange}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="new_user">New User</SelectItem>
-                  <SelectItem value="course_completed">Course Completed</SelectItem>
-                  <SelectItem value="certificate">Certificate</SelectItem>
-                  <SelectItem value="general">General</SelectItem>
+                  <SelectItem value="general">
+                    <div className="flex items-center justify-between w-full">
+                      <span>General</span>
+                      <span className="text-xs text-muted-foreground ml-2">({allStudents.length})</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="new_user">
+                    <div className="flex items-center justify-between w-full">
+                      <span>New Users (0-7 days)</span>
+                      <span className="text-xs text-muted-foreground ml-2">({getStudentCountByType("new_user")})</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="course_completed">
+                    <div className="flex items-center justify-between w-full">
+                      <span>Course Completed (100%)</span>
+                      <span className="text-xs text-muted-foreground ml-2">({getStudentCountByType("course_completed")})</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="certificate">
+                    <div className="flex items-center justify-between w-full">
+                      <span>Has Certificate</span>
+                      <span className="text-xs text-muted-foreground ml-2">({getStudentCountByType("certificate")})</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                {type === "general" 
+                  ? "Select a type to auto-filter students" 
+                  : `Auto-selected ${getStudentsByType(type).length} ${type === "certificate" ? "certified" : type === "course_completed" ? "completed" : "new"} students`}
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -232,16 +338,29 @@ export default function NotificationsPage() {
                   }}
                 />
                 <Label htmlFor="sendAll" className="font-normal cursor-pointer">
-                  Send to all students ({students.length})
+                  Send to all students ({allStudents.length})
                 </Label>
               </div>
 
               {!sendToAll && (
                 <div className="border rounded-lg p-3 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Filter className="size-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">
+                      {type === "certificate" && "Students with certificates"}
+                      {type === "course_completed" && "Students who completed the course"}
+                      {type === "new_user" && "New users (last 7 days)"}
+                      {type === "general" && "All students"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      ({getStudentsByType(type).length})
+                    </span>
+                  </div>
+
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search students..."
+                      placeholder="Search within filtered students..."
                       value={studentSearch}
                       onChange={(e) => setStudentSearch(e.target.value)}
                       className="pl-9 h-9"
@@ -261,22 +380,40 @@ export default function NotificationsPage() {
 
                   <ScrollArea className="h-[200px]">
                     <div className="space-y-2">
-                      {filteredStudents.map((student) => (
-                        <div key={student._id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`student-${student._id}`}
-                            checked={selectedStudents.includes(student._id)}
-                            onCheckedChange={() => toggleStudent(student._id)}
-                          />
-                          <Label 
-                            htmlFor={`student-${student._id}`} 
-                            className="font-normal cursor-pointer flex-1 text-sm"
-                          >
-                            <span className="font-medium">{student.name}</span>
-                            <span className="text-muted-foreground ml-2">{student.email}</span>
-                          </Label>
-                        </div>
-                      ))}
+                      {filteredStudents.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">
+                          No students match this filter
+                        </p>
+                      ) : (
+                        filteredStudents.map((student) => (
+                          <div key={student._id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`student-${student._id}`}
+                              checked={selectedStudents.includes(student._id)}
+                              onCheckedChange={() => toggleStudent(student._id)}
+                            />
+                            <Label 
+                              htmlFor={`student-${student._id}`} 
+                              className="font-normal cursor-pointer flex-1 text-sm"
+                            >
+                              <span className="font-medium">{student.name}</span>
+                              <span className="text-muted-foreground ml-2">{student.email}</span>
+                              <div className="flex gap-1 mt-0.5">
+                                {student.hasCertificate && (
+                                  <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
+                                    Certified
+                                  </span>
+                                )}
+                                {student.hasCompleted && (
+                                  <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
+                                    Completed
+                                  </span>
+                                )}
+                              </div>
+                            </Label>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </ScrollArea>
 
