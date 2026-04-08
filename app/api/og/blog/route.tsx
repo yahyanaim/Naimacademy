@@ -8,7 +8,6 @@ export async function GET(req: NextRequest) {
   const title = searchParams.get("title") || "Article"
   const excerpt = searchParams.get("excerpt") || "Read this article on Naim Academy"
   const author = searchParams.get("author") || "Naim Academy"
-  const coverImage = searchParams.get("image")
 
   return new ImageResponse(
     (
@@ -18,45 +17,33 @@ export async function GET(req: NextRequest) {
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          backgroundColor: "#ffffff",
+          backgroundColor: "#1f2937",
           fontFamily: "system-ui, sans-serif",
         }}
       >
-        {coverImage ? (
-          <img
-            src={coverImage}
-            alt=""
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            }}
-          />
-        )}
-        
-        {/* Overlay */}
+        {/* Decorative circles */}
         <div
           style={{
             position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%)",
+            top: -100,
+            right: -100,
+            width: 400,
+            height: 400,
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            opacity: 0.3,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: -150,
+            left: -150,
+            width: 500,
+            height: 500,
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+            opacity: 0.2,
           }}
         />
 
@@ -66,9 +53,9 @@ export async function GET(req: NextRequest) {
             position: "relative",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "flex-end",
+            justifyContent: "center",
             height: "100%",
-            padding: 60,
+            padding: 80,
           }}
         >
           {/* Author badge */}
@@ -76,57 +63,46 @@ export async function GET(req: NextRequest) {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 12,
-              marginBottom: 20,
+              gap: 16,
+              marginBottom: 30,
             }}
           >
             <div
               style={{
-                backgroundColor: "rgba(255,255,255,0.2)",
-                borderRadius: 8,
-                padding: "8px 16px",
+                backgroundColor: "#ffffff",
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
+                justifyContent: "center",
+                fontSize: 28,
+                fontWeight: 700,
+                color: "#1f2937",
               }}
             >
-              <span
-                style={{
-                  fontSize: 24,
-                  fontWeight: 700,
-                  color: "#ffffff",
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {author.charAt(0)}
-              </span>
-              <span
-                style={{
-                  fontSize: 18,
-                  color: "#ffffff",
-                  opacity: 0.9,
-                }}
-              >
-                {author}
-              </span>
+              {author.charAt(0)}
             </div>
+            <span
+              style={{
+                fontSize: 22,
+                color: "#ffffff",
+                opacity: 0.9,
+              }}
+            >
+              {author}
+            </span>
           </div>
 
           {/* Title */}
           <div
             style={{
-              fontSize: title.length > 60 ? 48 : 56,
+              fontSize: title.length > 50 ? 42 : 52,
               fontWeight: 700,
               color: "#ffffff",
               lineHeight: 1.2,
-              marginBottom: 20,
-              maxWidth: 900,
+              marginBottom: 24,
+              maxWidth: 1000,
             }}
           >
             {title}
@@ -135,15 +111,15 @@ export async function GET(req: NextRequest) {
           {/* Excerpt */}
           <div
             style={{
-              fontSize: 20,
+              fontSize: 22,
               color: "#ffffff",
-              opacity: 0.8,
-              maxWidth: 700,
-              lineHeight: 1.4,
-              marginBottom: 30,
+              opacity: 0.7,
+              maxWidth: 800,
+              lineHeight: 1.5,
+              marginBottom: 40,
             }}
           >
-            {excerpt}
+            {excerpt.length > 150 ? excerpt.substring(0, 150) + "..." : excerpt}
           </div>
 
           {/* Branding */}
@@ -151,23 +127,23 @@ export async function GET(req: NextRequest) {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 12,
+              gap: 16,
             }}
           >
             <div
               style={{
                 backgroundColor: "#ffffff",
-                borderRadius: 8,
-                padding: "10px 20px",
+                borderRadius: 12,
+                padding: "14px 24px",
                 display: "flex",
                 alignItems: "center",
-                gap: 10,
+                gap: 12,
               }}
             >
               <span
                 style={{
-                  fontSize: 20,
-                  fontWeight: 700,
+                  fontSize: 24,
+                  fontWeight: 800,
                   color: "#1f2937",
                 }}
               >
@@ -176,9 +152,9 @@ export async function GET(req: NextRequest) {
             </div>
             <span
               style={{
-                fontSize: 16,
+                fontSize: 18,
                 color: "#ffffff",
-                opacity: 0.7,
+                opacity: 0.6,
               }}
             >
               naimacademy.com

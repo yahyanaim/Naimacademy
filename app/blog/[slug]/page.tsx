@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Clock } from "lucide-react";
+import { Clock, MessageSquare } from "lucide-react";
 import { connectDB } from "@/lib/db/mongoose";
 import { BlogPost } from "@/lib/models/blog-post.model";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import ShareButtons from "@/components/blog/share-buttons";
+import CommentsPlaceholder from "@/components/blog/comments-placeholder";
 
 async function getPost(slug: string) {
   try {
@@ -71,9 +72,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     excerpt: post.excerpt,
     author: post.author || "Naim Academy",
   });
-  if (post.coverImage) {
-    ogParams.set("image", post.coverImage);
-  }
   const ogImageUrl = `${baseUrl}/api/og/blog?${ogParams.toString()}`;
 
   return {
@@ -116,8 +114,6 @@ export default async function BlogPostPage({
   const relatedPosts = allPosts
     .filter((p) => p.slug !== slug)
     .slice(0, 3);
-
-  const articleUrl = `${baseUrl}/blog/${slug}`;
 
   return (
     <>
@@ -193,6 +189,8 @@ export default async function BlogPostPage({
             />
 
             <ShareButtons title={post.title} />
+
+            <CommentsPlaceholder />
           </article>
 
           {relatedPosts.length > 0 && (
