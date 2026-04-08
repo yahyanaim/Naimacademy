@@ -64,7 +64,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = await getPost(slug);
   if (!post) return { title: "Article Not Found" };
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://naimacademy.com";
+  const baseUrl = process.env.VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL}` 
+    : process.env.NEXT_PUBLIC_BASE_URL 
+      ? process.env.NEXT_PUBLIC_BASE_URL 
+      : "https://naimacademy.com";
   const articleUrl = `${baseUrl}/blog/${slug}`;
   
   const ogParams = new URLSearchParams({
@@ -101,7 +105,11 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://naimacademy.com";
+  const baseUrl = process.env.VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL}` 
+    : process.env.NEXT_PUBLIC_BASE_URL 
+      ? process.env.NEXT_PUBLIC_BASE_URL 
+      : "https://naimacademy.com";
   const [post, allPosts] = await Promise.all([
     getPost(slug),
     getAllPosts(),
