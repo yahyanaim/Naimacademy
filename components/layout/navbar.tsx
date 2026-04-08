@@ -71,7 +71,7 @@ export default function Navbar() {
         href="/blog"
         className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
       >
-        Blog
+        Articles
       </Link>
       {user && (
         <Link
@@ -206,7 +206,7 @@ export default function Navbar() {
                   className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
                 >
                   <FileText className="size-5" />
-                  Blog
+                  Articles
                 </Link>
                 
                 <div className="my-1 border-t mx-4" />
