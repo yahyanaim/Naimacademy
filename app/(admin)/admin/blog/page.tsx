@@ -248,10 +248,8 @@ export default function BlogManagementPage() {
                     </div>
                   </div>
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="size-4" />
-                      </Button>
+                    <DropdownMenuTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground">
+                      <MoreVertical className="size-4" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => openEditDialog(post)}>
