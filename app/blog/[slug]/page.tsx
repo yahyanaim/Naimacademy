@@ -5,7 +5,7 @@ async function getPost(slug: string) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     const res = await fetch(`${baseUrl}/api/blog/${slug}`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!res.ok) return null;
     return await res.json();
@@ -18,7 +18,7 @@ async function getAllPosts() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     const res = await fetch(`${baseUrl}/api/blog?limit=5`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!res.ok) return [];
     const data = await res.json();
@@ -52,8 +52,9 @@ function renderMarkdown(content: string): string {
   return html;
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const post = await getPost(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = await getPost(slug);
   if (!post) return { title: "Article Not Found" };
 
   return {
@@ -70,10 +71,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default async function BlogPostPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   const [post, allPosts] = await Promise.all([
-    getPost(params.slug),
+    getPost(slug),
     getAllPosts(),
   ]);
 
@@ -82,7 +84,7 @@ export default async function BlogPostPage({
   }
 
   const relatedPosts = allPosts
-    .filter((p: { slug: string }) => p.slug !== params.slug)
+    .filter((p: { slug: string }) => p.slug !== slug)
     .slice(0, 3);
 
   return (

@@ -5,17 +5,18 @@ async function getPosts() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     const res = await fetch(`${baseUrl}/api/blog?limit=20`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
-    if (!res.ok) return { posts: [] };
-    return await res.json();
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.posts || [];
   } catch {
-    return { posts: [] };
+    return [];
   }
 }
 
 export default async function BlogPage() {
-  const { posts } = await getPosts();
+  const posts = await getPosts();
 
   return (
     <div className="min-h-screen bg-white">
