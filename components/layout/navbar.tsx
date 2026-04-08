@@ -15,6 +15,7 @@ import {
   LogIn,
   UserPlus,
   Bell,
+  FileText,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -65,6 +66,12 @@ export default function Navbar() {
         className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
       >
         Course
+      </Link>
+      <Link
+        href="/blog"
+        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+      >
+        Blog
       </Link>
       {user && (
         <Link
@@ -192,6 +199,14 @@ export default function Navbar() {
                 >
                   <GraduationCap className="size-5" />
                   Course
+                </Link>
+                <Link
+                  href="/blog"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
+                >
+                  <FileText className="size-5" />
+                  Blog
                 </Link>
                 
                 <div className="my-1 border-t mx-4" />

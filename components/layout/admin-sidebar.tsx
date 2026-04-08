@@ -14,6 +14,7 @@ import {
   MessageSquare,
   Bot,
   Bell,
+  FileText,
 } from "lucide-react";
 
 const navItems = [
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/admin/ai", label: "AI Stats", icon: Bot },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
   { href: "/admin/support", label: "Support", icon: MessageSquare },
+  { href: "/admin/blog", label: "Blog", icon: FileText },
 ];
 
 export default function AdminSidebar() {
