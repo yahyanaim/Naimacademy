@@ -8,6 +8,22 @@ export async function GET(req: NextRequest) {
   const title = searchParams.get("title") || "Article"
   const excerpt = searchParams.get("excerpt") || "Read this article on Naim Academy"
   const author = searchParams.get("author") || "Naim Academy"
+  const imageUrl = searchParams.get("image") || ""
+
+  let coverImage = null
+  if (imageUrl) {
+    try {
+      const response = await fetch(imageUrl)
+      if (response.ok) {
+        const imageData = await response.arrayBuffer()
+        const base64 = Buffer.from(imageData).toString("base64")
+        const mimeType = response.headers.get("content-type") || "image/jpeg"
+        coverImage = `data:${mimeType};base64,${base64}`
+      }
+    } catch (e) {
+      console.log("Failed to fetch image")
+    }
+  }
 
   return new ImageResponse(
     (
@@ -21,29 +37,60 @@ export async function GET(req: NextRequest) {
           fontFamily: "system-ui, sans-serif",
         }}
       >
-        {/* Decorative circles */}
+        {/* Background Image */}
+        {coverImage ? (
+          <img
+            src={coverImage}
+            alt=""
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          <>
+            <div
+              style={{
+                position: "absolute",
+                top: -100,
+                right: -100,
+                width: 400,
+                height: 400,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                opacity: 0.3,
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                bottom: -150,
+                left: -150,
+                width: 500,
+                height: 500,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                opacity: 0.2,
+              }}
+            />
+          </>
+        )}
+
+        {/* Dark Overlay */}
         <div
           style={{
             position: "absolute",
-            top: -100,
-            right: -100,
-            width: 400,
-            height: 400,
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            opacity: 0.3,
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: -150,
-            left: -150,
-            width: 500,
-            height: 500,
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-            opacity: 0.2,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: coverImage 
+              ? "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.2) 100%)"
+              : "rgba(0,0,0,0.1)",
           }}
         />
 
@@ -53,9 +100,9 @@ export async function GET(req: NextRequest) {
             position: "relative",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
+            justifyContent: "flex-end",
             height: "100%",
-            padding: 80,
+            padding: 60,
           }}
         >
           {/* Author badge */}
@@ -64,19 +111,19 @@ export async function GET(req: NextRequest) {
               display: "flex",
               alignItems: "center",
               gap: 16,
-              marginBottom: 30,
+              marginBottom: 24,
             }}
           >
             <div
               style={{
                 backgroundColor: "#ffffff",
-                width: 56,
-                height: 56,
+                width: 52,
+                height: 52,
                 borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 28,
+                fontSize: 26,
                 fontWeight: 700,
                 color: "#1f2937",
               }}
@@ -85,7 +132,7 @@ export async function GET(req: NextRequest) {
             </div>
             <span
               style={{
-                fontSize: 22,
+                fontSize: 20,
                 color: "#ffffff",
                 opacity: 0.9,
               }}
@@ -97,11 +144,11 @@ export async function GET(req: NextRequest) {
           {/* Title */}
           <div
             style={{
-              fontSize: title.length > 50 ? 42 : 52,
+              fontSize: title.length > 50 ? 38 : 48,
               fontWeight: 700,
               color: "#ffffff",
               lineHeight: 1.2,
-              marginBottom: 24,
+              marginBottom: 20,
               maxWidth: 1000,
             }}
           >
@@ -111,15 +158,15 @@ export async function GET(req: NextRequest) {
           {/* Excerpt */}
           <div
             style={{
-              fontSize: 22,
+              fontSize: 20,
               color: "#ffffff",
-              opacity: 0.7,
+              opacity: 0.8,
               maxWidth: 800,
               lineHeight: 1.5,
-              marginBottom: 40,
+              marginBottom: 36,
             }}
           >
-            {excerpt.length > 150 ? excerpt.substring(0, 150) + "..." : excerpt}
+            {excerpt.length > 120 ? excerpt.substring(0, 120) + "..." : excerpt}
           </div>
 
           {/* Branding */}
@@ -133,16 +180,16 @@ export async function GET(req: NextRequest) {
             <div
               style={{
                 backgroundColor: "#ffffff",
-                borderRadius: 12,
-                padding: "14px 24px",
+                borderRadius: 10,
+                padding: "12px 20px",
                 display: "flex",
                 alignItems: "center",
-                gap: 12,
+                gap: 10,
               }}
             >
               <span
                 style={{
-                  fontSize: 24,
+                  fontSize: 22,
                   fontWeight: 800,
                   color: "#1f2937",
                 }}
@@ -152,7 +199,7 @@ export async function GET(req: NextRequest) {
             </div>
             <span
               style={{
-                fontSize: 18,
+                fontSize: 16,
                 color: "#ffffff",
                 opacity: 0.6,
               }}

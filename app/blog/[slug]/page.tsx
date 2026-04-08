@@ -76,6 +76,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     excerpt: post.excerpt,
     author: post.author || "Naim Academy",
   });
+  
+  if (post.coverImage) {
+    ogParams.set("image", post.coverImage);
+  }
+  
   const ogImageUrl = `${baseUrl}/api/og/blog?${ogParams.toString()}`;
 
   return {
