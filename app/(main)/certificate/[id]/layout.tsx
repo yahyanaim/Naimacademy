@@ -7,18 +7,24 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://naimacademy.com"
+  const baseUrl = process.env.VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL}` 
+    : process.env.NEXT_PUBLIC_BASE_URL 
+      ? process.env.NEXT_PUBLIC_BASE_URL 
+      : "https://naimacademy.com"
+  
+  const ogImageUrl = `${baseUrl}/api/og/certificate?id=${id}`
   
   return {
     title: "My Certificate - Naim Academy",
     description: "I earned my certificate from Naim Academy! Check out my achievement.",
     openGraph: {
       title: "I just earned my certificate from Naim Academy!",
-      description: "I completed the n8n Automation course and earned my certificate. Join me on this learning journey!",
+      description: "I completed a course and earned my certificate. Join me on this learning journey!",
       type: "website",
       images: [
         {
-          url: `${baseUrl}/api/og/certificate?id=${id}&name=Student&course=Naim+Academy+Course&score=100&date=${encodeURIComponent(new Date().toLocaleDateString())}`,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: "Naim Academy Certificate",
@@ -28,8 +34,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: "I just earned my certificate from Naim Academy!",
-      description: "I completed the n8n Automation course and earned my certificate.",
-      images: [`${baseUrl}/api/og/certificate?id=${id}`],
+      description: "I completed a course and earned my certificate.",
+      images: [ogImageUrl],
     },
   }
 }
