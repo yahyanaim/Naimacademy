@@ -19,7 +19,16 @@ interface Certification {
 }
 
 function ShareButtons({ cert }: { cert: Certification }) {
-  const certificateUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/certificate/${cert.certificationId}`
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : ""
+  const ogParams = new URLSearchParams({
+    id: cert.certificationId,
+    name: cert.studentName,
+    course: cert.courseTitle,
+    score: cert.score.toString(),
+    date: new Date(cert.issuedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+  })
+  const certificateUrl = `${baseUrl}/certificate/${cert.certificationId}`
+  const ogImageUrl = `${baseUrl}/api/og/certificate?${ogParams.toString()}`
   const shareText = `I just earned my ${cert.courseTitle} certificate from Naim Academy with a score of ${cert.score}%! 🎉`
 
   const shareLinks = {
