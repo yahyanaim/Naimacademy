@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText } from "lucide-react";
+import { FileText, GraduationCap } from "lucide-react";
 import { connectDB } from "@/lib/db/mongoose";
 import { BlogPost } from "@/lib/models/blog-post.model";
 
@@ -21,11 +21,40 @@ export default async function BlogPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="border-b">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold">
-            Naim Academy
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <GraduationCap className="h-5 w-5" />
+            <span>Naim Academy</span>
           </Link>
+          <nav className="flex items-center gap-6">
+            <Link
+              href="/course"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Courses
+            </Link>
+            <Link
+              href="/blog"
+              className="text-sm font-medium text-foreground transition-colors"
+            >
+              Articles
+            </Link>
+            <div className="flex items-center gap-2 border-l pl-4">
+              <Link
+                href="/login"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                className="px-3 py-1.5 text-sm font-medium bg-black text-white rounded-full hover:bg-black/80 transition-colors"
+              >
+                Get Started
+              </Link>
+            </div>
+          </nav>
         </div>
       </header>
 
@@ -114,11 +143,31 @@ export default async function BlogPage() {
         )}
       </main>
 
-      <footer className="border-t mt-20">
-        <div className="max-w-4xl mx-auto px-6 py-8">
-          <p className="text-sm text-muted-foreground text-center">
-            © {new Date().getFullYear()} Naim Academy. All rights reserved.
-          </p>
+      <footer className="border-t bg-muted/30">
+        <div className="max-w-4xl mx-auto px-6 py-12">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="h-5 w-5" />
+              <span className="font-semibold">Naim Academy</span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <Link href="/course" className="hover:text-foreground transition-colors">
+                Courses
+              </Link>
+              <Link href="/blog" className="hover:text-foreground transition-colors">
+                Articles
+              </Link>
+              <Link href="/privacy" className="hover:text-foreground transition-colors">
+                Privacy
+              </Link>
+              <Link href="/terms" className="hover:text-foreground transition-colors">
+                Terms
+              </Link>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} Naim Academy. All rights reserved.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
