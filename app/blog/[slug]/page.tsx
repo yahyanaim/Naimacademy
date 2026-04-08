@@ -92,13 +92,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       images: [
         {
           url: ogImageUrl,
+          secureUrl: ogImageUrl,
           width: 1200,
           height: 630,
           alt: post.title,
+          type: post.coverImage ? "image/jpeg" : "image/png",
         },
       ],
       siteName: "Naim Academy",
-      locale: "en_US",
     },
     twitter: {
       card: "summary_large_image",
