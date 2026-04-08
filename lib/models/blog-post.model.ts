@@ -35,13 +35,12 @@ const BlogPostSchema = new Schema<IBlogPost>(
   { timestamps: true }
 );
 
-BlogPostSchema.pre("save", function (next) {
+BlogPostSchema.pre("save", async function () {
   const words = this.content.replace(/<[^>]*>/g, "").split(/\s+/).length;
   this.readingTime = Math.ceil(words / 200);
   if (this.isPublished && !this.publishedAt) {
     this.publishedAt = new Date();
   }
-  next();
 });
 
 export const BlogPost =
