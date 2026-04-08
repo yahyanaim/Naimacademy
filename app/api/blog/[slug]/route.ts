@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
+import { connectDB } from "@/lib/db/mongoose";
 import { BlogPost } from "@/lib/models/blog-post.model";
 
 export async function GET(
