@@ -39,8 +39,8 @@ export default function CommentsPlaceholder() {
         
         <div className="bg-muted/50 rounded-lg p-8 text-center">
           <div className="max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Lock className="size-8 text-primary" />
+            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mx-auto mb-4">
+              <Lock className="size-8 text-black" />
             </div>
             <h3 className="text-lg font-semibold mb-2">Sign in to Comment</h3>
             <p className="text-muted-foreground mb-6">
@@ -69,8 +69,8 @@ export default function CommentsPlaceholder() {
       
       <div className="bg-muted/50 rounded-lg p-8 text-center">
         <div className="max-w-md mx-auto">
-          <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-4">
-            <Construction className="size-8 text-yellow-600" />
+          <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mx-auto mb-4">
+            <Construction className="size-8 text-black" />
           </div>
           <h3 className="text-lg font-semibold mb-2">Comments Under Development</h3>
           <p className="text-muted-foreground">

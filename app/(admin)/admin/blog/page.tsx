@@ -239,7 +239,7 @@ export default function BlogManagementPage() {
                       </span>
                       <span className="flex items-center gap-1 whitespace-nowrap">
                         <Clock className="size-3 flex-shrink-0" />
-                        <span>{post.readingTime} min</span>
+                        <span>{post.readingTime} min read</span>
                       </span>
                       <span className="flex items-center gap-1">
                         <Eye className="size-3" />
