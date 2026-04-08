@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connectDB } from "@/lib/db/mongoose";
+import { BlogPost } from "@/lib/models/blog-post.model";
 
 async function getPost(slug: string) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/blog/${slug}`, {
-      cache: "no-store",
-    });
-    if (!res.ok) return null;
-    return await res.json();
+    await connectDB();
+    const post = await BlogPost.findOneAndUpdate(
+      { slug, isPublished: true },
+      { $inc: { views: 1 } },
+      { new: true }
+    ).lean();
+    return post;
   } catch {
     return null;
   }
@@ -16,13 +19,12 @@ async function getPost(slug: string) {
 
 async function getAllPosts() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/blog?limit=5`, {
-      cache: "no-store",
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.posts || [];
+    await connectDB();
+    const posts = await BlogPost.find({ isPublished: true })
+      .sort({ publishedAt: -1 })
+      .limit(5)
+      .lean();
+    return posts;
   } catch {
     return [];
   }
@@ -84,7 +86,7 @@ export default async function BlogPostPage({
   }
 
   const relatedPosts = allPosts
-    .filter((p: { slug: string }) => p.slug !== slug)
+    .filter((p) => p.slug !== slug)
     .slice(0, 3);
 
   return (
@@ -124,18 +126,18 @@ export default async function BlogPostPage({
                 ) : (
                   <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
                     <span className="text-sm font-medium text-primary">
-                      {post.author.charAt(0)}
+                      {post.author?.charAt(0) || "N"}
                     </span>
                   </div>
                 )}
                 <div>
                   <p className="font-medium text-foreground">{post.author}</p>
                   <p className="text-sm">
-                    {new Date(post.publishedAt).toLocaleDateString("en-US", {
+                    {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", {
                       month: "long",
                       day: "numeric",
                       year: "numeric",
-                    })}{" "}
+                    }) : ""}{" "}
                     · {post.readingTime} min read
                   </p>
                 </div>
@@ -165,16 +167,9 @@ export default async function BlogPostPage({
           <section className="mt-16 pt-10 border-t">
             <h2 className="text-2xl font-bold mb-8">More Articles</h2>
             <div className="grid gap-6">
-              {relatedPosts.map((relatedPost: {
-                _id: string;
-                slug: string;
-                title: string;
-                excerpt: string;
-                publishedAt: string;
-                readingTime: number;
-              }) => (
+              {relatedPosts.map((relatedPost) => (
                 <Link
-                  key={relatedPost._id}
+                  key={relatedPost._id.toString()}
                   href={`/blog/${relatedPost.slug}`}
                   className="group block p-6 border rounded-lg hover:shadow-md transition-shadow"
                 >
@@ -185,7 +180,7 @@ export default async function BlogPostPage({
                     {relatedPost.excerpt}
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">
-                    {new Date(relatedPost.publishedAt).toLocaleDateString()} ·{" "}
+                    {relatedPost.publishedAt ? new Date(relatedPost.publishedAt).toLocaleDateString() : ""} ·{" "}
                     {relatedPost.readingTime} min read
                   </p>
                 </Link>

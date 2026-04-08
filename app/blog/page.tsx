@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
+import { connectDB } from "@/lib/db/mongoose";
+import { BlogPost } from "@/lib/models/blog-post.model";
 
 async function getPosts() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/blog?limit=20`, {
-      cache: "no-store",
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.posts || [];
+    await connectDB();
+    const posts = await BlogPost.find({ isPublished: true })
+      .sort({ publishedAt: -1 })
+      .limit(20)
+      .lean();
+    return posts;
   } catch {
     return [];
   }
@@ -46,18 +47,8 @@ export default async function BlogPage() {
           </div>
         ) : (
           <div className="space-y-10">
-            {posts.map((post: {
-              _id: string;
-              slug: string;
-              title: string;
-              excerpt: string;
-              coverImage?: string;
-              author: string;
-              publishedAt: string;
-              readingTime: number;
-              tags: string[];
-            }) => (
-              <article key={post._id} className="group">
+            {posts.map((post) => (
+              <article key={post._id.toString()} className="group">
                 <Link href={`/blog/${post.slug}`} className="block">
                   {post.coverImage && (
                     <div className="aspect-video rounded-lg overflow-hidden mb-6 bg-muted">
@@ -73,11 +64,11 @@ export default async function BlogPage() {
                       <span>{post.author}</span>
                       <span>·</span>
                       <time>
-                        {new Date(post.publishedAt).toLocaleDateString("en-US", {
+                        {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", {
                           month: "long",
                           day: "numeric",
                           year: "numeric",
-                        })}
+                        }) : ""}
                       </time>
                       <span>·</span>
                       <span>{post.readingTime} min read</span>
