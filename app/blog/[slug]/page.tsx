@@ -63,13 +63,28 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = await getPost(slug);
   if (!post) return { title: "Article Not Found" };
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://naimacademy.com";
+  const articleUrl = `${baseUrl}/blog/${slug}`;
+
   return {
-    title: `${post.title} - Naim Academy`,
+    title: post.title,
     description: post.excerpt,
     openGraph: {
+      type: "article",
+      url: articleUrl,
       title: post.title,
-      description: post.excerpt,
-      images: post.coverImage ? [post.coverImage] : [],
+      description: `Read "${post.title}" on Naim Academy`,
+      images: post.coverImage 
+        ? [{ url: post.coverImage, width: 1200, height: 630, alt: post.title }]
+        : [{ url: `${baseUrl}/og-default.jpg`, width: 1200, height: 630, alt: "Naim Academy" }],
+      siteName: "Naim Academy",
+      locale: "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: `Read "${post.title}" on Naim Academy`,
+      images: post.coverImage ? [post.coverImage] : [`${baseUrl}/og-default.jpg`],
     },
   };
 }
@@ -164,14 +179,16 @@ export default async function BlogPostPage({
               )}
             </header>
 
-            <ShareButtons title={post.title} url={articleUrl} />
-
             <div
               className="prose prose-lg max-w-none"
               dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
             />
 
-            <ShareButtons title={post.title} url={articleUrl} />
+            <ShareButtons 
+              title={post.title} 
+              url={articleUrl} 
+              coverImage={post.coverImage} 
+            />
           </article>
 
           {relatedPosts.length > 0 && (
