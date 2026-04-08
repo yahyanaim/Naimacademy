@@ -199,7 +199,7 @@ export default function AdminDashboardPage() {
       <div>
         <div className="mb-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <BarChart3 className="size-5" />
+            <BarChart3 className="size-5 text-yellow-500" />
             Quick Overview
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
@@ -214,7 +214,7 @@ export default function AdminDashboardPage() {
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {title}
                 </CardTitle>
-                <Icon className="size-4 text-muted-foreground" />
+                <Icon className="size-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
                 {loading ? (
@@ -253,7 +253,7 @@ export default function AdminDashboardPage() {
           <Card className="p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/50">
             <CardHeader className="px-2 pb-4">
               <div className="flex items-center gap-2">
-                <TrendingUp className="size-4 text-black" />
+                <TrendingUp className="size-4 text-yellow-500" />
                 <CardTitle className="text-sm font-semibold">User Growth</CardTitle>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -301,7 +301,7 @@ export default function AdminDashboardPage() {
           <Card className="p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/50">
             <CardHeader className="px-2 pb-4">
               <div className="flex items-center gap-2">
-                <PieChartIcon className="size-4 text-black" />
+                <PieChartIcon className="size-4 text-yellow-500" />
                 <CardTitle className="text-sm font-semibold">Course Completion</CardTitle>
               </div>
               <p className="text-xs text-muted-foreground">
