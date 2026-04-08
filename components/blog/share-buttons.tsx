@@ -1,19 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy, Check } from "lucide-react";
 
 interface ShareButtonsProps {
   title: string;
-  url: string;
-  coverImage?: string;
 }
 
-export default function ShareButtons({ title, url }: ShareButtonsProps) {
+export default function ShareButtons({ title }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
-  const encodedTitle = encodeURIComponent(title);
-  const encodedMessage = encodeURIComponent(`Read "${title}" on Naim Academy`);
-  const encodedUrl = encodeURIComponent(url);
+  const [url, setUrl] = useState("");
+  
+  useEffect(() => {
+    setUrl(window.location.href);
+  }, []);
+
+  const getEncodedUrl = () => encodeURIComponent(url);
+  const getEncodedTitle = () => encodeURIComponent(title);
+  const getMessage = () => encodeURIComponent(`Read "${title}" on Naim Academy`);
   
   const handleCopy = () => {
     navigator.clipboard.writeText(url);
@@ -21,14 +25,16 @@ export default function ShareButtons({ title, url }: ShareButtonsProps) {
     setTimeout(() => setCopied(false), 2000);
   };
   
+  if (!url) return null;
+  
   return (
     <div className="flex items-center gap-3 py-6 border-y my-8">
       <span className="text-sm font-medium text-muted-foreground">Share:</span>
       <a
-        href={`https://twitter.com/intent/tweet?text=${encodedMessage}&url=${encodedUrl}`}
+        href={`https://twitter.com/intent/tweet?text=${getMessage()}&url=${getEncodedUrl()}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#000000] text-white hover:bg-[#1a1a1a] transition-colors"
+        className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-black text-white hover:bg-gray-800 transition-colors"
         aria-label="Share on X"
       >
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -36,7 +42,7 @@ export default function ShareButtons({ title, url }: ShareButtonsProps) {
         </svg>
       </a>
       <a
-        href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
+        href={`https://www.facebook.com/sharer/sharer.php?u=${getEncodedUrl()}`}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#1877f2] text-white hover:opacity-90 transition-opacity"
@@ -47,7 +53,7 @@ export default function ShareButtons({ title, url }: ShareButtonsProps) {
         </svg>
       </a>
       <a
-        href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}&summary=${encodedMessage}`}
+        href={`https://www.linkedin.com/shareArticle?mini=true&url=${getEncodedUrl()}&title=${getEncodedTitle()}`}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#0a66c2] text-white hover:opacity-90 transition-opacity"
@@ -58,7 +64,7 @@ export default function ShareButtons({ title, url }: ShareButtonsProps) {
         </svg>
       </a>
       <a
-        href={`https://wa.me/?text=${encodedMessage}%20${encodedUrl}`}
+        href={`https://wa.me/?text=${getMessage()}%20${getEncodedUrl()}`}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#25d366] text-white hover:opacity-90 transition-opacity"

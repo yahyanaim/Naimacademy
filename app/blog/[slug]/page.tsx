@@ -65,7 +65,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://naimacademy.com";
   const articleUrl = `${baseUrl}/blog/${slug}`;
-  const ogImageUrl = `${baseUrl}/api/og/blog?title=${encodeURIComponent(post.title)}&excerpt=${encodeURIComponent(post.excerpt)}&author=${encodeURIComponent(post.author || "Naim Academy")}${post.coverImage ? `&image=${encodeURIComponent(post.coverImage)}` : ""}`;
+  
+  const ogParams = new URLSearchParams({
+    title: post.title,
+    excerpt: post.excerpt,
+    author: post.author || "Naim Academy",
+  });
+  if (post.coverImage) {
+    ogParams.set("image", post.coverImage);
+  }
+  const ogImageUrl = `${baseUrl}/api/og/blog?${ogParams.toString()}`;
 
   return {
     title: post.title,
@@ -183,11 +192,7 @@ export default async function BlogPostPage({
               dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
             />
 
-            <ShareButtons 
-              title={post.title} 
-              url={articleUrl} 
-              coverImage={post.coverImage} 
-            />
+            <ShareButtons title={post.title} />
           </article>
 
           {relatedPosts.length > 0 && (
