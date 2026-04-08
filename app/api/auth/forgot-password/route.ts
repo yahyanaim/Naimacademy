@@ -9,8 +9,48 @@ const forgotSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
+const forgotAttempts = new Map<string, { count: number; resetAt: number }>();
+const MAX_FORGOT_ATTEMPTS = 3;
+const FORGOT_WINDOW_MS = 900000;
+
+function getClientIp(req: NextRequest): string {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0].trim();
+  }
+  return "127.0.0.1";
+}
+
+function checkForgotRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const key = `forgot:${ip}`;
+  const entry = forgotAttempts.get(key);
+
+  if (!entry || now > entry.resetAt) {
+    forgotAttempts.set(key, { count: 1, resetAt: now + FORGOT_WINDOW_MS });
+    return { allowed: true };
+  }
+
+  if (entry.count >= MAX_FORGOT_ATTEMPTS) {
+    return { allowed: false, retryAfter: Math.ceil((entry.resetAt - now) / 1000) };
+  }
+
+  entry.count += 1;
+  return { allowed: true };
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const limit = checkForgotRateLimit(ip);
+
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: `Too many password reset attempts. Try again in ${limit.retryAfter} seconds.` },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const parsed = forgotSchema.safeParse(body);
     if (!parsed.success) {

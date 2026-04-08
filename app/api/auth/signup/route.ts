@@ -20,7 +20,47 @@ const signupSchema = z.object({
   termsAccepted: z.boolean().refine((val) => val === true, "You must accept the terms"),
 });
 
+const signupAttempts = new Map<string, { count: number; resetAt: number }>();
+const MAX_SIGNUP_ATTEMPTS = 5;
+const SIGNUP_WINDOW_MS = 3600000;
+
+function getClientIp(req: NextRequest): string {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0].trim();
+  }
+  return "127.0.0.1";
+}
+
+function checkSignupRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const key = `signup:${ip}`;
+  const entry = signupAttempts.get(key);
+
+  if (!entry || now > entry.resetAt) {
+    signupAttempts.set(key, { count: 1, resetAt: now + SIGNUP_WINDOW_MS });
+    return { allowed: true };
+  }
+
+  if (entry.count >= MAX_SIGNUP_ATTEMPTS) {
+    return { allowed: false, retryAfter: Math.ceil((entry.resetAt - now) / 1000) };
+  }
+
+  entry.count += 1;
+  return { allowed: true };
+}
+
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const limit = checkSignupRateLimit(ip);
+
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: `Too many signup attempts. Try again in ${limit.retryAfter} seconds.` },
+      { status: 429 }
+    );
+  }
+
   const body = await req.json();
 
   const parsed = signupSchema.safeParse(body);
