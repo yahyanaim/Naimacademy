@@ -65,6 +65,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://naimacademy.com";
   const articleUrl = `${baseUrl}/blog/${slug}`;
+  const ogImageUrl = `${baseUrl}/api/og/blog?title=${encodeURIComponent(post.title)}&excerpt=${encodeURIComponent(post.excerpt)}&author=${encodeURIComponent(post.author || "Naim Academy")}${post.coverImage ? `&image=${encodeURIComponent(post.coverImage)}` : ""}`;
 
   return {
     title: post.title,
@@ -74,9 +75,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       url: articleUrl,
       title: post.title,
       description: `Read "${post.title}" on Naim Academy`,
-      images: post.coverImage 
-        ? [{ url: post.coverImage, width: 1200, height: 630, alt: post.title }]
-        : [{ url: `${baseUrl}/og-default.jpg`, width: 1200, height: 630, alt: "Naim Academy" }],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
       siteName: "Naim Academy",
       locale: "en_US",
     },
@@ -84,7 +83,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       card: "summary_large_image",
       title: post.title,
       description: `Read "${post.title}" on Naim Academy`,
-      images: post.coverImage ? [post.coverImage] : [`${baseUrl}/og-default.jpg`],
+      images: [ogImageUrl],
     },
   };
 }
