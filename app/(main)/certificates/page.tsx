@@ -19,13 +19,13 @@ interface Certification {
 }
 
 function ShareButtons({ cert }: { cert: Certification }) {
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : ""
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://naimacademy.com"
+  const formattedDate = new Date(cert.issuedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
   const ogParams = new URLSearchParams({
-    id: cert.certificationId,
     name: cert.studentName,
     course: cert.courseTitle,
     score: cert.score.toString(),
-    date: new Date(cert.issuedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+    date: formattedDate,
   })
   const certificateUrl = `${baseUrl}/certificate/${cert.certificationId}`
   const ogImageUrl = `${baseUrl}/api/og/certificate?${ogParams.toString()}`

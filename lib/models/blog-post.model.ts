@@ -36,8 +36,15 @@ const BlogPostSchema = new Schema<IBlogPost>(
 );
 
 BlogPostSchema.pre("save", async function () {
-  const words = this.content.replace(/<[^>]*>/g, "").split(/\s+/).length;
-  this.readingTime = Math.ceil(words / 200);
+  let text = this.content;
+  text = text.replace(/<[^>]*>/g, " ");
+  text = text.replace(/[#*_`~\[\]()]/g, " ");
+  text = text.replace(/\s+/g, " ").trim();
+  const words = text.split(/\s+/).filter(w => w.length > 0).length;
+  const avgCharsPerWord = 5;
+  const wpm = 200;
+  const time = Math.max(1, Math.ceil((words * avgCharsPerWord) / (wpm * avgCharsPerWord)));
+  this.readingTime = time;
   if (this.isPublished && !this.publishedAt) {
     this.publishedAt = new Date();
   }

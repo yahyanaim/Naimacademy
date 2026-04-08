@@ -5,11 +5,10 @@ export const runtime = "edge"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
-  const certId = searchParams.get("id") || "unknown"
   const name = searchParams.get("name") || "Student"
-  const course = searchParams.get("course") || "Naim Academy Course"
+  const course = searchParams.get("course") || "Course"
   const score = searchParams.get("score") || "0"
-  const date = searchParams.get("date") || new Date().toLocaleDateString()
+  const date = searchParams.get("date") || ""
 
   return new ImageResponse(
     (
@@ -32,7 +31,7 @@ export async function GET(req: NextRequest) {
             width: 500,
             height: 500,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(251, 191, 36, 0.4) 0%, transparent 70%)",
           }}
         />
         <div
@@ -43,7 +42,7 @@ export async function GET(req: NextRequest) {
             width: 500,
             height: 500,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(251, 146, 60, 0.3) 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(251, 146, 60, 0.4) 0%, transparent 70%)",
           }}
         />
 
@@ -62,20 +61,20 @@ export async function GET(req: NextRequest) {
           {/* Badge */}
           <div
             style={{
-              width: "80px",
-              height: "80px",
+              width: "90px",
+              height: "90px",
               borderRadius: "50%",
               backgroundColor: "#fbbf24",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              marginBottom: "30px",
-              boxShadow: "0 0 60px rgba(251, 191, 36, 0.5)",
+              marginBottom: "32px",
+              boxShadow: "0 0 80px rgba(251, 191, 36, 0.6)",
             }}
           >
             <svg
-              width="45"
-              height="45"
+              width="50"
+              height="50"
               viewBox="0 0 24 24"
               fill="none"
               stroke="#0f172a"
@@ -91,38 +90,43 @@ export async function GET(req: NextRequest) {
           {/* Title */}
           <div
             style={{
-              fontSize: "14px",
+              fontSize: "13px",
               fontWeight: 600,
-              letterSpacing: "8px",
+              letterSpacing: "10px",
               color: "#fbbf24",
               textTransform: "uppercase",
-              marginBottom: "12px",
+              marginBottom: "16px",
             }}
           >
             Certificate of Completion
           </div>
 
+          {/* Name */}
           <div
             style={{
-              fontSize: "40px",
+              fontSize: "48px",
               fontWeight: 700,
               color: "#ffffff",
-              marginBottom: "40px",
+              marginBottom: "32px",
+              maxWidth: "900px",
+              textAlign: "center",
             }}
           >
             {name}
           </div>
 
+          {/* Completed */}
           <div
             style={{
-              fontSize: "18px",
+              fontSize: "16px",
               color: "#94a3b8",
-              marginBottom: "16px",
+              marginBottom: "20px",
             }}
           >
             has successfully completed
           </div>
 
+          {/* Course */}
           <div
             style={{
               fontSize: "28px",
@@ -130,84 +134,90 @@ export async function GET(req: NextRequest) {
               color: "#ffffff",
               textAlign: "center",
               maxWidth: "800px",
-              marginBottom: "40px",
+              marginBottom: "48px",
             }}
           >
             {course}
           </div>
 
           {/* Score and Date */}
-          <div
-            style={{
-              display: "flex",
-              gap: "60px",
-              alignItems: "center",
-            }}
-          >
+          {score && score !== "0" && (
             <div
               style={{
                 display: "flex",
-                flexDirection: "column",
+                gap: "80px",
                 alignItems: "center",
               }}
             >
               <div
                 style={{
-                  fontSize: "12px",
-                  color: "#64748b",
-                  marginBottom: "8px",
-                  textTransform: "uppercase",
-                  letterSpacing: "2px",
-                }}
-              >
-                Score
-              </div>
-              <div
-                style={{
-                  fontSize: "36px",
-                  fontWeight: 700,
-                  color: "#fbbf24",
-                }}
-              >
-                {score}%
-              </div>
-            </div>
-            <div
-              style={{
-                width: "1px",
-                height: "60px",
-                backgroundColor: "#334155",
-              }}
-            />
-            <div
-              style={{
-                display: "flex",
+                  display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
               }}
-            >
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#64748b",
-                  marginBottom: "8px",
-                  textTransform: "uppercase",
-                  letterSpacing: "2px",
-                }}
               >
-                Date
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "#64748b",
+                    marginBottom: "8px",
+                    textTransform: "uppercase",
+                    letterSpacing: "3px",
+                  }}
+                >
+                  Score
+                </div>
+                <div
+                  style={{
+                    fontSize: "40px",
+                    fontWeight: 700,
+                    color: "#fbbf24",
+                  }}
+                >
+                  {score}%
+                </div>
               </div>
-              <div
-                style={{
-                  fontSize: "20px",
-                  fontWeight: 600,
-                  color: "#ffffff",
-                }}
-              >
-                {date}
-              </div>
+              {date && (
+                <>
+                  <div
+                    style={{
+                      width: "1px",
+                      height: "60px",
+                      backgroundColor: "#334155",
+                    }}
+                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: "#64748b",
+                        marginBottom: "8px",
+                        textTransform: "uppercase",
+                        letterSpacing: "3px",
+                      }}
+                    >
+                      Date
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "18px",
+                        fontWeight: 600,
+                        color: "#ffffff",
+                      }}
+                    >
+                      {date}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
-          </div>
+          )}
 
           {/* Branding */}
           <div
@@ -222,13 +232,13 @@ export async function GET(req: NextRequest) {
             <div
               style={{
                 backgroundColor: "#fbbf24",
-                borderRadius: "8px",
-                padding: "8px 16px",
+                borderRadius: "10px",
+                padding: "10px 20px",
               }}
             >
               <span
                 style={{
-                  fontSize: "16px",
+                  fontSize: "18px",
                   fontWeight: 800,
                   color: "#0f172a",
                   letterSpacing: "-0.5px",
