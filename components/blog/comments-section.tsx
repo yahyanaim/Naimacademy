@@ -183,7 +183,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         <div className="bg-muted/50 rounded-lg p-6 text-center">
           <div className="h-6 w-32 bg-muted rounded animate-pulse mx-auto" />
         </div>
-      ) : step === "locked" && (
+      ) : step === "locked" && !currentUser ? (
         <div className="bg-muted/50 rounded-lg p-8 text-center">
           <div className="max-w-md mx-auto">
             <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mx-auto mb-4">
@@ -198,9 +198,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
             </Button>
           </div>
         </div>
-      )}
-
-      {step === "identity" && (
+      ) : step === "identity" && !currentUser ? (
         <div className="bg-card border rounded-xl p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-semibold">Enter your details to comment</h3>
@@ -247,9 +245,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
             </div>
           </form>
         </div>
-      )}
-
-      {(step === "form" || currentUser) && (
+      ) : (step === "form" || currentUser) ? (
         <div className="space-y-6">
           <div className="bg-card border rounded-xl p-4">
             <div className="flex items-start gap-3">
