@@ -21,6 +21,12 @@ interface CommentsSectionProps {
   articleTitle: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export default function CommentsSection({ slug, articleTitle }: CommentsSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,10 +38,32 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [step, setStep] = useState<"locked" | "identity" | "form">("locked");
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
+    checkAuth();
     fetchComments();
   }, [slug]);
+
+  async function checkAuth() {
+    try {
+      const res = await fetch("/api/auth/me");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          setCurrentUser(data.user);
+          setName(data.user.name || "");
+          setEmail(data.user.email || "");
+          setStep("form");
+        }
+      }
+    } catch {
+      // not logged in
+    } finally {
+      setCheckingAuth(false);
+    }
+  }
 
   async function fetchComments() {
     try {
@@ -132,7 +160,11 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         )}
       </div>
 
-      {step === "locked" && (
+      {checkingAuth ? (
+        <div className="bg-muted/50 rounded-lg p-6 text-center">
+          <div className="h-6 w-32 bg-muted rounded animate-pulse mx-auto" />
+        </div>
+      ) : step === "locked" && (
         <div className="bg-muted/50 rounded-lg p-8 text-center">
           <div className="max-w-md mx-auto">
             <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mx-auto mb-4">
@@ -198,7 +230,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         </div>
       )}
 
-      {step === "form" && (
+      {(step === "form" || currentUser) && (
         <div className="space-y-6">
           <div className="bg-card border rounded-xl p-4">
             <div className="flex items-start gap-3">
@@ -209,22 +241,13 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
               </div>
               <form onSubmit={handleCommentSubmit} className="flex-1">
                 <Textarea
-                  placeholder={`What do you think, ${name.split(" ")[0]}?`}
+                  placeholder={currentUser ? `What do you think, ${name.split(" ")[0]}?` : "Write a comment..."}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   rows={3}
                   className="resize-none mb-3 border rounded-lg"
                 />
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setStep("identity")}
-                      className="text-xs text-muted-foreground hover:text-foreground"
-                    >
-                      Comment as {name}
-                    </button>
-                  </div>
+                <div className="flex items-center justify-end">
                   <div className="flex items-center gap-2">
                     {error && (
                       <span className="text-xs text-red-500">{error}</span>
@@ -245,17 +268,11 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          {comments.length > 0 && (
             <p className="text-sm text-muted-foreground">
               {comments.length} comment{comments.length !== 1 ? "s" : ""}
             </p>
-            <button
-              onClick={() => setStep("locked")}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              Close comment box
-            </button>
-          </div>
+          )}
         </div>
       )}
 
