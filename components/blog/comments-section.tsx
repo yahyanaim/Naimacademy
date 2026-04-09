@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageSquare, Send, User, Mail, CheckCircle, Lock, X, Facebook } from "lucide-react";
+import { MessageSquare, Send, User, Mail, CheckCircle, Lock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
