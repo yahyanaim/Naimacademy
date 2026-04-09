@@ -7,7 +7,7 @@ import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import ShareButtons from "@/components/blog/share-buttons";
 import VoteButtons from "@/components/blog/vote-buttons";
-import CommentsPlaceholder from "@/components/blog/comments-placeholder";
+import CommentsSection from "@/components/blog/comments-section";
 
 async function getPost(slug: string) {
   try {
@@ -216,7 +216,7 @@ export default async function BlogPostPage({
 
             <ShareButtons title={post.title} />
 
-            <CommentsPlaceholder />
+            <CommentsSection slug={post.slug} articleTitle={post.title} />
           </article>
 
           {relatedPosts.length > 0 && (
