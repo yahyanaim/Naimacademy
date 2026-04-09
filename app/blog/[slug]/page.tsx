@@ -203,7 +203,7 @@ export default async function BlogPostPage({
             </header>
 
             <div
-              className="prose prose-lg max-w-none"
+              className="prose prose-lg max-w-none text-justify leading-relaxed"
               dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
             />
 
