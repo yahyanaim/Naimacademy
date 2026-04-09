@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ThumbsUp, ThumbsDown, Lock, User, Mail, X, CheckCircle } from "lucide-react";
+import { ThumbsUp, ThumbsDown, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface VoteButtonsProps {
@@ -16,55 +16,80 @@ interface Voter {
   vote: "up" | "down" | null;
 }
 
+interface LoggedInUser {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes = 0 }: VoteButtonsProps) {
   const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
   const [upvotes, setUpvotes] = useState(initialUpvotes);
   const [downvotes, setDownvotes] = useState(initialDownvotes);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [step, setStep] = useState<"locked" | "identity" | "voted">("locked");
+  const [step, setStep] = useState<"checking" | "locked" | "identity" | "ready">("checking");
   const [voterName, setVoterName] = useState("");
   const [voterEmail, setVoterEmail] = useState("");
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
 
   useEffect(() => {
-    checkStoredVoter();
+    checkAuthAndVoter();
   }, [slug]);
 
-  function checkStoredVoter() {
+  async function checkAuthAndVoter() {
+    try {
+      const authRes = await fetch("/api/auth/me");
+      if (authRes.ok) {
+        const authData = await authRes.json();
+        if (authData.user) {
+          setLoggedInUser({
+            id: authData.user.id,
+            name: authData.user.name || authData.user.email?.split("@")[0] || "User",
+            email: authData.user.email || "",
+          });
+          setVoterName(authData.user.name || authData.user.email?.split("@")[0] || "User");
+          setVoterEmail(authData.user.email || "");
+          await fetchVotes(authData.user.email?.toLowerCase() || "");
+          setStep("ready");
+          return;
+        }
+      }
+    } catch {
+      // not logged in, check localStorage
+    }
+
     const stored = localStorage.getItem(`vote_${slug}`);
     if (stored) {
       try {
         const voter: Voter = JSON.parse(stored);
         setVoterName(voter.name);
         setVoterEmail(voter.email);
-        fetchVotes(voter.email);
+        await fetchVotes(voter.email);
+        setStep("ready");
         return;
       } catch {
         localStorage.removeItem(`vote_${slug}`);
       }
     }
-    setCheckingAuth(false);
+    
+    setStep("locked");
   }
 
   async function fetchVotes(email: string) {
     try {
-      const res = await fetch(`/api/blog/vote?slug=${slug}&email=${encodeURIComponent(email)}`);
+      const params = new URLSearchParams({ slug });
+      if (email) params.append("email", email);
+      
+      const res = await fetch(`/api/blog/vote?${params}`);
       if (res.ok) {
         const data = await res.json();
         setUpvotes(data.upvotes);
         setDownvotes(data.downvotes);
         setUserVote(data.userVote);
-        if (data.userVote) {
-          setStep("voted");
-        } else {
-          setStep("voted");
-        }
       }
     } catch {
       // ignore
-    } finally {
-      setCheckingAuth(false);
     }
   }
 
@@ -92,12 +117,12 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
       vote: null
     }));
 
-    setStep("voted");
+    setStep("ready");
     fetchVotes(voterEmail.trim().toLowerCase());
   }
 
   async function handleVote(vote: "up" | "down") {
-    if (step !== "voted") return;
+    if (step !== "ready") return;
     if (loading) return;
     if (userVote === vote) return;
 
@@ -128,11 +153,13 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
       setDownvotes(data.downvotes);
       setUserVote(data.userVote);
 
-      localStorage.setItem(`vote_${slug}`, JSON.stringify({
-        name: voterName.trim(),
-        email: voterEmail.trim().toLowerCase(),
-        vote: data.userVote || null,
-      }));
+      if (!loggedInUser) {
+        localStorage.setItem(`vote_${slug}`, JSON.stringify({
+          name: voterName.trim(),
+          email: voterEmail.trim().toLowerCase(),
+          vote: data.userVote || null,
+        }));
+      }
     } catch {
       setError("Failed to vote");
     } finally {
@@ -140,7 +167,7 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
     }
   }
 
-  if (checkingAuth) {
+  if (step === "checking") {
     return (
       <div className="flex items-center gap-4 py-6 border-y">
         <div className="h-10 w-32 bg-muted rounded-full animate-pulse" />
@@ -153,7 +180,6 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
     return (
       <div className="flex items-center gap-4 py-6 border-y">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Lock className="size-4" />
           <span>Enter your details to vote on this article</span>
         </div>
         <Button onClick={handleStartVoting} size="sm" className="ml-auto">
@@ -166,26 +192,24 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
   if (step === "identity") {
     return (
       <div className="flex items-center gap-4 py-6 border-y">
-        <form onSubmit={handleIdentitySubmit} className="flex items-center gap-2 flex-1">
-          <div className="relative flex-1 max-w-[150px]">
-            <User className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <form onSubmit={handleIdentitySubmit} className="flex items-center gap-2 flex-1 flex-wrap">
+          <div className="relative flex-1 min-w-[120px] max-w-[150px]">
             <input
               type="text"
               placeholder="Name"
               value={voterName}
               onChange={(e) => setVoterName(e.target.value)}
-              className="w-full pl-8 pr-2 py-1.5 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full px-3 py-1.5 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
               required
             />
           </div>
-          <div className="relative flex-1 max-w-[200px]">
-            <Mail className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <div className="relative flex-1 min-w-[160px] max-w-[200px]">
             <input
               type="email"
               placeholder="Email"
               value={voterEmail}
               onChange={(e) => setVoterEmail(e.target.value)}
-              className="w-full pl-8 pr-2 py-1.5 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full px-3 py-1.5 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
               required
             />
           </div>
@@ -193,13 +217,6 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
           <Button type="submit" size="sm">
             Continue
           </Button>
-          <button
-            type="button"
-            onClick={() => setStep("locked")}
-            className="p-1.5 text-muted-foreground hover:text-foreground"
-          >
-            <X className="size-4" />
-          </button>
         </form>
       </div>
     );
@@ -253,7 +270,7 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
       {userVote && (
         <div className="ml-auto flex items-center gap-1 text-xs text-green-600">
           <CheckCircle className="size-3" />
-          <span>Voted as {voterName}</span>
+          <span>Voted{loggedInUser ? " as " + loggedInUser.name : ""}</span>
         </div>
       )}
     </div>
