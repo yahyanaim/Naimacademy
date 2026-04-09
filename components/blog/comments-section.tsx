@@ -183,7 +183,51 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         <div className="bg-muted/50 rounded-lg p-6 text-center">
           <div className="h-6 w-32 bg-muted rounded animate-pulse mx-auto" />
         </div>
-      ) : step === "locked" && !currentUser ? (
+      ) : currentUser || step === "form" ? (
+        <div className="space-y-6">
+          <div className="bg-card border rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <div className="size-10 rounded-full bg-black/80 flex items-center justify-center flex-shrink-0">
+                <span className="text-sm font-bold text-white">
+                  {name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <form onSubmit={handleCommentSubmit} className="flex-1">
+                <Textarea
+                  placeholder={currentUser ? `What do you think, ${name.split(" ")[0]}?` : "Write a comment..."}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  rows={3}
+                  className="resize-none mb-3 border rounded-lg"
+                />
+                <div className="flex items-center justify-end">
+                  <div className="flex items-center gap-2">
+                    {error && (
+                      <span className="text-xs text-red-500">{error}</span>
+                    )}
+                    {success && (
+                      <span className="text-xs text-green-600 flex items-center gap-1">
+                        <CheckCircle className="size-3" />
+                        Posted!
+                      </span>
+                    )}
+                    <Button type="submit" size="sm" disabled={submitting}>
+                      <Send className="size-4 mr-1" />
+                      {submitting ? "Posting..." : "Post"}
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {comments.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {comments.length} comment{comments.length !== 1 ? "s" : ""}
+            </p>
+          )}
+        </div>
+      ) : step === "locked" ? (
         <div className="bg-muted/50 rounded-lg p-8 text-center">
           <div className="max-w-md mx-auto">
             <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mx-auto mb-4">
@@ -198,7 +242,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
             </Button>
           </div>
         </div>
-      ) : step === "identity" && !currentUser ? (
+      ) : step === "identity" ? (
         <div className="bg-card border rounded-xl p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-semibold">Enter your details to comment</h3>
@@ -245,51 +289,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
             </div>
           </form>
         </div>
-      ) : (step === "form" || currentUser) ? (
-        <div className="space-y-6">
-          <div className="bg-card border rounded-xl p-4">
-            <div className="flex items-start gap-3">
-              <div className="size-10 rounded-full bg-black/80 flex items-center justify-center flex-shrink-0">
-                <span className="text-sm font-bold text-white">
-                  {name.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <form onSubmit={handleCommentSubmit} className="flex-1">
-                <Textarea
-                  placeholder={currentUser ? `What do you think, ${name.split(" ")[0]}?` : "Write a comment..."}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={3}
-                  className="resize-none mb-3 border rounded-lg"
-                />
-                <div className="flex items-center justify-end">
-                  <div className="flex items-center gap-2">
-                    {error && (
-                      <span className="text-xs text-red-500">{error}</span>
-                    )}
-                    {success && (
-                      <span className="text-xs text-green-600 flex items-center gap-1">
-                        <CheckCircle className="size-3" />
-                        Posted!
-                      </span>
-                    )}
-                    <Button type="submit" size="sm" disabled={submitting}>
-                      <Send className="size-4 mr-1" />
-                      {submitting ? "Posting..." : "Post"}
-                    </Button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          {comments.length > 0 && (
-            <p className="text-sm text-muted-foreground">
-              {comments.length} comment{comments.length !== 1 ? "s" : ""}
-            </p>
-          )}
-        </div>
-      )}
+      ) : null}
 
       {loading ? (
         <div className="space-y-4 mt-6">
