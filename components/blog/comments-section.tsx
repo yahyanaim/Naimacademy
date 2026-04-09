@@ -56,13 +56,27 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
           setName(data.user.name || "");
           setEmail(data.user.email || "");
           setStep("form");
+          return;
         }
       }
     } catch {
       // not logged in
-    } finally {
-      setCheckingAuth(false);
     }
+
+    const stored = localStorage.getItem("user_identity");
+    if (stored) {
+      try {
+        const identity = JSON.parse(stored);
+        setName(identity.name || "");
+        setEmail(identity.email || "");
+        setStep("form");
+        return;
+      } catch {
+        // invalid stored data
+      }
+    }
+
+    setCheckingAuth(false);
   }
 
   async function fetchComments() {
@@ -96,6 +110,11 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
       setError("Please enter a valid email");
       return;
     }
+
+    localStorage.setItem("user_identity", JSON.stringify({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+    }));
 
     setStep("form");
   }

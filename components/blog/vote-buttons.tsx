@@ -59,10 +59,24 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
       // not logged in, check localStorage
     }
 
-    const stored = localStorage.getItem(`vote_${slug}`);
+    const stored = localStorage.getItem("user_identity");
     if (stored) {
       try {
-        const voter: Voter = JSON.parse(stored);
+        const identity = JSON.parse(stored);
+        setVoterName(identity.name || "");
+        setVoterEmail(identity.email || "");
+        await fetchVotes(identity.email);
+        setStep("ready");
+        return;
+      } catch {
+        // invalid stored data
+      }
+    }
+
+    const voteStored = localStorage.getItem(`vote_${slug}`);
+    if (voteStored) {
+      try {
+        const voter: Voter = JSON.parse(voteStored);
         setVoterName(voter.name);
         setVoterEmail(voter.email);
         await fetchVotes(voter.email);
@@ -111,6 +125,11 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
       return;
     }
 
+    localStorage.setItem("user_identity", JSON.stringify({
+      name: voterName.trim(),
+      email: voterEmail.trim().toLowerCase(),
+    }));
+
     localStorage.setItem(`vote_${slug}`, JSON.stringify({
       name: voterName.trim(),
       email: voterEmail.trim().toLowerCase(),
@@ -158,6 +177,10 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
           name: voterName.trim(),
           email: voterEmail.trim().toLowerCase(),
           vote: data.userVote || null,
+        }));
+        localStorage.setItem("user_identity", JSON.stringify({
+          name: voterName.trim(),
+          email: voterEmail.trim().toLowerCase(),
         }));
       }
     } catch {
