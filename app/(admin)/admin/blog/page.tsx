@@ -150,10 +150,7 @@ export default function BlogManagementPage() {
           setIsDialogOpen(false);
           
           if (formData.isPublished) {
-            const sendNotification = confirm("Article published! Would you like to send a notification to all students about this new article?");
-            if (sendNotification) {
-              await sendNewArticleNotification(formData.title);
-            }
+            await sendNewArticleNotification(formData.title);
           }
         }
       }
@@ -206,10 +203,7 @@ export default function BlogManagementPage() {
       await loadPosts();
       
       if (newStatus) {
-        const sendNotification = confirm("Article published! Would you like to send a notification to all students?");
-        if (sendNotification) {
-          await sendNewArticleNotification(post.title);
-        }
+        await sendNewArticleNotification(post.title);
       }
     } catch {
       // ignore
