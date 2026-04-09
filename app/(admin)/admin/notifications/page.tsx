@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, Send, Users, Award, BookOpen, Info, CheckCircle, X, User, Search, Filter } from "lucide-react";
+import { Bell, Send, Users, Award, BookOpen, Info, CheckCircle, X, User, Search, Filter, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 interface Notification {
@@ -121,6 +121,10 @@ export default function NotificationsPage() {
         filtered = allStudents.filter(s => s.isNew);
         autoSelected = allStudents.filter(s => s.isNew).map(s => s._id);
         break;
+      case "new_article":
+        filtered = allStudents;
+        autoSelected = allStudents.map(s => s._id);
+        break;
       default:
         filtered = allStudents;
         autoSelected = [];
@@ -229,6 +233,8 @@ export default function NotificationsPage() {
         return allStudents.filter(s => s.hasCompleted);
       case "new_user":
         return allStudents.filter(s => s.isNew);
+      case "new_article":
+        return allStudents;
       default:
         return allStudents;
     }
@@ -247,6 +253,7 @@ export default function NotificationsPage() {
     new_user: Users,
     course_completed: BookOpen,
     certificate: Award,
+    new_article: FileText,
     general: Info,
   };
 
@@ -297,6 +304,12 @@ export default function NotificationsPage() {
                     <div className="flex items-center justify-between w-full">
                       <span>Has Certificate</span>
                       <span className="text-xs text-muted-foreground ml-2">({getStudentCountByType("certificate")})</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="new_article">
+                    <div className="flex items-center justify-between w-full">
+                      <span>New Article Published</span>
+                      <span className="text-xs text-muted-foreground ml-2">({allStudents.length})</span>
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -350,6 +363,7 @@ export default function NotificationsPage() {
                       {type === "certificate" && "Students with certificates"}
                       {type === "course_completed" && "Students who completed the course"}
                       {type === "new_user" && "New users (last 7 days)"}
+                      {type === "new_article" && "All students (new article)"}
                       {type === "general" && "All students"}
                     </span>
                     <span className="text-xs text-muted-foreground">

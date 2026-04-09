@@ -30,7 +30,9 @@ import {
   Search,
   Calendar,
   Clock,
+  Bell,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface BlogPost {
   _id: string;
@@ -146,10 +148,40 @@ export default function BlogManagementPage() {
         if (res.ok) {
           await loadPosts();
           setIsDialogOpen(false);
+          
+          if (formData.isPublished) {
+            const sendNotification = confirm("Article published! Would you like to send a notification to all students about this new article?");
+            if (sendNotification) {
+              await sendNewArticleNotification(formData.title);
+            }
+          }
         }
       }
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function sendNewArticleNotification(articleTitle: string) {
+    try {
+      const res = await fetch("/api/admin/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: "New Article Published!",
+          message: `Check out our latest article: "${articleTitle}"`,
+          type: "new_article",
+          userIds: [],
+        }),
+      });
+      
+      if (res.ok) {
+        toast.success("Notification sent to all students!");
+      } else {
+        toast.error("Failed to send notification");
+      }
+    } catch {
+      toast.error("Failed to send notification");
     }
   }
 
@@ -164,13 +196,21 @@ export default function BlogManagementPage() {
   }
 
   async function handleTogglePublish(post: BlogPost) {
+    const newStatus = !post.isPublished;
     try {
       await fetch("/api/admin/blog", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: post._id, isPublished: !post.isPublished }),
+        body: JSON.stringify({ id: post._id, isPublished: newStatus }),
       });
       await loadPosts();
+      
+      if (newStatus) {
+        const sendNotification = confirm("Article published! Would you like to send a notification to all students?");
+        if (sendNotification) {
+          await sendNewArticleNotification(post.title);
+        }
+      }
     } catch {
       // ignore
     }

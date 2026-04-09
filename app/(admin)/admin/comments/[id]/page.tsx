@@ -40,9 +40,7 @@ export default function CommentReplyPage() {
       if (res.ok) {
         const data = await res.json();
         setComment(data.comment);
-        if (data.comment?.adminReply) {
-          setReply(data.comment.adminReply);
-        }
+        setReply("");
       } else {
         router.push("/admin/comments");
       }
@@ -75,6 +73,7 @@ export default function CommentReplyPage() {
       if (res.ok) {
         const data = await res.json();
         setComment(data.comment);
+        setReply("");
         setSuccess(true);
         setTimeout(() => setSuccess(false), 3000);
       } else {
