@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     await connectDB();
     
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const token = cookieStore.get("auth-token")?.value;
     
     if (!token) {
       return NextResponse.json({ error: "Please login to vote" }, { status: 401 });
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
     
-    if (vote !== "up" && vote !== "down" && vote !== "remove") {
+    if (vote !== "up" && vote !== "down") {
       return NextResponse.json({ error: "Invalid vote type" }, { status: 400 });
     }
     
@@ -36,43 +36,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
     
-    const hasVoted = post.votedBy.includes(userId);
+    const votesMap = post.votes as Map<string, string>;
+    const previousVote = votesMap.get(userId);
     
-    if (vote === "remove" && hasVoted) {
-      const previousVote = post.votedBy.indexOf(userId);
-      if (previousVote !== -1) {
-        post.votedBy.splice(previousVote, 1);
-        if (post.votes && post.votes[userId] === "up") {
-          post.upvotes = Math.max(0, post.upvotes - 1);
-        } else if (post.votes && post.votes[userId] === "down") {
-          post.downvotes = Math.max(0, post.downvotes - 1);
-        }
-      }
-      await post.save();
+    if (previousVote === vote) {
       return NextResponse.json({ 
-        success: true, 
+        error: "You have already voted for this",
         upvotes: post.upvotes,
         downvotes: post.downvotes,
-        userVote: null
-      });
+        userVote: vote
+      }, { status: 400 });
     }
     
-    if (hasVoted && vote !== "remove") {
-      return NextResponse.json({ 
-        error: "You have already voted. Remove your vote first.",
-        upvotes: post.upvotes,
-        downvotes: post.downvotes,
-        userVote: post.votes?.[userId] || null
-      }, { status: 400 });
+    if (previousVote === "up") {
+      post.upvotes = Math.max(0, post.upvotes - 1);
+    } else if (previousVote === "down") {
+      post.downvotes = Math.max(0, post.downvotes - 1);
+    } else {
+      post.votedBy.push(userId);
     }
     
     if (vote === "up") {
       post.upvotes += 1;
-      post.votedBy.push(userId);
     } else if (vote === "down") {
       post.downvotes += 1;
-      post.votedBy.push(userId);
     }
+    
+    votesMap.set(userId, vote);
     
     await post.save();
     
@@ -80,7 +70,7 @@ export async function POST(request: Request) {
       success: true, 
       upvotes: post.upvotes,
       downvotes: post.downvotes,
-      userVote: vote === "remove" ? null : vote
+      userVote: vote
     });
     
   } catch (error) {
@@ -97,7 +87,7 @@ export async function GET(request: Request) {
     await connectDB();
     
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const token = cookieStore.get("auth-token")?.value;
     
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get("slug");
@@ -119,7 +109,8 @@ export async function GET(request: Request) {
         const secret = process.env.JWT_SECRET || "default-secret";
         const decoded = jwt.default.verify(token, secret) as { userId: string };
         const userId = decoded.userId;
-        userVote = (post as any).votedBy?.includes(userId) ? "voted" : null;
+        const votesMap = (post as any).votes as Record<string, string> | undefined;
+        userVote = votesMap?.[userId] || null;
       } catch {
         // Invalid token, ignore
       }
