@@ -7,12 +7,12 @@ export default function BlogPage() {
     <>
       <Navbar />
       <main className="flex-1 pt-14">
-        <div className="max-w-4xl mx-auto px-6 py-12">
-          <div className="mb-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+        <div className="max-w-3xl mx-auto px-6 py-8">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold tracking-tight">
               Articles
             </h1>
-            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+            <p className="text-sm text-muted-foreground mt-1">
               Insights, tutorials, and stories to help you learn and grow
             </p>
           </div>
