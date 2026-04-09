@@ -13,7 +13,7 @@ interface VoteButtonsProps {
 interface Voter {
   name: string;
   email: string;
-  vote: "up" | "down";
+  vote: "up" | "down" | null;
 }
 
 export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes = 0 }: VoteButtonsProps) {
@@ -89,7 +89,7 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
     localStorage.setItem(`vote_${slug}`, JSON.stringify({
       name: voterName.trim(),
       email: voterEmail.trim().toLowerCase(),
-      vote: null as "up" | "down"
+      vote: null
     }));
 
     setStep("voted");
@@ -131,7 +131,7 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
       localStorage.setItem(`vote_${slug}`, JSON.stringify({
         name: voterName.trim(),
         email: voterEmail.trim().toLowerCase(),
-        vote: data.userVote,
+        vote: data.userVote || null,
       }));
     } catch {
       setError("Failed to vote");
