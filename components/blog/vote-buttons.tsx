@@ -183,7 +183,8 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
           email: voterEmail.trim().toLowerCase(),
         }));
       }
-    } catch {
+    } catch (err) {
+      console.error("Vote error:", err);
       setError("Failed to vote");
     } finally {
       setLoading(false);

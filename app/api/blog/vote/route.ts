@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
     
-    const votesObj = post.votes instanceof Map ? Object.fromEntries(post.votes) : post.votes || {};
+    const votesObj = post.votes || {};
     const previousVote = votesObj[email];
     
     if (previousVote === vote) {

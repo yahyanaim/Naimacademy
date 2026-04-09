@@ -15,7 +15,7 @@ export interface IBlogPost extends Document {
   upvotes: number;
   downvotes: number;
   votedBy: string[];
-  votes: Record<string, "up" | "down">;
+  votes: Record<string, string>;
   publishedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -37,7 +37,7 @@ const BlogPostSchema = new Schema<IBlogPost>(
     upvotes: { type: Number, default: 0 },
     downvotes: { type: Number, default: 0 },
     votedBy: [{ type: String }],
-    votes: { type: Map, of: String, default: {} },
+    votes: { type: Object, default: {} },
     publishedAt: { type: Date },
   },
   { timestamps: true }
