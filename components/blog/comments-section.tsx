@@ -120,10 +120,6 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
     });
   }
 
-  function getInitials(name: string) {
-    return name.charAt(0).toUpperCase();
-  }
-
   return (
     <section className="mt-12 pt-8 border-t">
       <div className="flex items-center gap-3 mb-6">
@@ -137,20 +133,17 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
       </div>
 
       {step === "locked" && (
-        <div className="bg-card border rounded-xl p-6">
-          <div className="flex items-center gap-4">
-            <div className="size-12 rounded-full bg-muted flex items-center justify-center">
-              <Lock className="size-5 text-muted-foreground" />
+        <div className="bg-muted/50 rounded-lg p-8 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mx-auto mb-4">
+              <Lock className="size-8 text-black" />
             </div>
-            <div className="flex-1">
-              <h3 className="font-semibold mb-1">Join the conversation</h3>
-              <p className="text-sm text-muted-foreground">
-                Sign in or comment as a guest to share your thoughts
-              </p>
-            </div>
+            <h3 className="text-lg font-semibold mb-2">Join the conversation</h3>
+            <p className="text-muted-foreground mb-6">
+              Enter your name and email to share your thoughts on this article
+            </p>
             <Button onClick={handleStartCommenting}>
-              <MessageSquare className="size-4 mr-2" />
-              Comment
+              Start Commenting
             </Button>
           </div>
         </div>
@@ -209,9 +202,9 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         <div className="space-y-6">
           <div className="bg-card border rounded-xl p-4">
             <div className="flex items-start gap-3">
-              <div className="size-10 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+              <div className="size-10 rounded-full bg-black/80 flex items-center justify-center flex-shrink-0">
                 <span className="text-sm font-bold text-white">
-                  {getInitials(name)}
+                  {name.charAt(0).toUpperCase()}
                 </span>
               </div>
               <form onSubmit={handleCommentSubmit} className="flex-1">
@@ -283,9 +276,9 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         <div className="space-y-6 mt-6">
           {comments.map((comment) => (
             <div key={comment._id} className="flex gap-3">
-              <div className="size-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+              <div className="size-10 rounded-full bg-black/80 flex items-center justify-center flex-shrink-0">
                 <span className="text-sm font-bold text-white">
-                  {getInitials(comment.authorName)}
+                  {comment.authorName.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="flex-1">
