@@ -29,8 +29,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
     
-    const votesMap = post.votes as Map<string, string>;
-    const previousVote = votesMap.get(email);
+    const votesObj = post.votes instanceof Map ? Object.fromEntries(post.votes) : post.votes || {};
+    const previousVote = votesObj[email];
     
     if (previousVote === vote) {
       return NextResponse.json({ 
@@ -55,7 +55,8 @@ export async function POST(request: Request) {
       post.downvotes += 1;
     }
     
-    votesMap.set(email, vote);
+    votesObj[email] = vote;
+    post.votes = votesObj;
     
     await post.save();
     
@@ -95,8 +96,8 @@ export async function GET(request: Request) {
     
     let userVote = null;
     if (email) {
-      const votesMap = (post as any).votes as Record<string, string> | undefined;
-      userVote = votesMap?.[email.toLowerCase()] || null;
+      const votesObj = (post as any).votes || {};
+      userVote = votesObj[email.toLowerCase()] || null;
     }
     
     return NextResponse.json({ 
