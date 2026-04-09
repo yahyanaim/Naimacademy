@@ -111,43 +111,40 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
 
   return (
     <div className="flex items-center gap-4 py-6 border-y">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <button
           onClick={() => handleVote("up")}
           disabled={loading}
-          className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full transition-all font-medium text-sm ${
+          className={`inline-flex items-center justify-center w-10 h-10 rounded-full transition-all ${
             userVote === "up"
               ? "bg-emerald-500 text-white hover:bg-emerald-600"
-              : "bg-emerald-100 hover:bg-emerald-200 text-emerald-700 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 dark:text-emerald-400"
+              : "bg-black/10 hover:bg-emerald-100 text-black/70 hover:text-emerald-600 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
           }`}
           title="Upvote"
         >
-          <ThumbsUp className="size-4" />
-          Upvote
+          <ThumbsUp className="size-5" />
         </button>
-        <span className={`text-lg font-bold min-w-[3ch] text-center px-2 ${
-          score > 0 ? "text-emerald-600 dark:text-emerald-400" : score < 0 ? "text-red-600 dark:text-red-400" : "text-muted-foreground"
+        <span className={`text-lg font-bold min-w-[3ch] text-center ${
+          score > 0 ? "text-emerald-600" : score < 0 ? "text-red-600" : "text-muted-foreground"
         }`}>
           {score > 0 ? `+${score}` : score}
         </span>
         <button
           onClick={() => handleVote("down")}
           disabled={loading}
-          className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full transition-all font-medium text-sm ${
+          className={`inline-flex items-center justify-center w-10 h-10 rounded-full transition-all ${
             userVote === "down"
               ? "bg-red-500 text-white hover:bg-red-600"
-              : "bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400"
+              : "bg-black/10 hover:bg-red-100 text-black/70 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
           }`}
           title="Downvote"
         >
-          <ThumbsDown className="size-4" />
-          Downvote
+          <ThumbsDown className="size-5" />
         </button>
       </div>
       
-      <div className="flex items-center gap-3 text-xs text-muted-foreground ml-2">
+      <div className="flex items-center gap-4 text-xs text-muted-foreground">
         <span>{upvotes} upvotes</span>
-        <span>·</span>
         <span>{downvotes} downvotes</span>
       </div>
 
