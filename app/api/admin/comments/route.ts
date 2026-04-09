@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongoose";
 import { Comment } from "@/lib/models/comment.model";
+import { BlogPost } from "@/lib/models/blog-post.model";
 
 export async function GET(request: Request) {
   try {
@@ -23,8 +24,21 @@ export async function GET(request: Request) {
       Comment.countDocuments(query),
     ]);
 
+    const uniqueSlugs = [...new Set(comments.map((c) => c.articleSlug))];
+    const posts = await BlogPost.find({ slug: { $in: uniqueSlugs } }).lean();
+    const postsMap = new Map(posts.map((p) => [p.slug, p]));
+
+    const commentsWithVotes = comments.map((comment) => {
+      const post = postsMap.get(comment.articleSlug);
+      return {
+        ...comment,
+        upvotes: post?.upvotes || 0,
+        downvotes: post?.downvotes || 0,
+      };
+    });
+
     return NextResponse.json({
-      comments,
+      comments: commentsWithVotes,
       pagination: {
         page,
         limit,

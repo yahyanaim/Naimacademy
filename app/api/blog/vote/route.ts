@@ -1,21 +1,13 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongoose";
 import { BlogPost } from "@/lib/models/blog-post.model";
-import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
   try {
     await connectDB();
     
-    const cookieStore = await cookies();
-    const token = cookieStore.get("auth-token")?.value;
-    
-    if (!token) {
-      return NextResponse.json({ error: "Please login to vote" }, { status: 401 });
-    }
-    
     const body = await request.json();
-    const { slug, vote } = body;
+    const { slug, vote, voterName, voterEmail } = body;
     
     if (!slug || !vote) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -25,10 +17,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid vote type" }, { status: 400 });
     }
     
-    const jwt = await import("jsonwebtoken");
-    const secret = process.env.JWT_SECRET || "default-secret";
-    const decoded = jwt.default.verify(token, secret) as { userId: string };
-    const userId = decoded.userId;
+    if (!voterEmail) {
+      return NextResponse.json({ error: "Email required" }, { status: 400 });
+    }
+    
+    const email = voterEmail.toLowerCase();
     
     const post = await BlogPost.findOne({ slug, isPublished: true });
     
@@ -37,7 +30,7 @@ export async function POST(request: Request) {
     }
     
     const votesMap = post.votes as Map<string, string>;
-    const previousVote = votesMap.get(userId);
+    const previousVote = votesMap.get(email);
     
     if (previousVote === vote) {
       return NextResponse.json({ 
@@ -53,7 +46,7 @@ export async function POST(request: Request) {
     } else if (previousVote === "down") {
       post.downvotes = Math.max(0, post.downvotes - 1);
     } else {
-      post.votedBy.push(userId);
+      post.votedBy.push(email);
     }
     
     if (vote === "up") {
@@ -62,7 +55,7 @@ export async function POST(request: Request) {
       post.downvotes += 1;
     }
     
-    votesMap.set(userId, vote);
+    votesMap.set(email, vote);
     
     await post.save();
     
@@ -86,11 +79,9 @@ export async function GET(request: Request) {
   try {
     await connectDB();
     
-    const cookieStore = await cookies();
-    const token = cookieStore.get("auth-token")?.value;
-    
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get("slug");
+    const email = searchParams.get("email");
     
     if (!slug) {
       return NextResponse.json({ error: "Slug required" }, { status: 400 });
@@ -103,17 +94,9 @@ export async function GET(request: Request) {
     }
     
     let userVote = null;
-    if (token) {
-      try {
-        const jwt = await import("jsonwebtoken");
-        const secret = process.env.JWT_SECRET || "default-secret";
-        const decoded = jwt.default.verify(token, secret) as { userId: string };
-        const userId = decoded.userId;
-        const votesMap = (post as any).votes as Record<string, string> | undefined;
-        userVote = votesMap?.[userId] || null;
-      } catch {
-        // Invalid token, ignore
-      }
+    if (email) {
+      const votesMap = (post as any).votes as Record<string, string> | undefined;
+      userVote = votesMap?.[email.toLowerCase()] || null;
     }
     
     return NextResponse.json({ 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -16,6 +16,8 @@ interface Comment {
   isReplied: boolean;
   adminReply?: string;
   createdAt: string;
+  upvotes?: number;
+  downvotes?: number;
 }
 
 interface Pagination {
@@ -110,6 +112,7 @@ export default function CommentsPage() {
                 <th className="px-4 py-3 text-left text-sm font-medium">User</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Article</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Comment</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">Votes</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Date</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
@@ -129,6 +132,9 @@ export default function CommentsPage() {
                       <div className="h-4 w-48 bg-muted rounded animate-pulse" />
                     </td>
                     <td className="px-4 py-3">
+                      <div className="h-4 w-16 bg-muted rounded animate-pulse" />
+                    </td>
+                    <td className="px-4 py-3">
                       <div className="h-4 w-20 bg-muted rounded animate-pulse" />
                     </td>
                     <td className="px-4 py-3">
@@ -141,7 +147,7 @@ export default function CommentsPage() {
                 ))
               ) : filteredComments.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
                     <MessageCircle className="size-12 mx-auto mb-3 opacity-30" />
                     <p>No comments found</p>
                   </td>
@@ -165,9 +171,21 @@ export default function CommentsPage() {
                       </Link>
                     </td>
                     <td className="px-4 py-3">
-                      <p className="text-sm text-muted-foreground line-clamp-2 max-w-[300px]">
+                      <p className="text-sm text-muted-foreground line-clamp-2 max-w-[250px]">
                         {comment.content}
                       </p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 text-xs text-green-600">
+                          <ThumbsUp className="size-3" />
+                          {comment.upvotes || 0}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-xs text-red-600">
+                          <ThumbsDown className="size-3" />
+                          {comment.downvotes || 0}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <p className="text-sm text-muted-foreground whitespace-nowrap">
