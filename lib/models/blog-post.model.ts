@@ -12,6 +12,10 @@ export interface IBlogPost extends Document {
   isPublished: boolean;
   readingTime: number;
   views: number;
+  upvotes: number;
+  downvotes: number;
+  votedBy: string[];
+  votes: Record<string, "up" | "down">;
   publishedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -30,6 +34,10 @@ const BlogPostSchema = new Schema<IBlogPost>(
     isPublished: { type: Boolean, default: false },
     readingTime: { type: Number, default: 5 },
     views: { type: Number, default: 0 },
+    upvotes: { type: Number, default: 0 },
+    downvotes: { type: Number, default: 0 },
+    votedBy: [{ type: String }],
+    votes: { type: Map, of: String, default: {} },
     publishedAt: { type: Date },
   },
   { timestamps: true }

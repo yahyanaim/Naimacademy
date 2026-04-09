@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Clock, MessageSquare } from "lucide-react";
+import { Clock } from "lucide-react";
 import { connectDB } from "@/lib/db/mongoose";
 import { BlogPost } from "@/lib/models/blog-post.model";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import ShareButtons from "@/components/blog/share-buttons";
+import VoteButtons from "@/components/blog/vote-buttons";
 import CommentsPlaceholder from "@/components/blog/comments-placeholder";
 
 async function getPost(slug: string) {
@@ -205,6 +206,12 @@ export default async function BlogPostPage({
             <div
               className="prose prose-lg max-w-none text-justify leading-relaxed"
               dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
+            />
+
+            <VoteButtons 
+              slug={post.slug} 
+              initialUpvotes={post.upvotes || 0} 
+              initialDownvotes={post.downvotes || 0} 
             />
 
             <ShareButtons title={post.title} />
