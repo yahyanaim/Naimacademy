@@ -354,15 +354,15 @@ export default function BlogManagementPage() {
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader className="pb-4 border-b">
+            <DialogTitle className="text-lg">
               {editingPost ? "Edit Article" : "Create New Article"}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="title">Title</Label>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="col-span-2">
+              <Label htmlFor="title" className="text-sm font-medium">Title</Label>
               <Input
                 id="title"
                 value={formData.title}
@@ -370,46 +370,29 @@ export default function BlogManagementPage() {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 placeholder="Enter article title"
+                className="mt-1"
               />
             </div>
             <div>
-              <Label htmlFor="titleStyle">Title Heading Style</Label>
-              <p className="text-xs text-muted-foreground mb-2">
-                Choose how the title appears on the article page. H1 is largest, H3 is smallest.
-              </p>
+              <Label htmlFor="titleStyle" className="text-sm font-medium">Title Heading Style</Label>
               <Select
                 value={formData.titleStyle}
                 onValueChange={(v) =>
                   setFormData({ ...formData, titleStyle: v as "h1" | "h2" | "h3" })
                 }
               >
-                <SelectTrigger id="titleStyle">
+                <SelectTrigger id="titleStyle" className="mt-1">
                   <SelectValue placeholder="Select heading style" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="h1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold">H1</span>
-                      <span className="text-muted-foreground text-xs">- Largest heading</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="h2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold">H2</span>
-                      <span className="text-muted-foreground text-xs">- Medium heading</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="h3">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold">H3</span>
-                      <span className="text-muted-foreground text-xs">- Smallest heading</span>
-                    </div>
-                  </SelectItem>
+                  <SelectItem value="h1">H1 - Largest heading</SelectItem>
+                  <SelectItem value="h2">H2 - Medium heading</SelectItem>
+                  <SelectItem value="h3">H3 - Smaller heading</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="author">Author</Label>
+              <Label htmlFor="author" className="text-sm font-medium">Author</Label>
               <Input
                 id="author"
                 value={formData.author}
@@ -417,10 +400,11 @@ export default function BlogManagementPage() {
                   setFormData({ ...formData, author: e.target.value })
                 }
                 placeholder="Author name"
+                className="mt-1"
               />
             </div>
-            <div>
-              <Label htmlFor="excerpt">Excerpt</Label>
+            <div className="col-span-2">
+              <Label htmlFor="excerpt" className="text-sm font-medium">Excerpt</Label>
               <Textarea
                 id="excerpt"
                 value={formData.excerpt}
@@ -429,62 +413,20 @@ export default function BlogManagementPage() {
                 }
                 placeholder="Brief description of the article"
                 rows={2}
+                className="mt-1"
               />
             </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label htmlFor="content">Content (Markdown supported)</Label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => insertHeading("# ")}
-                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
-                  >
-                    H1
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => insertHeading("## ")}
-                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
-                  >
-                    H2
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => insertHeading("### ")}
-                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
-                  >
-                    H3
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => insertHeading("#### ")}
-                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
-                  >
-                    H4
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => insertHeading("##### ")}
-                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
-                  >
-                    H5
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => insertHeading("###### ")}
-                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
-                  >
-                    H6
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => insertHeading("**")}
-                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
-                    title="Bold"
-                  >
-                    B
-                  </button>
+            <div className="col-span-2">
+              <div className="flex items-center justify-between mb-1">
+                <Label htmlFor="content" className="text-sm font-medium">Content</Label>
+                <div className="flex gap-1 flex-wrap justify-end">
+                  <button type="button" onClick={() => insertHeading("# ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H1</button>
+                  <button type="button" onClick={() => insertHeading("## ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H2</button>
+                  <button type="button" onClick={() => insertHeading("### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H3</button>
+                  <button type="button" onClick={() => insertHeading("#### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H4</button>
+                  <button type="button" onClick={() => insertHeading("##### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H5</button>
+                  <button type="button" onClick={() => insertHeading("###### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H6</button>
+                  <button type="button" onClick={() => insertHeading("**")} className="px-2 py-1 text-xs font-bold border rounded hover:bg-muted" title="Bold">B</button>
                 </div>
               </div>
               <Textarea
@@ -494,15 +436,15 @@ export default function BlogManagementPage() {
                   setFormData({ ...formData, content: e.target.value })
                 }
                 placeholder="Write your article content here... (Markdown is supported)"
-                rows={15}
-                className="font-mono text-sm"
+                rows={20}
+                className="mt-1 font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Use the buttons above to insert headings, or type manually: # Heading 1, ## Heading 2, ### Heading 3
+                Tip: Click heading buttons to insert at cursor position
               </p>
             </div>
             <div>
-              <Label htmlFor="coverImage">Cover Image URL</Label>
+              <Label htmlFor="coverImage" className="text-sm font-medium">Cover Image URL</Label>
               <Input
                 id="coverImage"
                 value={formData.coverImage}
@@ -510,10 +452,11 @@ export default function BlogManagementPage() {
                   setFormData({ ...formData, coverImage: e.target.value })
                 }
                 placeholder="https://example.com/image.jpg"
+                className="mt-1"
               />
             </div>
             <div>
-              <Label htmlFor="tags">Tags (comma separated)</Label>
+              <Label htmlFor="tags" className="text-sm font-medium">Tags</Label>
               <Input
                 id="tags"
                 value={formData.tags}
@@ -521,10 +464,11 @@ export default function BlogManagementPage() {
                   setFormData({ ...formData, tags: e.target.value })
                 }
                 placeholder="learning, tips, tutorial"
+                className="mt-1"
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="pt-4 border-t mt-4">
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               Cancel
             </Button>
