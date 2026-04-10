@@ -220,7 +220,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
           >
             <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
-          <Select value={filter} onValueChange={(v: "all" | "pending" | "replied") => { setFilter(v); setPage(1); }}>
+          <Select value={filter} onValueChange={(v) => { if (v) { setFilter(v as "all" | "pending" | "replied"); setPage(1); } }}>
             <SelectTrigger className="w-[130px] h-8 text-xs">
               <SelectValue placeholder="Filter" />
             </SelectTrigger>
