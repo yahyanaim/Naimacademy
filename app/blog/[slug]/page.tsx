@@ -244,7 +244,7 @@ export default async function BlogPostPage({
                     <p className="font-medium text-foreground" itemProp="author" itemScope itemType="https://schema.org/Person">
                       <span itemProp="name">{post.author}</span>
                     </p>
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-3 text-sm">
                       <time dateTime={post.publishedAt ? new Date(post.publishedAt).toISOString() : new Date().toISOString()} itemProp="datePublished">
                         {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", {
                           month: "long",
@@ -257,6 +257,8 @@ export default async function BlogPostPage({
                         <Clock className="size-3" />
                         {post.readingTime} min read
                       </span>
+                      <span>·</span>
+                      <ListenButton content={post.content} title={post.title} />
                     </div>
                   </div>
                 </div>
@@ -280,14 +282,11 @@ export default async function BlogPostPage({
               dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
             />
 
-            <div className="flex items-center justify-between py-4 border-y">
-              <ListenButton content={post.content} title={post.title} />
-              <VoteButtons 
-                slug={post.slug} 
-                initialUpvotes={post.upvotes || 0} 
-                initialDownvotes={post.downvotes || 0} 
-              />
-            </div>
+            <VoteButtons 
+              slug={post.slug} 
+              initialUpvotes={post.upvotes || 0} 
+              initialDownvotes={post.downvotes || 0} 
+            />
 
             <ShareButtons title={post.title} />
 
