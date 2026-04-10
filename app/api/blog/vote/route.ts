@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
     
-    const votesObj = post.votes || {};
+    const votesObj: Record<string, string> = post.votes || {};
     const previousVote = votesObj[email];
     
     if (previousVote === vote) {
@@ -45,8 +45,6 @@ export async function POST(request: Request) {
       post.upvotes = Math.max(0, post.upvotes - 1);
     } else if (previousVote === "down") {
       post.downvotes = Math.max(0, post.downvotes - 1);
-    } else {
-      post.votedBy.push(email);
     }
     
     if (vote === "up") {
