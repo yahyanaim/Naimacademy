@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-col min-h-screen pt-14" style={{ backgroundColor: "#fefdfb" }}>
+    <div className="flex flex-col min-h-screen pt-14" style={{ backgroundColor: "#fefdfb", overflowX: "hidden" }}>
       <main className="flex-1 pb-16">
         <div className="max-w-3xl mx-auto px-6 py-12 space-y-12">
           <div className="space-y-4">
