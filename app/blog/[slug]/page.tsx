@@ -39,22 +39,22 @@ async function getAllPosts() {
 function renderMarkdown(content: string): string {
   let html = content;
 
-  html = html.replace(/^### (.*$)/gm, '<h3 class="text-2xl font-bold mt-2 mb-2">$1</h3>');
-  html = html.replace(/^## (.*$)/gm, '<h2 class="text-3xl font-bold mt-2 mb-2">$1</h2>');
-  html = html.replace(/^# (.*$)/gm, '<h2 class="text-3xl font-bold mt-2 mb-2">$1</h2>');
+  html = html.replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold mt-2 mb-2">$1</h3>');
+  html = html.replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold mt-2 mb-2">$1</h2>');
+  html = html.replace(/^# (.*$)/gm, '<h2 class="text-2xl font-bold mt-2 mb-2">$1</h2>');
 
   html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
-  html = html.replace(/`([^`]+)`/g, "<code class=\"bg-muted px-1.5 py-0.5 rounded text-base font-mono\">$1</code>");
+  html = html.replace(/`([^`]+)`/g, "<code class=\"bg-muted px-1.5 py-0.5 rounded text-sm font-mono\">$1</code>");
 
-  html = html.replace(/^\* (.*$)/gm, '<li class="ml-4 list-disc text-lg">$1</li>');
-  html = html.replace(/^\d+\. (.*$)/gm, '<li class="ml-4 list-decimal text-lg">$1</li>');
+  html = html.replace(/^\* (.*$)/gm, '<li class="ml-4 list-disc">$1</li>');
+  html = html.replace(/^\d+\. (.*$)/gm, '<li class="ml-4 list-decimal">$1</li>');
 
-  html = html.replace(/\n\n/g, '</p><p class="mb-4 text-lg">');
+  html = html.replace(/\n\n/g, '</p><p class="mb-4">');
   html = html.replace(/\n/g, "<br />");
 
   if (!html.startsWith("<")) {
-    html = "<p class=\"mb-4 text-lg\">" + html;
+    html = "<p class=\"mb-4\">" + html;
   }
 
   return html;
@@ -208,15 +208,15 @@ export default async function BlogPostPage({
 
             <header className="mb-6">
               {post.titleStyle === "h2" ? (
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4" itemProp="headline">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-4" itemProp="headline">
                   {post.title}
                 </h2>
               ) : post.titleStyle === "h3" ? (
-                <h3 className="text-2xl md:text-3xl font-bold tracking-tight mb-4" itemProp="headline">
+                <h3 className="text-xl md:text-2xl font-bold tracking-tight mb-4" itemProp="headline">
                   {post.title}
                 </h3>
               ) : (
-                <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4" itemProp="headline">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4" itemProp="headline">
                   {post.title}
                 </h1>
               )}
