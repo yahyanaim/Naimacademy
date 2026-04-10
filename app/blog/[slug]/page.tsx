@@ -39,9 +39,9 @@ async function getAllPosts() {
 function renderMarkdown(content: string): string {
   let html = content;
 
-  html = html.replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold mb-0">$1</h3>');
-  html = html.replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold mb-0">$1</h2>');
-  html = html.replace(/^# (.*$)/gm, '<h2 class="text-2xl font-bold mb-0">$1</h2>');
+  html = html.replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold mb-0 leading-tight">$1</h3>');
+  html = html.replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold mb-0 leading-tight">$1</h2>');
+  html = html.replace(/^# (.*$)/gm, '<h2 class="text-2xl font-bold mb-0 leading-tight">$1</h2>');
 
   html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
@@ -50,11 +50,11 @@ function renderMarkdown(content: string): string {
   html = html.replace(/^\* (.*$)/gm, '<li class="ml-4 list-disc">$1</li>');
   html = html.replace(/^\d+\. (.*$)/gm, '<li class="ml-4 list-decimal">$1</li>');
 
-  html = html.replace(/\n\n/g, '</p><p class="mt-0">');
+  html = html.replace(/\n\n/g, '</p><p class="mt-0 leading-snug">');
   html = html.replace(/\n/g, "<br />");
 
   if (!html.startsWith("<")) {
-    html = "<p class=\"mt-0\">" + html;
+    html = "<p class=\"mt-0 leading-snug\">" + html;
   }
 
   return html;
