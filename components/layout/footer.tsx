@@ -18,7 +18,7 @@ export default function Footer() {
               Transparency
             </Link>
             <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              About
+              About Us
             </Link>
           </div>
         </div>

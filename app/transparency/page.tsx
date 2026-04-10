@@ -7,7 +7,7 @@ export default function TransparencyPage() {
       <main className="flex-1 pb-16">
         <div className="max-w-3xl mx-auto px-6 py-12 space-y-10">
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight">Transparency Report</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Transparency</h1>
             <p className="text-muted-foreground">Last updated: April 10, 2026</p>
           </div>
 
@@ -100,15 +100,9 @@ export default function TransparencyPage() {
             </section>
           </div>
 
-          <div className="pt-6 border-t border-border flex items-center gap-6">
+          <div className="pt-6 border-t border-border">
             <Link href="/" className="text-primary hover:underline text-sm">
               &larr; Back to Home
-            </Link>
-            <Link href="/privacy" className="text-primary hover:underline text-sm">
-              Privacy Policy
-            </Link>
-            <Link href="/about" className="text-primary hover:underline text-sm">
-              About Us
             </Link>
           </div>
         </div>

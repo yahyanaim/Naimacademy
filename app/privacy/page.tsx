@@ -7,7 +7,7 @@ export default function PrivacyPolicyPage() {
       <main className="flex-1 pb-16">
         <div className="max-w-3xl mx-auto px-6 py-12 space-y-10">
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight">Privacy Policy & Transparency</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Privacy Policy</h1>
             <p className="text-muted-foreground">Version 3.0 - Last updated: April 10, 2026</p>
           </div>
 
