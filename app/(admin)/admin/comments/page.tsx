@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2 } from "lucide-react";
+import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -44,6 +44,7 @@ export default function CommentsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<"all" | "pending" | "replied">("all");
+  const [autoRefresh, setAutoRefresh] = useState(true);
 
   const fetchComments = useCallback(async (page = 1) => {
     setLoading(true);
@@ -65,6 +66,16 @@ export default function CommentsPage() {
   useEffect(() => {
     fetchComments(currentPage);
   }, [currentPage, fetchComments]);
+
+  useEffect(() => {
+    if (!autoRefresh) return;
+    
+    const interval = setInterval(() => {
+      fetchComments(currentPage);
+    }, 15000);
+    
+    return () => clearInterval(interval);
+  }, [autoRefresh, currentPage, fetchComments]);
 
   async function handleDelete(comment: Comment) {
     if (!confirm(`Delete comment from "${comment.authorName}"?\n\n"${comment.content.substring(0, 50)}..."`)) return;
@@ -113,6 +124,35 @@ export default function CommentsPage() {
             Manage article comments and replies
           </p>
         </div>
+        <button
+          onClick={() => setAutoRefresh(!autoRefresh)}
+          className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full transition-colors ${
+            autoRefresh 
+              ? 'bg-green-100 text-green-700' 
+              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+          }`}
+          title="Auto-refresh every 15 seconds"
+        >
+          <RefreshCw className={`size-3 ${autoRefresh ? 'animate-spin' : ''}`} style={{ animationDuration: '2s' }} />
+          {autoRefresh ? 'Auto On' : 'Auto Off'}
+        </button>
+      </div>
+
+      <div className="flex gap-2 items-center">
+        <form onSubmit={handleSearch} className="flex gap-2 flex-1">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, email, article..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Button type="submit" variant="secondary">
+            Search
+          </Button>
+        </form>
         <Select value={filter} onValueChange={(v) => { if (v) { setFilter(v as "all" | "pending" | "replied"); setCurrentPage(1); } }}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="Filter" />
@@ -124,21 +164,6 @@ export default function CommentsPage() {
           </SelectContent>
         </Select>
       </div>
-
-      <form onSubmit={handleSearch} className="flex gap-2">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name, email, article..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Button type="submit" variant="secondary">
-          Search
-        </Button>
-      </form>
 
       <div className="border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
