@@ -458,6 +458,27 @@ export default function BlogManagementPage() {
                   </button>
                   <button
                     type="button"
+                    onClick={() => insertHeading("#### ")}
+                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
+                  >
+                    H4
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertHeading("##### ")}
+                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
+                  >
+                    H5
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertHeading("###### ")}
+                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
+                  >
+                    H6
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => insertHeading("**")}
                     className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
                     title="Bold"

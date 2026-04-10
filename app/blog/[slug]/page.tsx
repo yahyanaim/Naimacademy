@@ -39,6 +39,9 @@ async function getAllPosts() {
 function renderMarkdown(content: string): string {
   let html = content;
 
+  html = html.replace(/^###### (.*$)/gm, '<h6 class="text-lg font-bold mt-6 mb-2">$1</h6>');
+  html = html.replace(/^##### (.*$)/gm, '<h5 class="text-xl font-bold mt-6 mb-2">$1</h5>');
+  html = html.replace(/^#### (.*$)/gm, '<h4 class="text-xl font-bold mt-6 mb-2">$1</h4>');
   html = html.replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold mt-6 mb-2">$1</h3>');
   html = html.replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold mt-6 mb-2">$1</h2>');
   html = html.replace(/^# (.*$)/gm, '<h2 class="text-2xl font-bold mt-6 mb-2">$1</h2>');
