@@ -46,7 +46,16 @@ export default function TranslateSelection() {
     }
 
     const range = sel.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
+    
+    let element: Node | null = range.commonAncestorContainer;
+    while (element && element.nodeType !== Node.ELEMENT_NODE) {
+      element = element.parentNode;
+    }
+    
+    if (!element) return;
+    
+    const pElement = element as HTMLElement;
+    const rect = pElement.getBoundingClientRect();
     
     setSelection({ text, rect });
     translateToArabic(text);
@@ -78,9 +87,9 @@ export default function TranslateSelection() {
     <div
       className="fixed z-50 bg-white dark:bg-gray-900 rounded-lg shadow-xl border p-3 w-80"
       style={{ 
-        top: `${selection.rect.bottom + window.scrollY + 10}px`, 
-        left: `${selection.rect.left + window.scrollX}px`,
-        maxWidth: selection.rect.width
+        top: `${selection.rect.bottom + window.scrollY + 15}px`, 
+        left: `${Math.max(16, selection.rect.left + window.scrollX)}px`,
+        maxWidth: Math.min(selection.rect.width, 400)
       }}
     >
       <div className="flex items-center justify-between mb-2">
