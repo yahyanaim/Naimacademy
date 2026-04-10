@@ -47,6 +47,8 @@ interface BlogPost {
   isPublished: boolean;
   readingTime: number;
   views: number;
+  upvotes: number;
+  downvotes: number;
   publishedAt: string;
   createdAt: string;
 }

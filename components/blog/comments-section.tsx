@@ -157,19 +157,45 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
     });
   }
 
+  const [showComments, setShowComments] = useState(true);
+
   return (
     <section className="mt-12 pt-8 border-t">
-      <div className="flex items-center gap-3 mb-6">
-        <MessageSquare className="size-6 text-muted-foreground" />
-        <h2 className="text-2xl font-bold">Comments</h2>
-        {comments.length > 0 && (
-          <span className="px-2 py-0.5 text-sm bg-muted rounded-full">
-            {comments.length}
-          </span>
-        )}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <MessageSquare className="size-6 text-muted-foreground" />
+          <h2 className="text-2xl font-bold">Comments</h2>
+          {comments.length > 0 && (
+            <span className="px-2 py-0.5 text-sm bg-muted rounded-full">
+              {comments.length}
+            </span>
+          )}
+        </div>
+        <button
+          onClick={() => setShowComments(!showComments)}
+          className="px-3 py-1.5 text-sm border rounded-md hover:bg-muted transition-colors flex items-center gap-2"
+        >
+          {showComments ? (
+            <>
+              <span>Hide</span>
+              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+              </svg>
+            </>
+          ) : (
+            <>
+              <span>Show</span>
+              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </>
+          )}
+        </button>
       </div>
 
-      {showIdentityForm && (
+      {showComments && (
+        <div>
+          {showIdentityForm && (
         <div className="bg-card border rounded-xl p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-semibold">Enter your details to comment</h3>
@@ -336,6 +362,8 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
           ))}
         </div>
       ) : null}
+        </div>
+      )}
     </section>
   );
 }
