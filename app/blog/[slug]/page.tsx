@@ -203,7 +203,7 @@ export default async function BlogPostPage({
         <div className="max-w-3xl mx-auto px-6 py-12">
           <article itemProp="articleBody">
             {post.coverImage && (
-              <div className="aspect-video rounded-lg overflow-hidden mb-10 bg-muted">
+              <div className="aspect-video rounded-lg border border-gray-300 overflow-hidden mb-10 bg-muted">
                 <img
                   src={post.coverImage}
                   alt={post.title}
