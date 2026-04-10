@@ -14,6 +14,18 @@ async function checkAdmin(req: NextRequest) {
   return payload;
 }
 
+function recalculateVotes(post: any) {
+  const votesObj = post.votes || {};
+  let upvotes = 0;
+  let downvotes = 0;
+  for (const v of Object.values(votesObj)) {
+    if (v === "up") upvotes++;
+    else if (v === "down") downvotes++;
+  }
+  post.upvotes = upvotes;
+  post.downvotes = downvotes;
+}
+
 export async function POST(req: NextRequest) {
   const admin = await checkAdmin(req);
   if (!admin) {
@@ -24,7 +36,20 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { slug } = body;
+    const { slug, recalculate } = body;
+
+    if (recalculate) {
+      const posts = await BlogPost.find({}).lean();
+      for (const post of posts) {
+        recalculateVotes(post);
+        await BlogPost.updateOne({ _id: post._id }, { 
+          upvotes: post.upvotes, 
+          downvotes: post.downvotes,
+          votes: post.votes 
+        });
+      }
+      return NextResponse.json({ success: true, message: "All votes recalculated" });
+    }
 
     if (slug) {
       await BlogPost.updateOne(

@@ -251,6 +251,25 @@ export default function BlogManagementPage() {
     }
   }
 
+  async function handleRecalculateVotes() {
+    if (!confirm("Recalculate vote counts from stored votes? This will fix any counting issues.")) return;
+    try {
+      const res = await fetch("/api/admin/articles/reset-votes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recalculate: true }),
+      });
+      if (res.ok) {
+        toast.success("Votes recalculated successfully!");
+        loadPosts();
+      } else {
+        toast.error("Failed to recalculate votes");
+      }
+    } catch {
+      toast.error("Failed to recalculate votes");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -259,8 +278,11 @@ export default function BlogManagementPage() {
           <p className="text-muted-foreground text-sm">Create and manage your blog articles</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleResetAllVotes}>
+          <Button variant="outline" onClick={handleRecalculateVotes}>
             <RotateCcw className="size-4 mr-2" />
+            Recalculate Votes
+          </Button>
+          <Button variant="outline" onClick={handleResetAllVotes}>
             Reset All Votes
           </Button>
           <Button onClick={openCreateDialog}>

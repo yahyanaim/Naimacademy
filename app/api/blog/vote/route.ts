@@ -29,7 +29,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
     
-    const votesObj: Record<string, string> = post.votes || {};
+    let votesObj: Record<string, string> = {};
+    if (post.votes && typeof post.votes === 'object') {
+      votesObj = { ...post.votes } as Record<string, string>;
+    }
+    
     const previousVote = votesObj[email];
     
     if (previousVote === vote) {
@@ -41,19 +45,17 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
     
-    if (previousVote === "up") {
-      post.upvotes = Math.max(0, post.upvotes - 1);
-    } else if (previousVote === "down") {
-      post.downvotes = Math.max(0, post.downvotes - 1);
-    }
-    
-    if (vote === "up") {
-      post.upvotes += 1;
-    } else if (vote === "down") {
-      post.downvotes += 1;
-    }
-    
     votesObj[email] = vote;
+    
+    let upvotes = 0;
+    let downvotes = 0;
+    for (const v of Object.values(votesObj)) {
+      if (v === "up") upvotes++;
+      else if (v === "down") downvotes++;
+    }
+    
+    post.upvotes = upvotes;
+    post.downvotes = downvotes;
     post.votes = votesObj;
     
     await post.save();
