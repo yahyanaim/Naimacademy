@@ -103,8 +103,6 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
         localStorage.removeItem(`vote_${slug}`);
       }
     }
-    
-    setStep("locked");
   }, [slug, fetchVotes]);
 
   useEffect(() => {

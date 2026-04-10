@@ -2,10 +2,17 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2, RefreshCw } from "lucide-react";
+import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Comment {
   _id: string;
@@ -36,11 +43,12 @@ export default function CommentsPage() {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [filter, setFilter] = useState<"all" | "pending" | "replied">("all");
 
   const fetchComments = useCallback(async (page = 1) => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({ page: page.toString(), limit: "20" });
+      const params = new URLSearchParams({ page: page.toString(), limit: "20", filter });
       const res = await fetch(`/api/admin/comments?${params}`);
       if (res.ok) {
         const data = await res.json();
@@ -52,7 +60,7 @@ export default function CommentsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filter]);
 
   useEffect(() => {
     fetchComments(currentPage);
@@ -105,14 +113,16 @@ export default function CommentsPage() {
             Manage article comments and replies
           </p>
         </div>
-        <button
-          onClick={() => fetchComments(currentPage)}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          title="Refresh comments"
-        >
-          <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <Select value={filter} onValueChange={(v) => { if (v) { setFilter(v as "all" | "pending" | "replied"); setCurrentPage(1); } }}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Filter" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Comments</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="replied">Replied</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <form onSubmit={handleSearch} className="flex gap-2">

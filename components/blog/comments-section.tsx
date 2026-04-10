@@ -1,16 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { MessageSquare, Send, User, Mail, CheckCircle, Lock, X, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { MessageSquare, Send, User, Mail, CheckCircle, Lock, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface Comment {
   _id: string;
@@ -43,15 +36,12 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalComments, setTotalComments] = useState(0);
-  const [autoRefresh, setAutoRefresh] = useState(false);
-  const [filter, setFilter] = useState<"all" | "pending" | "replied">("all");
-
   const COMMENTS_PER_PAGE = 10;
 
   const fetchComments = useCallback(async (pageNum: number = 1) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/blog/comments?slug=${slug}&page=${pageNum}&limit=${COMMENTS_PER_PAGE}&filter=${filter}`);
+      const res = await fetch(`/api/blog/comments?slug=${slug}&page=${pageNum}&limit=${COMMENTS_PER_PAGE}`);
       if (res.ok) {
         const data = await res.json();
         setComments(data.comments || []);
@@ -62,21 +52,11 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
       }
     } catch {}
     setLoading(false);
-  }, [slug, filter]);
+  }, [slug]);
 
   useEffect(() => {
     checkAuthAndLoadComments();
   }, [slug]);
-
-  useEffect(() => {
-    if (!autoRefresh) return;
-    
-    const interval = setInterval(() => {
-      fetchComments(page);
-    }, 10000);
-    
-    return () => clearInterval(interval);
-  }, [autoRefresh, page, fetchComments]);
 
   async function checkAuthAndLoadComments() {
     try {
@@ -212,25 +192,6 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => fetchComments(page)}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            title="Refresh comments"
-          >
-            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-          <Select value={filter} onValueChange={(v) => { if (v) { setFilter(v as "all" | "pending" | "replied"); setPage(1); } }}>
-            <SelectTrigger className="w-[130px] h-8 text-xs">
-              <SelectValue placeholder="Filter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Comments</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="replied">Replied</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
       {showComments && (

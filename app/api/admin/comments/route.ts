@@ -9,10 +9,17 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
     const articleSlug = searchParams.get("articleSlug");
+    const filter = searchParams.get("filter") || "all";
 
     await connectDB();
 
-    const query = articleSlug ? { articleSlug } : {};
+    const query: Record<string, unknown> = articleSlug ? { articleSlug } : {};
+    if (filter === "pending") {
+      query.isReplied = false;
+    } else if (filter === "replied") {
+      query.isReplied = true;
+    }
+    
     const skip = (page - 1) * limit;
 
     const [comments, total] = await Promise.all([
