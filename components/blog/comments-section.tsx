@@ -21,62 +21,45 @@ interface CommentsSectionProps {
   articleTitle: string;
 }
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
 export default function CommentsSection({ slug, articleTitle }: CommentsSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCommentForm, setShowCommentForm] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [step, setStep] = useState<"locked" | "identity" | "form">("locked");
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [showIdentityForm, setShowIdentityForm] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    checkAuth();
-    fetchComments();
+    checkAuthAndLoadComments();
   }, [slug]);
 
-  async function checkAuth() {
+  async function checkAuthAndLoadComments() {
     try {
       const res = await fetch("/api/auth/me");
       if (res.ok) {
         const data = await res.json();
         if (data.user) {
-          setCurrentUser(data.user);
-          setName(data.user.name || "");
+          setIsLoggedIn(true);
+          setName(data.user.name || data.user.email?.split("@")[0] || "User");
           setEmail(data.user.email || "");
-          setStep("form");
-          return;
+        }
+      } else {
+        const stored = localStorage.getItem("user_identity");
+        if (stored) {
+          try {
+            const identity = JSON.parse(stored);
+            setName(identity.name || "");
+            setEmail(identity.email || "");
+          } catch {}
         }
       }
-    } catch {
-      // not logged in
-    }
-
-    const stored = localStorage.getItem("user_identity");
-    if (stored) {
-      try {
-        const identity = JSON.parse(stored);
-        setName(identity.name || "");
-        setEmail(identity.email || "");
-        setStep("form");
-        return;
-      } catch {
-        // invalid stored data
-      }
-    }
-
-    setCheckingAuth(false);
+    } catch {}
+    
+    fetchComments();
   }
 
   async function fetchComments() {
@@ -86,15 +69,12 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         const data = await res.json();
         setComments(data.comments || []);
       }
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
+    setLoading(false);
   }
 
   function handleStartCommenting() {
-    setStep("identity");
+    setShowIdentityForm(true);
   }
 
   function handleIdentitySubmit(e: React.FormEvent) {
@@ -116,7 +96,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
       email: email.trim().toLowerCase(),
     }));
 
-    setStep("form");
+    setShowIdentityForm(false);
   }
 
   async function handleCommentSubmit(e: React.FormEvent) {
@@ -167,6 +147,8 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
     });
   }
 
+  const showCommentForm = isLoggedIn || name.length > 0;
+
   return (
     <section className="mt-12 pt-8 border-t">
       <div className="flex items-center gap-3 mb-6">
@@ -179,75 +161,12 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         )}
       </div>
 
-      {checkingAuth ? (
-        <div className="bg-muted/50 rounded-lg p-6 text-center">
-          <div className="h-6 w-32 bg-muted rounded animate-pulse mx-auto" />
-        </div>
-      ) : currentUser || step === "form" ? (
-        <div className="space-y-6">
-          <div className="bg-card border rounded-xl p-4">
-            <div className="flex items-start gap-3">
-              <div className="size-10 rounded-full bg-black/80 flex items-center justify-center flex-shrink-0">
-                <span className="text-sm font-bold text-white">
-                  {name.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <form onSubmit={handleCommentSubmit} className="flex-1">
-                <Textarea
-                  placeholder={currentUser ? `What do you think, ${name.split(" ")[0]}?` : "Write a comment..."}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={3}
-                  className="resize-none mb-3 border rounded-lg"
-                />
-                <div className="flex items-center justify-end">
-                  <div className="flex items-center gap-2">
-                    {error && (
-                      <span className="text-xs text-red-500">{error}</span>
-                    )}
-                    {success && (
-                      <span className="text-xs text-green-600 flex items-center gap-1">
-                        <CheckCircle className="size-3" />
-                        Posted!
-                      </span>
-                    )}
-                    <Button type="submit" size="sm" disabled={submitting}>
-                      <Send className="size-4 mr-1" />
-                      {submitting ? "Posting..." : "Post"}
-                    </Button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          {comments.length > 0 && (
-            <p className="text-sm text-muted-foreground">
-              {comments.length} comment{comments.length !== 1 ? "s" : ""}
-            </p>
-          )}
-        </div>
-      ) : step === "locked" ? (
-        <div className="bg-muted/50 rounded-lg p-8 text-center">
-          <div className="max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mx-auto mb-4">
-              <Lock className="size-8 text-black" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Join the conversation</h3>
-            <p className="text-muted-foreground mb-6">
-              Enter your name and email to share your thoughts on this article
-            </p>
-            <Button onClick={handleStartCommenting}>
-              Start Commenting
-            </Button>
-          </div>
-        </div>
-      ) : step === "identity" ? (
-        <div className="bg-card border rounded-xl p-6">
+      {showIdentityForm && !showCommentForm && (
+        <div className="bg-card border rounded-xl p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-semibold">Enter your details to comment</h3>
             <button
-              onClick={() => setStep("locked")}
+              onClick={() => setShowIdentityForm(false)}
               className="text-muted-foreground hover:text-foreground"
             >
               <X className="size-5" />
@@ -280,7 +199,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
               <p className="text-sm text-red-500">{error}</p>
             )}
             <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => setStep("locked")}>
+              <Button type="button" variant="outline" onClick={() => setShowIdentityForm(false)}>
                 Cancel
               </Button>
               <Button type="submit">
@@ -289,12 +208,73 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
             </div>
           </form>
         </div>
-      ) : null}
+      )}
+
+      {showCommentForm ? (
+        <div className="bg-card border rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <div className="size-10 rounded-full bg-black/80 flex items-center justify-center flex-shrink-0">
+              <span className="text-sm font-bold text-white">
+                {name.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <form onSubmit={handleCommentSubmit} className="flex-1">
+              <Textarea
+                placeholder={isLoggedIn ? `What do you think, ${name.split(" ")[0]}?` : "Write a comment..."}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={3}
+                className="resize-none mb-3 border rounded-lg"
+              />
+              <div className="flex items-center justify-end">
+                <div className="flex items-center gap-2">
+                  {error && (
+                    <span className="text-xs text-red-500">{error}</span>
+                  )}
+                  {success && (
+                    <span className="text-xs text-green-600 flex items-center gap-1">
+                      <CheckCircle className="size-3" />
+                      Posted!
+                    </span>
+                  )}
+                  <Button type="submit" size="sm" disabled={submitting}>
+                    <Send className="size-4 mr-1" />
+                    {submitting ? "Posting..." : "Post"}
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : (
+        !showIdentityForm && (
+          <div className="bg-muted/50 rounded-lg p-8 text-center">
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mx-auto mb-4">
+                <Lock className="size-8 text-black" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Join the conversation</h3>
+              <p className="text-muted-foreground mb-6">
+                Enter your name and email to share your thoughts on this article
+              </p>
+              <Button onClick={handleStartCommenting}>
+                Start Commenting
+              </Button>
+            </div>
+          </div>
+        )
+      )}
+
+      {!loading && comments.length > 0 && (
+        <p className="text-sm text-muted-foreground mt-6">
+          {comments.length} comment{comments.length !== 1 ? "s" : ""}
+        </p>
+      )}
 
       {loading ? (
         <div className="space-y-4 mt-6">
           {[1, 2].map((i) => (
-            <div key={i} className="flex gap-3 animate-pulse">
+            <div key={i} className="flex gap-3">
               <div className="size-10 rounded-full bg-muted flex-shrink-0" />
               <div className="flex-1">
                 <div className="h-4 bg-muted rounded w-1/4 mb-2" />
@@ -304,7 +284,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
             </div>
           ))}
         </div>
-      ) : comments.length > 0 && (
+      ) : comments.length > 0 ? (
         <div className="space-y-6 mt-6">
           {comments.map((comment) => (
             <div key={comment._id} className="flex gap-3">
@@ -339,7 +319,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
             </div>
           ))}
         </div>
-      )}
+      ) : null}
     </section>
   );
 }
