@@ -32,6 +32,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
   const [success, setSuccess] = useState(false);
   const [showIdentityForm, setShowIdentityForm] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [identityConfirmed, setIdentityConfirmed] = useState(false);
 
   useEffect(() => {
     checkAuthAndLoadComments();
@@ -44,6 +45,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         const data = await res.json();
         if (data.user) {
           setIsLoggedIn(true);
+          setIdentityConfirmed(true);
           setName(data.user.name || data.user.email?.split("@")[0] || "User");
           setEmail(data.user.email || "");
         }
@@ -52,8 +54,11 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         if (stored) {
           try {
             const identity = JSON.parse(stored);
-            setName(identity.name || "");
-            setEmail(identity.email || "");
+            if (identity.name && identity.email) {
+              setName(identity.name);
+              setEmail(identity.email);
+              setIdentityConfirmed(true);
+            }
           } catch {}
         }
       }
@@ -77,9 +82,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
     setShowIdentityForm(true);
   }
 
-  function handleIdentitySubmit(e: React.FormEvent) {
-    e.preventDefault();
-    
+  function handleIdentitySubmit() {
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
     
@@ -98,7 +101,9 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
       email: trimmedEmail.toLowerCase(),
     }));
 
+    setIdentityConfirmed(true);
     setShowIdentityForm(false);
+    setError("");
   }
 
   async function handleCommentSubmit(e: React.FormEvent) {
@@ -149,8 +154,6 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
     });
   }
 
-  const showCommentForm = isLoggedIn || name.length > 0;
-
   return (
     <section className="mt-12 pt-8 border-t">
       <div className="flex items-center gap-3 mb-6">
@@ -163,18 +166,21 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         )}
       </div>
 
-      {showIdentityForm && !showCommentForm && (
+      {showIdentityForm && (
         <div className="bg-card border rounded-xl p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-semibold">Enter your details to comment</h3>
             <button
-              onClick={() => setShowIdentityForm(false)}
+              onClick={() => {
+                setShowIdentityForm(false);
+                setError("");
+              }}
               className="text-muted-foreground hover:text-foreground"
             >
               <X className="size-5" />
             </button>
           </div>
-          <form onSubmit={handleIdentitySubmit} className="space-y-4">
+          <div className="space-y-4">
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <input
@@ -203,20 +209,23 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
             <div className="flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() => setShowIdentityForm(false)}
+                onClick={() => {
+                  setShowIdentityForm(false);
+                  setError("");
+                }}
                 className="px-4 py-2 text-sm border rounded-md hover:bg-muted transition-colors"
               >
                 Cancel
               </button>
-              <Button type="submit">
+              <Button onClick={handleIdentitySubmit}>
                 Continue
               </Button>
             </div>
-          </form>
+          </div>
         </div>
       )}
 
-      {showCommentForm ? (
+      {identityConfirmed ? (
         <div className="bg-card border rounded-xl p-4">
           <div className="flex items-start gap-3">
             <div className="size-10 rounded-full bg-black/80 flex items-center justify-center flex-shrink-0">
@@ -252,24 +261,22 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
             </form>
           </div>
         </div>
-      ) : (
-        !showIdentityForm && (
-          <div className="bg-muted/50 rounded-lg p-8 text-center">
-            <div className="max-w-md mx-auto">
-              <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mx-auto mb-4">
-                <Lock className="size-8 text-black" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Join the conversation</h3>
-              <p className="text-muted-foreground mb-6">
-                Enter your name and email to share your thoughts on this article
-              </p>
-              <Button onClick={handleStartCommenting}>
-                Start Commenting
-              </Button>
+      ) : !showIdentityForm ? (
+        <div className="bg-muted/50 rounded-lg p-8 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mx-auto mb-4">
+              <Lock className="size-8 text-black" />
             </div>
+            <h3 className="text-lg font-semibold mb-2">Join the conversation</h3>
+            <p className="text-muted-foreground mb-6">
+              Enter your name and email to share your thoughts on this article
+            </p>
+            <Button onClick={handleStartCommenting}>
+              Start Commenting
+            </Button>
           </div>
-        )
-      )}
+        </div>
+      ) : null}
 
       {!loading && comments.length > 0 && (
         <p className="text-sm text-muted-foreground mt-6">
