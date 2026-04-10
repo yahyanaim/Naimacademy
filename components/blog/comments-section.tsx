@@ -161,8 +161,11 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
 
   return (
     <section className="mt-12 pt-8 border-t">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 mb-6">
+        <button
+          onClick={() => setShowComments(!showComments)}
+          className="flex items-center gap-3 hover:opacity-70 transition-opacity"
+        >
           <MessageSquare className="size-6 text-muted-foreground" />
           <h2 className="text-2xl font-bold">Comments</h2>
           {comments.length > 0 && (
@@ -170,26 +173,14 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
               {comments.length}
             </span>
           )}
-        </div>
-        <button
-          onClick={() => setShowComments(!showComments)}
-          className="px-3 py-1.5 text-sm border rounded-md hover:bg-muted transition-colors flex items-center gap-2"
-        >
-          {showComments ? (
-            <>
-              <span>Hide</span>
-              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-              </svg>
-            </>
-          ) : (
-            <>
-              <span>Show</span>
-              <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </>
-          )}
+          <svg 
+            className={`size-5 text-muted-foreground transition-transform duration-200 ${showComments ? 'rotate-180' : ''}`} 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </button>
       </div>
 
