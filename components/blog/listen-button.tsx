@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
 interface ListenButtonProps {
@@ -11,11 +11,27 @@ interface ListenButtonProps {
 export default function ListenButton({ content, title }: ListenButtonProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(true);
+  const [voicesLoaded, setVoicesLoaded] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       setSpeechSupported(false);
+      return;
     }
+
+    const synth = window.speechSynthesis;
+    
+    const loadVoices = () => {
+      setVoicesLoaded(synth.getVoices().length > 0);
+    };
+
+    loadVoices();
+    synth.addEventListener("voiceschanged", loadVoices);
+
+    return () => {
+      synth.removeEventListener("voiceschanged", loadVoices);
+    };
   }, []);
 
   const stripMarkdown = (text: string): string => {
@@ -32,57 +48,97 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
     return clean;
   };
 
-  const speak = () => {
-    if (!speechSupported) return;
+  const stopSpeech = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const synth = window.speechSynthesis;
+    synth.cancel();
+    setIsPlaying(false);
+    utteranceRef.current = null;
+  }, []);
+
+  const speak = useCallback(() => {
+    if (!speechSupported || typeof window === "undefined") return;
 
     const synth = window.speechSynthesis;
     
     if (isPlaying) {
-      synth.cancel();
-      setIsPlaying(false);
+      stopSpeech();
       return;
     }
 
+    synth.cancel();
+
     const text = `${title}. ${stripMarkdown(content)}`;
     const utterance = new SpeechSynthesisUtterance(text);
+    utteranceRef.current = utterance;
     
-    const voices = synth.getVoices();
-    const maleVoice = voices.find(v => 
-      v.lang.startsWith("en") && 
-      (v.name.toLowerCase().includes("male") || 
-       v.name.toLowerCase().includes("daniel") ||
-       v.name.toLowerCase().includes("david") ||
-       v.name.toLowerCase().includes("alex") ||
-       v.name.toLowerCase().includes("mark") ||
-       v.name.toLowerCase().includes("tom") ||
-       v.name.toLowerCase().includes("fred") ||
-       v.name.toLowerCase().includes("ralph") ||
-       v.name.toLowerCase().includes("kyle") ||
-       v.name.toLowerCase().includes("james") ||
-       v.name.toLowerCase().includes("john") ||
-       v.name.toLowerCase().includes("michael") ||
-       v.name.toLowerCase().includes("will") ||
-       v.name.toLowerCase().includes("ben") ||
-       v.name.includes("Google UK English Male") ||
-       v.name.includes("Microsoft David") ||
-       v.name.includes("Microsoft Mark") ||
-       v.name.includes("Samantha") === false)
-    ) || voices.find(v => v.lang.startsWith("en"));
+    let voices = synth.getVoices();
     
-    if (maleVoice) {
-      utterance.voice = maleVoice;
+    if (voices.length === 0) {
+      voices = new Promise<SpeechSynthesisVoice[]>(resolve => {
+        synth.addEventListener("voiceschanged", () => resolve(synth.getVoices()), { once: true });
+      }) as unknown as SpeechSynthesisVoice[];
+    }
+
+    const maleNames = ["daniel", "david", "alex", "mark", "tom", "fred", "ralph", "kyle", "james", "john", "michael", "will", "ben", "george", "harry", "bob", "rick", "paul", "steve"];
+    
+    const selectVoice = (availableVoices: SpeechSynthesisVoice[]) => {
+      let maleVoice = availableVoices.find(v => 
+        v.lang.startsWith("en") && 
+        maleNames.some(name => v.name.toLowerCase().includes(name))
+      );
+      
+      if (!maleVoice) {
+        maleVoice = availableVoices.find(v => 
+          v.lang === "en-US" && 
+          !v.name.toLowerCase().includes("female") &&
+          !v.name.toLowerCase().includes("samantha") &&
+          !v.name.toLowerCase().includes("victoria") &&
+          !v.name.toLowerCase().includes("karen") &&
+          !v.name.toLowerCase().includes("zira")
+        );
+      }
+      
+      if (!maleVoice) {
+        maleVoice = availableVoices.find(v => v.lang.startsWith("en"));
+      }
+      
+      return maleVoice;
+    };
+
+    const availableVoices = Array.isArray(voices) ? voices : [];
+    const selectedVoice = selectVoice(availableVoices);
+    
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
     }
     
-    utterance.rate = 0.95;
-    utterance.pitch = 0.9;
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
     
-    utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => setIsPlaying(false);
+    utterance.onend = () => {
+      setIsPlaying(false);
+      utteranceRef.current = null;
+    };
     
-    synth.cancel();
-    synth.speak(utterance);
-    setIsPlaying(true);
-  };
+    utterance.onerror = () => {
+      setIsPlaying(false);
+      utteranceRef.current = null;
+    };
+    
+    setTimeout(() => {
+      synth.speak(utterance);
+      setIsPlaying(true);
+    }, 100);
+  }, [content, title, isPlaying, speechSupported, stopSpeech]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined") {
+        window.speechSynthesis?.cancel();
+      }
+    };
+  }, []);
 
   if (!speechSupported) return null;
 
