@@ -38,6 +38,7 @@ import {
   Calendar,
   Clock,
   Bell,
+  Image,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -213,6 +214,35 @@ export default function BlogManagementPage() {
         textarea.setSelectionRange(start + before.length, start + before.length + 4);
       }
     }, 0);
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const uploadFormData = new FormData();
+    uploadFormData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: uploadFormData });
+      const data = await res.json();
+
+      if (res.ok && data.url) {
+        const textarea = document.getElementById("content") as HTMLTextAreaElement;
+        const cursorPos = textarea?.selectionStart || 0;
+        const currentContent = formData.content;
+        const imageMarkdown = `\n![${file.name}](${data.url})\n`;
+        const newContent = currentContent.slice(0, cursorPos) + imageMarkdown + currentContent.slice(cursorPos);
+        setFormData({ ...formData, content: newContent });
+        toast.success("Image uploaded!");
+      } else {
+        toast.error(data.error || "Upload failed");
+      }
+    } catch {
+      toast.error("Upload failed");
+    }
+
+    e.target.value = "";
   }
 
   async function sendNewArticleNotification(articleTitle: string) {
@@ -451,6 +481,10 @@ export default function BlogManagementPage() {
                   <button type="button" onClick={() => insertHeading("###### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H6</button>
                   <button type="button" onClick={(e) => { e.preventDefault(); insertFormat("**", "**"); }} className="px-2 py-1 text-xs font-bold border rounded hover:bg-muted" title="Bold">B</button>
                   <button type="button" onClick={(e) => { e.preventDefault(); insertFormat("*", "*"); }} className="px-2 py-1 text-xs italic border rounded hover:bg-muted" title="Italic">I</button>
+                  <label className="px-2 py-1 text-xs border rounded hover:bg-muted cursor-pointer">
+                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                    <Image className="size-3 inline" />
+                  </label>
                 </div>
               </div>
               <Textarea
