@@ -160,11 +160,12 @@ export default function BlogManagementPage() {
           body: JSON.stringify(payload),
         });
         if (res.ok) {
+          const data = await res.json();
           await loadPosts();
           setIsDialogOpen(false);
           
-          if (formData.isPublished) {
-            await sendNewArticleNotification(formData.title);
+          if (formData.isPublished && data.slug) {
+            await sendNewArticleNotification(formData.title, `/blog/${data.slug}`);
           }
         }
       }
@@ -245,7 +246,7 @@ export default function BlogManagementPage() {
     e.target.value = "";
   }
 
-  async function sendNewArticleNotification(articleTitle: string) {
+  async function sendNewArticleNotification(articleTitle: string, articleUrl: string) {
     try {
       const res = await fetch("/api/admin/notifications", {
         method: "POST",
@@ -255,6 +256,7 @@ export default function BlogManagementPage() {
           message: `Check out our latest article: "${articleTitle}"`,
           type: "new_article",
           userIds: [],
+          url: articleUrl,
         }),
       });
       
@@ -289,7 +291,7 @@ export default function BlogManagementPage() {
       await loadPosts();
       
       if (newStatus) {
-        await sendNewArticleNotification(post.title);
+        await sendNewArticleNotification(post.title, `/blog/${post.slug}`);
       }
     } catch {
       // ignore

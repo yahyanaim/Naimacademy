@@ -5,8 +5,9 @@ export interface INotification extends Document {
   userId: Types.ObjectId;
   title: string;
   message: string;
-  type: "new_user" | "course_completed" | "certificate" | "general";
+  type: "new_user" | "course_completed" | "certificate" | "new_article" | "general";
   read: boolean;
+  url?: string;
   createdAt: Date;
 }
 
@@ -16,10 +17,11 @@ const NotificationSchema = new Schema<INotification>({
   message: { type: String, required: true },
   type: { 
     type: String, 
-    enum: ["new_user", "course_completed", "certificate", "general"], 
+    enum: ["new_user", "course_completed", "certificate", "new_article", "general"], 
     default: "general" 
   },
   read: { type: Boolean, default: false },
+  url: { type: String, default: "" },
 }, { timestamps: true });
 
 export const Notification = 

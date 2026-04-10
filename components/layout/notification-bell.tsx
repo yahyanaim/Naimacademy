@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Bell, Check, X } from "lucide-react";
+import { Bell, Check, X, FileText, ExternalLink } from "lucide-react";
+import Link from "next/link";
 
 interface Notification {
   _id: string;
   title: string;
   message: string;
   read: boolean;
+  type?: string;
+  url?: string;
   createdAt: string;
 }
 
@@ -129,6 +132,17 @@ export function NotificationBell() {
                         <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                           {n.message}
                         </p>
+                        {n.url && (
+                          <Link 
+                            href={n.url}
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-2"
+                            onClick={() => { markAsRead(n._id); setOpen(false); }}
+                          >
+                            {n.type === "new_article" && <FileText className="size-3" />}
+                            Read article
+                            <ExternalLink className="size-3" />
+                          </Link>
+                        )}
                         <p className="text-xs text-muted-foreground mt-2">
                           {new Date(n.createdAt).toLocaleString()}
                         </p>

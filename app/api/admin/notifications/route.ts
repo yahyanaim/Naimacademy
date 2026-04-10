@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   await connectDB();
 
   try {
-    const { title, message, type, userIds } = await req.json();
+    const { title, message, type, userIds, url } = await req.json();
 
     if (!title || !message) {
       return NextResponse.json({ error: "Title and message are required" }, { status: 400 });
@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
     console.log("[NOTIFICATIONS] Request received:", { 
       title, 
       type, 
+      url,
       userIdsCount: userIds?.length,
       userIds: userIds
     });
@@ -77,6 +78,7 @@ export async function POST(req: NextRequest) {
       message,
       type: type || "general",
       read: false,
+      url: url || "",
     }));
 
     await Notification.insertMany(notifications);
