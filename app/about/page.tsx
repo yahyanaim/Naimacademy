@@ -3,147 +3,113 @@ import Footer from "@/components/layout/footer";
 
 export const metadata = {
   title: "About Us - Naim Academy",
-  description: "Learn about Naim Academy, our mission, values, and the team behind our online learning platform dedicated to providing quality Islamic education.",
+  description: "Learn about Naim Academy, our mission to provide free Islamic education, and how we operate through voluntary donations.",
 };
 
 export default function AboutPage() {
   return (
     <div className="flex flex-col min-h-screen pt-14" style={{ backgroundColor: "#fefdfb", overflowX: "hidden" }}>
       <main className="flex-1 pb-16">
-        <div className="max-w-3xl mx-auto px-6 py-12 space-y-12">
+        <div className="max-w-3xl mx-auto px-6 py-12 space-y-8">
           <div className="space-y-4">
             <h1 className="text-4xl font-bold tracking-tight">About Naim Academy</h1>
-            <p className="text-muted-foreground text-lg">Empowering learners through quality Islamic education</p>
+            <p className="text-muted-foreground text-lg">Empowering learners through free quality Islamic education</p>
           </div>
 
-          <div className="space-y-8 text-muted-foreground leading-relaxed">
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-foreground">Our Mission</h2>
-              <p className="text-lg">
-                Naim Academy is dedicated to making quality Islamic education accessible to everyone. 
-                We believe that knowledge of the Quran and Islamic teachings should be available to all, 
-                regardless of their location or circumstances.
-              </p>
-            </section>
+          <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
+            <p>
+              Welcome to Naim Academy, a free online learning platform dedicated to making Islamic education 
+              accessible to everyone. We believe that knowledge of the Quran and Islamic teachings should 
+              be available to all, regardless of their location, financial situation, or circumstances.
+            </p>
 
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-foreground">What We Offer</h2>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="p-6 rounded-lg border border-border bg-card">
-                  <h3 className="font-semibold text-foreground mb-2">Structured Courses</h3>
-                  <p className="text-sm">Comprehensive courses designed with progressive learning paths to help you build a strong foundation in Islamic knowledge.</p>
-                </div>
-                <div className="p-6 rounded-lg border border-border bg-card">
-                  <h3 className="font-semibold text-foreground mb-2">Expert-Led Content</h3>
-                  <p className="text-sm">All our content is carefully prepared and reviewed to ensure accuracy and educational value.</p>
-                </div>
-                <div className="p-6 rounded-lg border border-border bg-card">
-                  <h3 className="font-semibold text-foreground mb-2">Track Your Progress</h3>
-                  <p className="text-sm">Monitor your learning journey with progress tracking, exams, and certificates upon completion.</p>
-                </div>
-                <div className="p-6 rounded-lg border border-border bg-card">
-                  <h3 className="font-semibold text-foreground mb-2">Community Engagement</h3>
-                  <p className="text-sm">Learn alongside others through our article comments and voting system that helps identify quality content.</p>
-                </div>
-              </div>
-            </section>
+            <h2 className="text-2xl font-semibold text-foreground pt-4">Our Mission</h2>
+            <p>
+              Our mission is simple: to provide free, high-quality Islamic education to anyone with an 
+              internet connection. We are committed to breaking down the barriers that often prevent people 
+              from learning about their faith, whether those barriers are financial, geographical, or otherwise.
+            </p>
 
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-foreground">Our Values</h2>
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary font-semibold">1</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Accessibility</h3>
-                    <p className="text-sm">We believe education should have no barriers. Our platform is designed to be user-friendly and accessible to all.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary font-semibold">2</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Integrity</h3>
-                    <p className="text-sm">We are committed to transparency in our operations and the integrity of our educational content.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary font-semibold">3</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Community</h3>
-                    <p className="text-sm">We foster a supportive learning community where students can engage, discuss, and grow together.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary font-semibold">4</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Continuous Improvement</h3>
-                    <p className="text-sm">We constantly strive to improve our platform and content based on student feedback.</p>
-                  </div>
-                </div>
-              </div>
-            </section>
+            <h2 className="text-2xl font-semibold text-foreground pt-4">How We Operate</h2>
+            <p>
+              Naim Academy is completely free for all students. We do not charge any fees for accessing 
+              our courses, watching lessons, or taking exams. Our platform is built and maintained through 
+              the generous support of our community via donations.
+            </p>
+            <p>
+              If you find value in our content and would like to support our mission, you can make a 
+              voluntary donation. These contributions help us cover hosting costs, improve our platform, 
+              and continue developing new courses. However, donations are entirely optional and do not 
+              affect access to any content.
+            </p>
 
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-foreground">How It Works</h2>
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="size-8 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0 text-sm font-medium">1</div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Create an Account</h3>
-                    <p className="text-sm">Sign up for free to access our courses. Course access is granted after payment confirmation.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="size-8 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0 text-sm font-medium">2</div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Complete Payment</h3>
-                    <p className="text-sm">Make a bank transfer to unlock your selected courses. Contact us for custom packages.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="size-8 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0 text-sm font-medium">3</div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Start Learning</h3>
-                    <p className="text-sm">Access lessons, track your progress, take exams, and earn certificates as you complete courses.</p>
-                  </div>
-                </div>
-              </div>
-            </section>
+            <h2 className="text-2xl font-semibold text-foreground pt-4">What We Offer</h2>
+            <p>
+              Our platform provides structured courses designed to help you build a strong foundation 
+              in Islamic knowledge. Each course includes:
+            </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>Comprehensive lessons covering essential Islamic topics</li>
+              <li>Progress tracking to monitor your learning journey</li>
+              <li>Exams to test your understanding</li>
+              <li>Certificates upon successful completion</li>
+              <li>Article discussions where you can share your thoughts and vote on content</li>
+            </ul>
 
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-foreground">Get in Touch</h2>
-              <p>
-                We would love to hear from you! Whether you have questions about our courses, 
-                feedback to share, or just want to say hello, feel free to reach out.
-              </p>
-              <div className="p-4 rounded-lg border border-border bg-muted/30">
-                <p className="text-sm">
-                  <strong>Email:</strong> yahyaniam2001@gmail.com
-                </p>
-              </div>
-            </section>
+            <h2 className="text-2xl font-semibold text-foreground pt-4">Our Values</h2>
+            <p>
+              <strong>Accessibility:</strong> We believe education should have no barriers. Our platform 
+              is designed to be user-friendly and accessible to all, regardless of their technical expertise.
+            </p>
+            <p>
+              <strong>Integrity:</strong> We are committed to transparency in our operations and ensuring 
+              the accuracy of our educational content.
+            </p>
+            <p>
+              <strong>Community:</strong> We foster a supportive learning community where students can 
+              engage, discuss, and grow together through our article comments and feedback system.
+            </p>
+            <p>
+              <strong>Continuous Improvement:</strong> We constantly strive to improve our platform and 
+              content based on student feedback and needs.
+            </p>
 
-            <section className="space-y-4 pt-4 border-t border-border">
-              <h2 className="text-2xl font-semibold text-foreground">Learn More</h2>
+            <h2 className="text-2xl font-semibold text-foreground pt-4">Getting Started</h2>
+            <p>
+              To access our courses, simply create a free account. Once your account is verified, you 
+              can start learning immediately. If you choose to support us, you can make a bank transfer 
+              donation, but this is entirely optional and all course content remains free.
+            </p>
+            <p>
+              Start your learning journey today and discover the beauty of Islamic knowledge in a supportive, 
+              free environment.
+            </p>
+
+            <h2 className="text-2xl font-semibold text-foreground pt-4">Get in Touch</h2>
+            <p>
+              We would love to hear from you! Whether you have questions about our courses, feedback 
+              to share, or just want to say hello, feel free to reach out at{' '}
+              <a href="mailto:yahyaniam2001@gmail.com" className="text-primary hover:underline">
+                yahyaniam2001@gmail.com
+              </a>.
+            </p>
+
+            <div className="pt-6 border-t border-border">
+              <h2 className="text-xl font-semibold text-foreground mb-4">Learn More</h2>
               <div className="flex flex-wrap gap-4">
-                <Link href="/privacy" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                <Link href="/privacy" className="text-primary hover:underline">
                   Privacy Policy
                 </Link>
-                <Link href="/transparency" className="px-4 py-2 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                <span className="text-muted-foreground">|</span>
+                <Link href="/transparency" className="text-primary hover:underline">
                   Transparency Report
                 </Link>
-                <Link href="/terms" className="px-4 py-2 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                <span className="text-muted-foreground">|</span>
+                <Link href="/terms" className="text-primary hover:underline">
                   Terms of Service
                 </Link>
               </div>
-            </section>
+            </div>
           </div>
 
           <div className="pt-6 border-t border-border">
