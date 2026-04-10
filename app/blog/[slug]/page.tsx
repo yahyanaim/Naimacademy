@@ -39,9 +39,9 @@ async function getAllPosts() {
 function renderMarkdown(content: string): string {
   let html = content;
 
-  html = html.replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold mt-8 mb-4">$1</h3>');
-  html = html.replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold mt-10 mb-4">$1</h2>');
-  html = html.replace(/^# (.*$)/gm, '<h2 class="text-2xl font-bold mt-10 mb-4">$1</h2>');
+  html = html.replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold mt-6 mb-2">$1</h3>');
+  html = html.replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold mt-6 mb-2">$1</h2>');
+  html = html.replace(/^# (.*$)/gm, '<h2 class="text-2xl font-bold mt-6 mb-2">$1</h2>');
 
   html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
@@ -50,11 +50,11 @@ function renderMarkdown(content: string): string {
   html = html.replace(/^\* (.*$)/gm, '<li class="ml-4 list-disc">$1</li>');
   html = html.replace(/^\d+\. (.*$)/gm, '<li class="ml-4 list-decimal">$1</li>');
 
-  html = html.replace(/\n\n/g, '</p><p class="mb-4">');
+  html = html.replace(/\n\n/g, '</p><p class="mb-3">');
   html = html.replace(/\n/g, "<br />");
 
   if (!html.startsWith("<")) {
-    html = "<p class=\"mb-4\">" + html;
+    html = "<p class=\"mb-3\">" + html;
   }
 
   return html;
@@ -206,7 +206,7 @@ export default async function BlogPostPage({
               </div>
             )}
 
-            <header className="mb-6">
+            <header className="mb-4">
               {post.titleStyle === "h2" ? (
                 <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-4" itemProp="headline">
                   {post.title}
@@ -258,7 +258,7 @@ export default async function BlogPostPage({
                 </div>
               </div>
               {post.tags && post.tags.length > 0 && (
-                <div className="flex gap-2 mt-4" itemProp="keywords">
+                <div className="flex gap-2 mt-2" itemProp="keywords">
                   {post.tags.map((tag: string) => (
                     <span
                       key={tag}
