@@ -21,6 +21,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Plus,
   Edit,
   Trash2,
@@ -37,6 +44,7 @@ import { toast } from "sonner";
 interface BlogPost {
   _id: string;
   title: string;
+  titleStyle: "h1" | "h2" | "h3";
   slug: string;
   excerpt: string;
   content: string;
@@ -60,6 +68,7 @@ export default function BlogManagementPage() {
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [formData, setFormData] = useState({
     title: "",
+    titleStyle: "h1" as "h1" | "h2" | "h3",
     excerpt: "",
     content: "",
     coverImage: "",
@@ -97,6 +106,7 @@ export default function BlogManagementPage() {
     setEditingPost(null);
     setFormData({
       title: "",
+      titleStyle: "h1",
       excerpt: "",
       content: "",
       coverImage: "",
@@ -111,6 +121,7 @@ export default function BlogManagementPage() {
     setEditingPost(post);
     setFormData({
       title: post.title,
+      titleStyle: post.titleStyle || "h1",
       excerpt: post.excerpt,
       content: post.content,
       coverImage: post.coverImage || "",
@@ -340,6 +351,42 @@ export default function BlogManagementPage() {
                 }
                 placeholder="Enter article title"
               />
+            </div>
+            <div>
+              <Label htmlFor="titleStyle">Title Heading Style</Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Choose how the title appears on the article page. H1 is largest, H3 is smallest.
+              </p>
+              <Select
+                value={formData.titleStyle}
+                onValueChange={(v) =>
+                  setFormData({ ...formData, titleStyle: v as "h1" | "h2" | "h3" })
+                }
+              >
+                <SelectTrigger id="titleStyle">
+                  <SelectValue placeholder="Select heading style" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="h1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">H1</span>
+                      <span className="text-muted-foreground text-xs">- Largest heading</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="h2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">H2</span>
+                      <span className="text-muted-foreground text-xs">- Medium heading</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="h3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">H3</span>
+                      <span className="text-muted-foreground text-xs">- Smallest heading</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="author">Author</Label>

@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IBlogPost extends Document {
   title: string;
+  titleStyle: "h1" | "h2" | "h3";
   slug: string;
   excerpt: string;
   content: string;
@@ -24,6 +25,7 @@ export interface IBlogPost extends Document {
 const BlogPostSchema = new Schema<IBlogPost>(
   {
     title: { type: String, required: true },
+    titleStyle: { type: String, enum: ["h1", "h2", "h3"], default: "h1" },
     slug: { type: String, required: true, unique: true, index: true },
     excerpt: { type: String, required: true },
     content: { type: String, required: true },

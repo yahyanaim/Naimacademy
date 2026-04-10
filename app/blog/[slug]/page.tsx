@@ -207,9 +207,19 @@ export default async function BlogPostPage({
             )}
 
             <header className="mb-6">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4" itemProp="headline">
-                {post.title}
-              </h1>
+              {post.titleStyle === "h2" ? (
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-4" itemProp="headline">
+                  {post.title}
+                </h2>
+              ) : post.titleStyle === "h3" ? (
+                <h3 className="text-xl md:text-2xl font-bold tracking-tight mb-4" itemProp="headline">
+                  {post.title}
+                </h3>
+              ) : (
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4" itemProp="headline">
+                  {post.title}
+                </h1>
+              )}
               <div className="flex items-center gap-4 text-muted-foreground">
                 <div className="flex items-center gap-3">
                   {post.authorAvatar ? (
