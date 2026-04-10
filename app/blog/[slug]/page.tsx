@@ -82,14 +82,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     ? post.coverImage 
     : `${baseUrl}/api/og/blog?${ogParams.toString()}`;
 
+  const publishedDate = post.publishedAt ? new Date(post.publishedAt).toISOString() : new Date().toISOString();
+  const modifiedDate = post.updatedAt ? new Date(post.updatedAt).toISOString() : publishedDate;
+
   return {
-    title: post.title,
+    title: `${post.title} | Naim Academy`,
     description: post.excerpt,
+    authors: [{ name: post.author || "Naim Academy" }],
     openGraph: {
       type: "article",
       url: articleUrl,
       title: post.title,
-      description: `Read "${post.title}" on Naim Academy`,
+      description: post.excerpt,
       images: [
         {
           url: ogImageUrl,
@@ -101,12 +105,25 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         },
       ],
       siteName: "Naim Academy",
+      locale: "en_US",
+      publishedTime: publishedDate,
+      modifiedTime: modifiedDate,
+      authors: [post.author || "Naim Academy"],
+      tags: post.tags || [],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
-      description: `Read "${post.title}" on Naim Academy`,
+      description: post.excerpt,
       images: [ogImageUrl],
+      creator: "@naimacademy",
+    },
+    other: {
+      "article:published_time": publishedDate,
+      "article:modified_time": modifiedDate,
+      "article:author": post.author || "Naim Academy",
+      "article:section": "Education",
+      "fb:app_id": "",
     },
   };
 }
@@ -135,12 +152,50 @@ export default async function BlogPostPage({
     .filter((p) => p.slug !== slug)
     .slice(0, 3);
 
+  const publishedDate = post.publishedAt ? new Date(post.publishedAt).toISOString() : new Date().toISOString();
+  const modifiedDate = post.updatedAt ? new Date(post.updatedAt).toISOString() : publishedDate;
+  const articleUrl = `${baseUrl}/blog/${slug}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": post.title,
+    "description": post.excerpt,
+    "image": post.coverImage || `${baseUrl}/api/og/blog?title=${encodeURIComponent(post.title)}`,
+    "author": {
+      "@type": "Person",
+      "name": post.author || "Naim Academy",
+      "url": baseUrl,
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Naim Academy",
+      "url": baseUrl,
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${baseUrl}/favicon.ico`,
+      },
+    },
+    "datePublished": publishedDate,
+    "dateModified": modifiedDate,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": articleUrl,
+    },
+    "articleSection": "Education",
+    "keywords": post.tags?.join(", ") || "Islamic Education, Learning",
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
-      <main className="flex-1 pt-14">
+      <main className="flex-1 pt-14" itemScope itemType="https://schema.org/Article">
         <div className="max-w-3xl mx-auto px-6 py-12">
-          <article>
+          <article itemProp="articleBody">
             {post.coverImage && (
               <div className="aspect-video rounded-lg overflow-hidden mb-10 bg-muted">
                 <img
@@ -152,7 +207,7 @@ export default async function BlogPostPage({
             )}
 
             <header className="mb-6">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4" itemProp="headline">
                 {post.title}
               </h1>
               <div className="flex items-center gap-4 text-muted-foreground">
@@ -162,6 +217,7 @@ export default async function BlogPostPage({
                       src={post.authorAvatar}
                       alt={post.author}
                       className="size-10 rounded-full"
+                      itemProp="image"
                     />
                   ) : (
                     <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -171,15 +227,17 @@ export default async function BlogPostPage({
                     </div>
                   )}
                   <div>
-                    <p className="font-medium text-foreground">{post.author}</p>
+                    <p className="font-medium text-foreground" itemProp="author" itemScope itemType="https://schema.org/Person">
+                      <span itemProp="name">{post.author}</span>
+                    </p>
                     <div className="flex items-center gap-2 text-sm">
-                      <span>
+                      <time dateTime={post.publishedAt ? new Date(post.publishedAt).toISOString() : new Date().toISOString()} itemProp="datePublished">
                         {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", {
                           month: "long",
                           day: "numeric",
                           year: "numeric",
                         }) : ""}
-                      </span>
+                      </time>
                       <span>·</span>
                       <span className="flex items-center gap-1">
                         <Clock className="size-3" />
@@ -190,7 +248,7 @@ export default async function BlogPostPage({
                 </div>
               </div>
               {post.tags && post.tags.length > 0 && (
-                <div className="flex gap-2 mt-4">
+                <div className="flex gap-2 mt-4" itemProp="keywords">
                   {post.tags.map((tag: string) => (
                     <span
                       key={tag}

@@ -8,7 +8,7 @@ export default function TransparencyPage() {
         <div className="max-w-3xl mx-auto px-6 py-12 space-y-10">
           <div className="space-y-4">
             <h1 className="text-4xl font-bold tracking-tight">Transparency Report</h1>
-            <p className="text-muted-foreground">Last updated: April 4, 2026</p>
+            <p className="text-muted-foreground">Last updated: April 10, 2026</p>
           </div>
 
           <div className="space-y-8 text-muted-foreground leading-relaxed">
@@ -22,7 +22,7 @@ export default function TransparencyPage() {
               <div className="space-y-4">
                 <div className="p-4 rounded-lg border border-border bg-muted/30">
                   <p className="font-medium text-foreground text-sm">What we collect</p>
-                  <p className="text-sm mt-1">Name, email, course progress, exam scores, video timestamps</p>
+                  <p className="text-sm mt-1">Name, email, course progress, exam scores, video timestamps, article comments, and votes</p>
                 </div>
                 <div className="p-4 rounded-lg border border-border bg-muted/30">
                   <p className="font-medium text-foreground text-sm">What we don&apos;t collect</p>
@@ -33,6 +33,18 @@ export default function TransparencyPage() {
                   <p className="text-sm mt-1">We never sell, trade, or share your personal data with any third party</p>
                 </div>
               </div>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-xl font-semibold text-foreground">Comments and Voting System</h2>
+              <p>Our community engagement features are designed with privacy in mind:</p>
+              <ul className="list-disc pl-6 space-y-1">
+                <li><strong>No Account Required:</strong> Users can comment and vote on articles using just their name and email</li>
+                <li><strong>Identity Linking:</strong> If you are logged in or have commented before, your voting identity is automatically linked (and vice versa)</li>
+                <li><strong>One Vote Per Person:</strong> Each email address can only cast one vote (up or down) per article</li>
+                <li><strong>No Tracking:</strong> We do not use cookies or trackers for our comment and voting systems</li>
+                <li><strong>Data Isolation:</strong> Your comment/voting identity is stored separately from your course progress data</li>
+              </ul>
             </section>
 
             <section className="space-y-3">
@@ -64,7 +76,22 @@ export default function TransparencyPage() {
 
             <section className="space-y-3">
               <h2 className="text-xl font-semibold text-foreground">Data Retention</h2>
-              <p>Your data is retained for as long as your account is active. If you delete your account, all associated data is permanently removed from our systems within 30 days.</p>
+              <ul className="list-disc pl-6 space-y-1">
+                <li><strong>Active Accounts:</strong> Your data is retained for as long as your account is active</li>
+                <li><strong>Comments and Votes:</strong> Stored indefinitely until you request deletion or delete your account</li>
+                <li><strong>Account Deletion:</strong> All associated data (including comments and votes) is permanently removed within 30 days</li>
+              </ul>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-xl font-semibold text-foreground">Your Control</h2>
+              <p>You have full control over your data:</p>
+              <ul className="list-disc pl-6 space-y-1">
+                <li>Delete your account anytime from profile settings</li>
+                <li>Request deletion of individual comments</li>
+                <li>Export your course progress and certificates</li>
+                <li>Update your personal information at any time</li>
+              </ul>
             </section>
 
             <section className="space-y-3">
@@ -79,6 +106,9 @@ export default function TransparencyPage() {
             </Link>
             <Link href="/privacy" className="text-primary hover:underline text-sm">
               Privacy Policy
+            </Link>
+            <Link href="/about" className="text-primary hover:underline text-sm">
+              About Us
             </Link>
           </div>
         </div>
