@@ -58,6 +58,14 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
     checkAuthAndLoadComments();
   }, [slug]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchComments(page);
+    }, 15000);
+    
+    return () => clearInterval(interval);
+  }, [page, fetchComments]);
+
   async function checkAuthAndLoadComments() {
     try {
       const res = await fetch("/api/auth/me");

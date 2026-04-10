@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2, RefreshCw } from "lucide-react";
+import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -117,25 +117,11 @@ export default function CommentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Comments</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage article comments and replies
-          </p>
-        </div>
-        <button
-          onClick={() => setAutoRefresh(!autoRefresh)}
-          className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full transition-colors ${
-            autoRefresh 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-muted text-muted-foreground hover:bg-muted/80'
-          }`}
-          title="Auto-refresh every 15 seconds"
-        >
-          <RefreshCw className={`size-3 ${autoRefresh ? 'animate-spin' : ''}`} style={{ animationDuration: '2s' }} />
-          {autoRefresh ? 'Auto On' : 'Auto Off'}
-        </button>
+      <div>
+        <h1 className="text-2xl font-bold">Comments</h1>
+        <p className="text-sm text-muted-foreground">
+          Manage article comments and replies
+        </p>
       </div>
 
       <div className="flex gap-2 items-center">
