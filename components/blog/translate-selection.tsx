@@ -1,16 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Copy, X } from "lucide-react";
+import { Copy, X, Move } from "lucide-react";
 
 export default function TranslateSelection() {
-  const [selection, setSelection] = useState<{
-    text: string;
-    rect: DOMRect;
-  } | null>(null);
   const [translatedText, setTranslatedText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showTranslation, setShowTranslation] = useState(false);
+  const [position, setPosition] = useState({ x: 100, y: 100 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
 
   const translateToArabic = useCallback(async (text: string) => {
     setLoading(true);
@@ -21,7 +20,7 @@ export default function TranslateSelection() {
       const data = await response.json();
       if (data.responseStatus === 200 && data.responseData?.translatedText) {
         setTranslatedText(data.responseData.translatedText);
-        setShowTranslation(true);
+        setShowPopup(true);
       }
     } catch {
       setTranslatedText("Translation failed");
@@ -32,32 +31,11 @@ export default function TranslateSelection() {
 
   const handleSelection = useCallback(() => {
     const sel = window.getSelection();
-    if (!sel || sel.isCollapsed) {
-      setSelection(null);
-      setShowTranslation(false);
-      return;
-    }
+    if (!sel || sel.isCollapsed) return;
 
     const text = sel.toString().trim();
-    if (text.length < 2 || text.length > 500) {
-      setSelection(null);
-      setShowTranslation(false);
-      return;
-    }
+    if (text.length < 2 || text.length > 500) return;
 
-    const range = sel.getRangeAt(0);
-    
-    let element: Node | null = range.commonAncestorContainer;
-    while (element && element.nodeType !== Node.ELEMENT_NODE) {
-      element = element.parentNode;
-    }
-    
-    if (!element) return;
-    
-    const pElement = element as HTMLElement;
-    const rect = pElement.getBoundingClientRect();
-    
-    setSelection({ text, rect });
     translateToArabic(text);
   }, [translateToArabic]);
 
@@ -66,10 +44,47 @@ export default function TranslateSelection() {
   };
 
   const closeTranslation = () => {
-    setShowTranslation(false);
-    setSelection(null);
+    setShowPopup(false);
     setTranslatedText("");
   };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    setIsDragging(true);
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startPosX: position.x,
+      startPosY: position.y,
+    };
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || !dragRef.current) return;
+      const dx = e.clientX - dragRef.current.startX;
+      const dy = e.clientY - dragRef.current.startY;
+      setPosition({
+        x: dragRef.current.startPosX + dx,
+        y: dragRef.current.startPosY + dy,
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      dragRef.current = null;
+    };
+
+    if (isDragging) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging]);
 
   useEffect(() => {
     document.addEventListener("mouseup", handleSelection);
@@ -81,19 +96,20 @@ export default function TranslateSelection() {
     };
   }, [handleSelection]);
 
-  if (!selection || !showTranslation) return null;
+  if (!showPopup) return null;
 
   return (
     <div
-      className="fixed z-50 bg-white dark:bg-gray-900 rounded-lg shadow-xl border p-3 w-80"
+      className="fixed z-50 bg-white dark:bg-gray-900 rounded-lg shadow-xl border p-3 w-80 cursor-move"
       style={{ 
-        top: `${selection.rect.bottom + window.scrollY + 15}px`, 
-        left: `${Math.max(16, selection.rect.left + window.scrollX)}px`,
-        maxWidth: Math.min(selection.rect.width, 400)
+        top: `${position.y}px`, 
+        left: `${position.x}px`,
       }}
+      onMouseDown={handleMouseDown}
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-muted-foreground">
+        <span className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          <Move className="size-3 cursor-move" />
           Translation (Arabic)
         </span>
         <button
@@ -118,12 +134,6 @@ export default function TranslateSelection() {
           >
             <Copy className="size-3" />
             Copy
-          </button>
-          <button
-            onClick={() => translateToArabic(selection.text)}
-            className="flex-1 bg-muted hover:bg-muted/80 py-1.5 rounded-md text-xs font-medium transition-colors"
-          >
-            Translate Again
           </button>
         </div>
       )}
