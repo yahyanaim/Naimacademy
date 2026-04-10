@@ -31,7 +31,6 @@ import {
   Calendar,
   Clock,
   Bell,
-  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -213,62 +212,7 @@ export default function BlogManagementPage() {
     }
   }
 
-  async function handleResetVotes(post: BlogPost) {
-    if (!confirm(`Reset votes for "${post.title}"? This will set upvotes and downvotes to 0.`)) return;
-    try {
-      const res = await fetch("/api/admin/articles/reset-votes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: post.slug }),
-      });
-      if (res.ok) {
-        toast.success("Votes reset successfully!");
-        loadPosts();
-      } else {
-        toast.error("Failed to reset votes");
-      }
-    } catch {
-      toast.error("Failed to reset votes");
-    }
-  }
 
-  async function handleResetAllVotes() {
-    if (!confirm("Reset votes for ALL articles? This will set all upvotes and downvotes to 0.")) return;
-    try {
-      const res = await fetch("/api/admin/articles/reset-votes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      if (res.ok) {
-        toast.success("All votes reset successfully!");
-        loadPosts();
-      } else {
-        toast.error("Failed to reset votes");
-      }
-    } catch {
-      toast.error("Failed to reset votes");
-    }
-  }
-
-  async function handleRecalculateVotes() {
-    if (!confirm("Recalculate vote counts from stored votes? This will fix any counting issues.")) return;
-    try {
-      const res = await fetch("/api/admin/articles/reset-votes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recalculate: true }),
-      });
-      if (res.ok) {
-        toast.success("Votes recalculated successfully!");
-        loadPosts();
-      } else {
-        toast.error("Failed to recalculate votes");
-      }
-    } catch {
-      toast.error("Failed to recalculate votes");
-    }
-  }
 
   return (
     <div className="space-y-6">
@@ -278,13 +222,6 @@ export default function BlogManagementPage() {
           <p className="text-muted-foreground text-sm">Create and manage your blog articles</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleRecalculateVotes}>
-            <RotateCcw className="size-4 mr-2" />
-            Recalculate Votes
-          </Button>
-          <Button variant="outline" onClick={handleResetAllVotes}>
-            Reset All Votes
-          </Button>
           <Button onClick={openCreateDialog}>
             <Plus className="size-4 mr-2" />
             New Article
@@ -368,10 +305,6 @@ export default function BlogManagementPage() {
                       <DropdownMenuItem onClick={() => handleTogglePublish(post)}>
                         <Eye className="size-4 mr-2" />
                         {post.isPublished ? "Unpublish" : "Publish"}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleResetVotes(post)}>
-                        <RotateCcw className="size-4 mr-2" />
-                        Reset Votes
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleDelete(post._id)}

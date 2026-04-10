@@ -103,6 +103,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
     
     localStorage.setItem("user_identity", JSON.stringify(identityData));
     localStorage.setItem("identity_updated", Date.now().toString());
+    window.dispatchEvent(new Event("identity-changed"));
 
     setIdentityConfirmed(true);
     setShowIdentityForm(false);

@@ -35,27 +35,50 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
 
   useEffect(() => {
     checkAuthAndVoter();
-    
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "identity_updated" && step === "locked") {
+  }, [slug]);
+
+  useEffect(() => {
+    const handleIdentityUpdate = () => {
+      if (step !== "ready") {
         checkAuthAndVoter();
+      } else {
+        const stored = localStorage.getItem("user_identity");
+        if (stored) {
+          try {
+            const identity = JSON.parse(stored);
+            if (identity.name && identity.email && (identity.name !== voterName || identity.email !== voterEmail)) {
+              setVoterName(identity.name);
+              setVoterEmail(identity.email);
+              fetchVotes(identity.email);
+            }
+          } catch {}
+        }
+      }
+    };
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "identity_updated") {
+        handleIdentityUpdate();
       }
     };
     
     window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("identity-changed", handleIdentityUpdate);
     
     const interval = setInterval(() => {
       const updated = localStorage.getItem("identity_updated");
-      if (updated && step === "locked") {
-        checkAuthAndVoter();
+      if (updated) {
+        localStorage.removeItem("identity_updated");
+        handleIdentityUpdate();
       }
-    }, 1000);
+    }, 500);
     
     return () => {
       window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("identity-changed", handleIdentityUpdate);
       clearInterval(interval);
     };
-  }, [slug, step]);
+  }, [slug, step, voterName, voterEmail]);
 
   async function checkAuthAndVoter() {
     if (step === "ready") return;
@@ -155,12 +178,7 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
       name: voterName.trim(),
       email: voterEmail.trim().toLowerCase(),
     }));
-
-    localStorage.setItem(`vote_${slug}`, JSON.stringify({
-      name: voterName.trim(),
-      email: voterEmail.trim().toLowerCase(),
-      vote: null
-    }));
+    window.dispatchEvent(new Event("identity-changed"));
 
     setStep("ready");
     fetchVotes(voterEmail.trim().toLowerCase());
@@ -208,6 +226,7 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
           name: voterName.trim(),
           email: voterEmail.trim().toLowerCase(),
         }));
+        window.dispatchEvent(new Event("identity-changed"));
       }
     } catch (err) {
       console.error("Vote error:", err);
@@ -242,7 +261,7 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
   if (step === "identity") {
     return (
       <div className="flex items-center gap-4 py-6 border-y">
-        <form onSubmit={handleIdentitySubmit} className="flex items-center gap-2 flex-1 flex-wrap">
+        <div className="flex items-center gap-2 flex-1 flex-wrap">
           <div className="relative flex-1 min-w-[120px] max-w-[150px]">
             <input
               type="text"
@@ -250,7 +269,6 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
               value={voterName}
               onChange={(e) => setVoterName(e.target.value)}
               className="w-full px-3 py-1.5 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-              required
             />
           </div>
           <div className="relative flex-1 min-w-[160px] max-w-[200px]">
@@ -260,14 +278,13 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
               value={voterEmail}
               onChange={(e) => setVoterEmail(e.target.value)}
               className="w-full px-3 py-1.5 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-              required
             />
           </div>
           {error && <span className="text-xs text-red-500">{error}</span>}
-          <Button type="submit" size="sm">
+          <Button onClick={handleIdentitySubmit} size="sm">
             Continue
           </Button>
-        </form>
+        </div>
       </div>
     );
   }
