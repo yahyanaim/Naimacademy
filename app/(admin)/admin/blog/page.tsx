@@ -172,6 +172,26 @@ export default function BlogManagementPage() {
     }
   }
 
+  function insertHeading(prefix: string) {
+    const textarea = document.getElementById("content") as HTMLTextAreaElement;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const text = textarea.value;
+    const before = text.substring(0, start);
+    const lineStart = before.lastIndexOf("\n") + 1;
+    
+    const newText = text.substring(0, lineStart) + prefix + text.substring(lineStart);
+    const cursorPos = start + prefix.length;
+    
+    setFormData({ ...formData, content: newText });
+    
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(cursorPos, cursorPos);
+    }, 0);
+  }
+
   async function sendNewArticleNotification(articleTitle: string) {
     try {
       const res = await fetch("/api/admin/notifications", {
@@ -412,7 +432,40 @@ export default function BlogManagementPage() {
               />
             </div>
             <div>
-              <Label htmlFor="content">Content (Markdown supported)</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="content">Content (Markdown supported)</Label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => insertHeading("# ")}
+                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
+                  >
+                    H1
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertHeading("## ")}
+                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
+                  >
+                    H2
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertHeading("### ")}
+                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
+                  >
+                    H3
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertHeading("**")}
+                    className="px-3 py-1 text-xs font-bold border rounded hover:bg-muted"
+                    title="Bold"
+                  >
+                    B
+                  </button>
+                </div>
+              </div>
               <Textarea
                 id="content"
                 value={formData.content}
@@ -423,6 +476,9 @@ export default function BlogManagementPage() {
                 rows={15}
                 className="font-mono text-sm"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Use the buttons above to insert headings, or type manually: # Heading 1, ## Heading 2, ### Heading 3
+              </p>
             </div>
             <div>
               <Label htmlFor="coverImage">Cover Image URL</Label>
