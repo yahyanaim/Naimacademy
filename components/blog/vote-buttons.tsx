@@ -51,8 +51,6 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
   }, [slug]);
 
   const checkAuthAndVoter = useCallback(async () => {
-    if (step === "ready") return;
-    
     try {
       const authRes = await fetch("/api/auth/me");
       if (authRes.ok) {
@@ -107,7 +105,7 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
     }
     
     setStep("locked");
-  }, [step, slug, fetchVotes]);
+  }, [slug, fetchVotes]);
 
   useEffect(() => {
     checkAuthAndVoter();
@@ -115,49 +113,24 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
 
   useEffect(() => {
     const handleIdentityUpdate = () => {
-      const stored = localStorage.getItem("user_identity");
-      if (!stored) return;
-      
-      try {
-        const identity = JSON.parse(stored);
-        if (!identity.name || !identity.email) return;
-        
-        if (identity.name !== voterName || identity.email !== voterEmail) {
-          setVoterName(identity.name);
-          setVoterEmail(identity.email);
-        }
-        
-        if (step !== "ready") {
-          checkAuthAndVoter();
-        } else {
-          fetchVotes(identity.email);
-        }
-      } catch {}
+      checkAuthAndVoter();
     };
 
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "identity_updated") {
-        handleIdentityUpdate();
-      }
-    };
-    
-    window.addEventListener("storage", handleStorageChange);
     window.addEventListener("identity-changed", handleIdentityUpdate);
     
     const interval = setInterval(() => {
       const updated = localStorage.getItem("identity_updated");
       if (updated) {
         localStorage.removeItem("identity_updated");
-        handleIdentityUpdate();
+        checkAuthAndVoter();
       }
     }, 500);
     
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("identity-changed", handleIdentityUpdate);
       clearInterval(interval);
     };
-  }, [slug, step, voterName, voterEmail, checkAuthAndVoter, fetchVotes]);
+  }, [slug, checkAuthAndVoter]);
 
   function handleStartVoting() {
     setStep("identity");
