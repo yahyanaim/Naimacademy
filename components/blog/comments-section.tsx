@@ -96,10 +96,13 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
       return;
     }
 
-    localStorage.setItem("user_identity", JSON.stringify({
+    const identityData = {
       name: trimmedName,
       email: trimmedEmail.toLowerCase(),
-    }));
+    };
+    
+    localStorage.setItem("user_identity", JSON.stringify(identityData));
+    localStorage.setItem("identity_updated", Date.now().toString());
 
     setIdentityConfirmed(true);
     setShowIdentityForm(false);

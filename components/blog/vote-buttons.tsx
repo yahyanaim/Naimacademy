@@ -35,9 +35,31 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
 
   useEffect(() => {
     checkAuthAndVoter();
-  }, [slug]);
+    
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "identity_updated" && step === "locked") {
+        checkAuthAndVoter();
+      }
+    };
+    
+    window.addEventListener("storage", handleStorageChange);
+    
+    const interval = setInterval(() => {
+      const updated = localStorage.getItem("identity_updated");
+      if (updated && step === "locked") {
+        checkAuthAndVoter();
+      }
+    }, 1000);
+    
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [slug, step]);
 
   async function checkAuthAndVoter() {
+    if (step === "ready") return;
+    
     try {
       const authRes = await fetch("/api/auth/me");
       if (authRes.ok) {
@@ -63,11 +85,13 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
     if (stored) {
       try {
         const identity = JSON.parse(stored);
-        setVoterName(identity.name || "");
-        setVoterEmail(identity.email || "");
-        await fetchVotes(identity.email);
-        setStep("ready");
-        return;
+        if (identity.name && identity.email) {
+          setVoterName(identity.name || "");
+          setVoterEmail(identity.email || "");
+          await fetchVotes(identity.email);
+          setStep("ready");
+          return;
+        }
       } catch {
         // invalid stored data
       }
@@ -77,11 +101,13 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
     if (voteStored) {
       try {
         const voter: Voter = JSON.parse(voteStored);
-        setVoterName(voter.name);
-        setVoterEmail(voter.email);
-        await fetchVotes(voter.email);
-        setStep("ready");
-        return;
+        if (voter.name && voter.email) {
+          setVoterName(voter.name);
+          setVoterEmail(voter.email);
+          await fetchVotes(voter.email);
+          setStep("ready");
+          return;
+        }
       } catch {
         localStorage.removeItem(`vote_${slug}`);
       }
