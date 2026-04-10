@@ -35,7 +35,6 @@ export default function CommentsPage() {
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [autoRefresh, setAutoRefresh] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const fetchComments = useCallback(async (page = 1) => {
@@ -58,16 +57,6 @@ export default function CommentsPage() {
   useEffect(() => {
     fetchComments(currentPage);
   }, [currentPage, fetchComments]);
-
-  useEffect(() => {
-    if (!autoRefresh) return;
-    
-    const interval = setInterval(() => {
-      fetchComments(currentPage);
-    }, 15000);
-    
-    return () => clearInterval(interval);
-  }, [autoRefresh, currentPage, fetchComments]);
 
   async function handleDelete(comment: Comment) {
     if (!confirm(`Delete comment from "${comment.authorName}"?\n\n"${comment.content.substring(0, 50)}..."`)) return;
@@ -116,27 +105,14 @@ export default function CommentsPage() {
             Manage article comments and replies
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => fetchComments(currentPage)}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            title="Refresh comments"
-          >
-            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-          <button
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full transition-colors ${
-              autoRefresh 
-                ? 'bg-green-100 text-green-700' 
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-            }`}
-            title="Auto-refresh every 15 seconds"
-          >
-            <RefreshCw className={`size-3 ${autoRefresh ? 'animate-spin' : ''}`} style={{ animationDuration: '2s' }} />
-            {autoRefresh ? 'Auto On' : 'Auto Off'}
-          </button>
-        </div>
+        <button
+          onClick={() => fetchComments(currentPage)}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          title="Refresh comments"
+        >
+          <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
       </div>
 
       <form onSubmit={handleSearch} className="flex gap-2">

@@ -4,6 +4,13 @@ import { useState, useEffect, useCallback } from "react";
 import { MessageSquare, Send, User, Mail, CheckCircle, Lock, X, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Comment {
   _id: string;
@@ -37,14 +44,14 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
   const [totalPages, setTotalPages] = useState(1);
   const [totalComments, setTotalComments] = useState(0);
   const [autoRefresh, setAutoRefresh] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [filter, setFilter] = useState<"all" | "pending" | "replied">("all");
 
   const COMMENTS_PER_PAGE = 10;
 
   const fetchComments = useCallback(async (pageNum: number = 1) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/blog/comments?slug=${slug}&page=${pageNum}&limit=${COMMENTS_PER_PAGE}`);
+      const res = await fetch(`/api/blog/comments?slug=${slug}&page=${pageNum}&limit=${COMMENTS_PER_PAGE}&filter=${filter}`);
       if (res.ok) {
         const data = await res.json();
         setComments(data.comments || []);
@@ -52,11 +59,10 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
           setTotalPages(data.pagination.pages);
           setTotalComments(data.pagination.total);
         }
-        setLastUpdate(new Date());
       }
     } catch {}
     setLoading(false);
-  }, [slug]);
+  }, [slug, filter]);
 
   useEffect(() => {
     checkAuthAndLoadComments();
@@ -214,18 +220,16 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
           >
             <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
-          <button
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full transition-colors ${
-              autoRefresh 
-                ? 'bg-green-100 text-green-700' 
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-            }`}
-            title="Auto-refresh every 10 seconds"
-          >
-            <RefreshCw className={`size-3 ${autoRefresh ? 'animate-spin' : ''}`} style={{ animationDuration: '2s' }} />
-            {autoRefresh ? 'Auto' : 'Auto'}
-          </button>
+          <Select value={filter} onValueChange={(v: "all" | "pending" | "replied") => { setFilter(v); setPage(1); }}>
+            <SelectTrigger className="w-[130px] h-8 text-xs">
+              <SelectValue placeholder="Filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Comments</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="replied">Replied</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     const slug = searchParams.get("slug");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+    const filter = searchParams.get("filter") || "all";
 
     if (!slug) {
       return NextResponse.json({ error: "Slug required" }, { status: 400 });
@@ -24,14 +25,21 @@ export async function GET(request: Request) {
 
     await connectDB();
     
+    const baseQuery: Record<string, unknown> = { articleSlug: slug };
+    if (filter === "pending") {
+      baseQuery.isReplied = false;
+    } else if (filter === "replied") {
+      baseQuery.isReplied = true;
+    }
+    
     const skip = (page - 1) * limit;
     const [comments, total] = await Promise.all([
-      Comment.find({ articleSlug: slug })
+      Comment.find(baseQuery)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      Comment.countDocuments({ articleSlug: slug }),
+      Comment.countDocuments(baseQuery),
     ]);
 
     return NextResponse.json({
