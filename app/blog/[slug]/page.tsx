@@ -41,7 +41,7 @@ function renderMarkdown(content: string): string {
 
   html = html.replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold mt-8 mb-4">$1</h3>');
   html = html.replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold mt-10 mb-4">$1</h2>');
-  html = html.replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold mt-10 mb-6">$1</h1>');
+  html = html.replace(/^# (.*$)/gm, '<h2 class="text-2xl font-bold mt-10 mb-4">$1</h2>');
 
   html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
