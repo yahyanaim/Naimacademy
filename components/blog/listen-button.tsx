@@ -89,7 +89,7 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
   return (
     <button
       onClick={speak}
-      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+      className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all ${
         isPlaying
           ? "bg-primary text-primary-foreground"
           : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
@@ -97,16 +97,11 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
       title={isPlaying ? "Stop listening" : "Listen to article"}
     >
       {isPlaying ? (
-        <>
-          <VolumeX className="size-4" />
-          Stop
-        </>
+        <VolumeX className="size-3" />
       ) : (
-        <>
-          <Volume2 className="size-4" />
-          Listen
-        </>
+        <Volume2 className="size-3" />
       )}
+      <span className="hidden sm:inline">{isPlaying ? "Stop" : "Listen"}</span>
     </button>
   );
 }
