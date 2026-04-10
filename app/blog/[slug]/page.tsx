@@ -131,7 +131,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       "article:modified_time": modifiedDate,
       "article:author": post.author || "Naim Academy",
       "article:section": "Education",
-      "fb:app_id": "",
+      "fb:app_id": process.env.NEXT_PUBLIC_FB_APP_ID || "YOUR_FB_APP_ID",
     },
   };
 }
