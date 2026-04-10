@@ -15,17 +15,34 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get("slug");
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
 
     if (!slug) {
       return NextResponse.json({ error: "Slug required" }, { status: 400 });
     }
 
     await connectDB();
-    const comments = await Comment.find({ articleSlug: slug })
-      .sort({ createdAt: -1 })
-      .lean();
+    
+    const skip = (page - 1) * limit;
+    const [comments, total] = await Promise.all([
+      Comment.find({ articleSlug: slug })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Comment.countDocuments({ articleSlug: slug }),
+    ]);
 
-    return NextResponse.json({ comments });
+    return NextResponse.json({
+      comments,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Error fetching comments:", error);
     return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });

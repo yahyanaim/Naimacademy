@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ThumbsUp, ThumbsDown, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -39,21 +39,24 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
 
   useEffect(() => {
     const handleIdentityUpdate = () => {
-      if (step !== "ready") {
-        checkAuthAndVoter();
-      } else {
-        const stored = localStorage.getItem("user_identity");
-        if (stored) {
-          try {
-            const identity = JSON.parse(stored);
-            if (identity.name && identity.email && (identity.name !== voterName || identity.email !== voterEmail)) {
-              setVoterName(identity.name);
-              setVoterEmail(identity.email);
-              fetchVotes(identity.email);
-            }
-          } catch {}
+      const stored = localStorage.getItem("user_identity");
+      if (!stored) return;
+      
+      try {
+        const identity = JSON.parse(stored);
+        if (!identity.name || !identity.email) return;
+        
+        if (identity.name !== voterName || identity.email !== voterEmail) {
+          setVoterName(identity.name);
+          setVoterEmail(identity.email);
         }
-      }
+        
+        if (step !== "ready") {
+          checkAuthAndVoter();
+        } else {
+          fetchVotes(identity.email);
+        }
+      } catch {}
     };
 
     const handleStorageChange = (e: StorageEvent) => {
@@ -78,9 +81,26 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
       window.removeEventListener("identity-changed", handleIdentityUpdate);
       clearInterval(interval);
     };
-  }, [slug, step, voterName, voterEmail]);
+  }, [slug, step, voterName, voterEmail, checkAuthAndVoter]);
 
-  async function checkAuthAndVoter() {
+  const fetchVotes = useCallback(async (email: string) => {
+    try {
+      const params = new URLSearchParams({ slug });
+      if (email) params.append("email", email);
+      
+      const res = await fetch(`/api/blog/vote?${params}`);
+      if (res.ok) {
+        const data = await res.json();
+        setUpvotes(data.upvotes);
+        setDownvotes(data.downvotes);
+        setUserVote(data.userVote);
+      }
+    } catch {
+      // ignore
+    }
+  }, [slug]);
+
+  const checkAuthAndVoter = useCallback(async () => {
     if (step === "ready") return;
     
     try {
@@ -137,24 +157,7 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
     }
     
     setStep("locked");
-  }
-
-  async function fetchVotes(email: string) {
-    try {
-      const params = new URLSearchParams({ slug });
-      if (email) params.append("email", email);
-      
-      const res = await fetch(`/api/blog/vote?${params}`);
-      if (res.ok) {
-        const data = await res.json();
-        setUpvotes(data.upvotes);
-        setDownvotes(data.downvotes);
-        setUserVote(data.userVote);
-      }
-    } catch {
-      // ignore
-    }
-  }
+  }, [step, slug, fetchVotes]);
 
   function handleStartVoting() {
     setStep("identity");

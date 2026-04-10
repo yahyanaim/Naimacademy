@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { MessageSquare, Send, User, Mail, CheckCircle, Lock, X } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { MessageSquare, Send, User, Mail, CheckCircle, Lock, X, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -33,10 +33,44 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
   const [showIdentityForm, setShowIdentityForm] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [identityConfirmed, setIdentityConfirmed] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalComments, setTotalComments] = useState(0);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+
+  const COMMENTS_PER_PAGE = 10;
+
+  const fetchComments = useCallback(async (pageNum: number = 1) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/blog/comments?slug=${slug}&page=${pageNum}&limit=${COMMENTS_PER_PAGE}`);
+      if (res.ok) {
+        const data = await res.json();
+        setComments(data.comments || []);
+        if (data.pagination) {
+          setTotalPages(data.pagination.pages);
+          setTotalComments(data.pagination.total);
+        }
+        setLastUpdate(new Date());
+      }
+    } catch {}
+    setLoading(false);
+  }, [slug]);
 
   useEffect(() => {
     checkAuthAndLoadComments();
   }, [slug]);
+
+  useEffect(() => {
+    if (!autoRefresh) return;
+    
+    const interval = setInterval(() => {
+      fetchComments(page);
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [autoRefresh, page, fetchComments]);
 
   async function checkAuthAndLoadComments() {
     try {
@@ -64,18 +98,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
       }
     } catch {}
     
-    fetchComments();
-  }
-
-  async function fetchComments() {
-    try {
-      const res = await fetch(`/api/blog/comments?slug=${slug}`);
-      if (res.ok) {
-        const data = await res.json();
-        setComments(data.comments || []);
-      }
-    } catch {}
-    setLoading(false);
+    fetchComments(page);
   }
 
   function handleStartCommenting() {
@@ -138,7 +161,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
       if (res.ok) {
         setSuccess(true);
         setContent("");
-        fetchComments();
+        fetchComments(page);
         setTimeout(() => setSuccess(false), 3000);
       } else {
         const data = await res.json();
@@ -162,16 +185,16 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
 
   return (
     <section className="mt-12 pt-8 border-t">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => setShowComments(!showComments)}
           className="flex items-center gap-3 hover:opacity-70 transition-opacity"
         >
           <MessageSquare className="size-6 text-muted-foreground" />
           <h2 className="text-2xl font-bold">Comments</h2>
-          {comments.length > 0 && (
+          {totalComments > 0 && (
             <span className="px-2 py-0.5 text-sm bg-muted rounded-full">
-              {comments.length}
+              {totalComments}
             </span>
           )}
           <svg 
@@ -183,6 +206,27 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => fetchComments(page)}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            title="Refresh comments"
+          >
+            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+          <button
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full transition-colors ${
+              autoRefresh 
+                ? 'bg-green-100 text-green-700' 
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+            }`}
+            title="Auto-refresh every 10 seconds"
+          >
+            <RefreshCw className={`size-3 ${autoRefresh ? 'animate-spin' : ''}`} style={{ animationDuration: '2s' }} />
+            {autoRefresh ? 'Auto' : 'Auto'}
+          </button>
+        </div>
       </div>
 
       {showComments && (
@@ -299,10 +343,43 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         </div>
       ) : null}
 
-      {!loading && comments.length > 0 && (
-        <p className="text-sm text-muted-foreground mt-6">
-          {comments.length} comment{comments.length !== 1 ? "s" : ""}
-        </p>
+      {!loading && totalComments > 0 && (
+        <div className="flex items-center justify-between mt-6">
+          <p className="text-sm text-muted-foreground">
+            Showing {comments.length} of {totalComments} comment{totalComments !== 1 ? "s" : ""}
+          </p>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setPage(p => Math.max(1, p - 1));
+                  fetchComments(page - 1);
+                }}
+                disabled={page <= 1}
+                className="h-8 px-2"
+              >
+                <ChevronLeft className="size-4" />
+              </Button>
+              <span className="text-sm text-muted-foreground px-2">
+                {page} / {totalPages}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setPage(p => Math.min(totalPages, p + 1));
+                  fetchComments(page + 1);
+                }}
+                disabled={page >= totalPages}
+                className="h-8 px-2"
+              >
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       )}
 
       {loading ? (
