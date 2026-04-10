@@ -232,6 +232,25 @@ export default function BlogManagementPage() {
     }
   }
 
+  async function handleResetAllVotes() {
+    if (!confirm("Reset votes for ALL articles? This will set all upvotes and downvotes to 0.")) return;
+    try {
+      const res = await fetch("/api/admin/articles/reset-votes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (res.ok) {
+        toast.success("All votes reset successfully!");
+        loadPosts();
+      } else {
+        toast.error("Failed to reset votes");
+      }
+    } catch {
+      toast.error("Failed to reset votes");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -239,10 +258,16 @@ export default function BlogManagementPage() {
           <h1 className="text-2xl font-bold tracking-tight">Blog Management</h1>
           <p className="text-muted-foreground text-sm">Create and manage your blog articles</p>
         </div>
-        <Button onClick={openCreateDialog}>
-          <Plus className="size-4 mr-2" />
-          New Article
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleResetAllVotes}>
+            <RotateCcw className="size-4 mr-2" />
+            Reset All Votes
+          </Button>
+          <Button onClick={openCreateDialog}>
+            <Plus className="size-4 mr-2" />
+            New Article
+          </Button>
+        </div>
       </div>
 
       <Card>

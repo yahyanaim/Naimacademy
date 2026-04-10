@@ -173,19 +173,6 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
 
     setLoading(true);
     setError("");
-    const previousVote = userVote;
-
-    setUpvotes(prev => {
-      if (vote === "up") return prev + 1;
-      if (previousVote === "up") return prev - 1;
-      return prev;
-    });
-    setDownvotes(prev => {
-      if (vote === "down") return prev + 1;
-      if (previousVote === "down") return prev - 1;
-      return prev;
-    });
-    setUserVote(vote);
 
     try {
       const res = await fetch("/api/blog/vote", {
@@ -203,9 +190,6 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
 
       if (!res.ok) {
         setError(data.error || "Failed to vote");
-        setUpvotes(data.upvotes);
-        setDownvotes(data.downvotes);
-        setUserVote(previousVote);
         setLoading(false);
         return;
       }
@@ -228,9 +212,6 @@ export default function VoteButtons({ slug, initialUpvotes = 0, initialDownvotes
     } catch (err) {
       console.error("Vote error:", err);
       setError("Failed to vote");
-      setUpvotes(initialUpvotes);
-      setDownvotes(initialDownvotes);
-      setUserVote(previousVote);
     } finally {
       setLoading(false);
     }
