@@ -481,10 +481,6 @@ export default function BlogManagementPage() {
                   <button type="button" onClick={() => insertHeading("###### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H6</button>
                   <button type="button" onClick={(e) => { e.preventDefault(); insertFormat("**", "**"); }} className="px-2 py-1 text-xs font-bold border rounded hover:bg-muted" title="Bold">B</button>
                   <button type="button" onClick={(e) => { e.preventDefault(); insertFormat("*", "*"); }} className="px-2 py-1 text-xs italic border rounded hover:bg-muted" title="Italic">I</button>
-                  <label className="px-2 py-1 text-xs border rounded hover:bg-muted cursor-pointer">
-                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                    <Image className="size-3 inline" />
-                  </label>
                 </div>
               </div>
               <Textarea
@@ -500,6 +496,13 @@ export default function BlogManagementPage() {
               <p className="text-xs text-muted-foreground mt-1">
                 Tip: Click heading buttons to insert at cursor position
               </p>
+              <div className="mt-2">
+                <label className="inline-flex items-center gap-2 px-3 py-2 text-sm border rounded-md hover:bg-muted cursor-pointer">
+                  <Image className="size-4" />
+                  <span>Upload Image</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                </label>
+              </div>
             </div>
             <div>
               <Label htmlFor="coverImage" className="text-sm font-medium">Cover Image URL</Label>
