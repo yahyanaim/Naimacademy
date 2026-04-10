@@ -79,21 +79,23 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
 
   function handleIdentitySubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
-
-    if (!name.trim() || name.trim().length < 2) {
+    
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    
+    if (!trimmedName || trimmedName.length < 2) {
       setError("Name must be at least 2 characters");
       return;
     }
 
-    if (!email.trim() || !email.includes("@")) {
+    if (!trimmedEmail || !trimmedEmail.includes("@")) {
       setError("Please enter a valid email");
       return;
     }
 
     localStorage.setItem("user_identity", JSON.stringify({
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
+      name: trimmedName,
+      email: trimmedEmail.toLowerCase(),
     }));
 
     setShowIdentityForm(false);
@@ -181,7 +183,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                required
+                autoComplete="name"
               />
             </div>
             <div className="relative">
@@ -192,16 +194,20 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                required
+                autoComplete="email"
               />
             </div>
             {error && (
               <p className="text-sm text-red-500">{error}</p>
             )}
             <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => setShowIdentityForm(false)}>
+              <button
+                type="button"
+                onClick={() => setShowIdentityForm(false)}
+                className="px-4 py-2 text-sm border rounded-md hover:bg-muted transition-colors"
+              >
                 Cancel
-              </Button>
+              </button>
               <Button type="submit">
                 Continue
               </Button>
