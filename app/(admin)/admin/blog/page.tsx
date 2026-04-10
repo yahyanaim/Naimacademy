@@ -449,8 +449,8 @@ export default function BlogManagementPage() {
                   <button type="button" onClick={() => insertHeading("#### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H4</button>
                   <button type="button" onClick={() => insertHeading("##### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H5</button>
                   <button type="button" onClick={() => insertHeading("###### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H6</button>
-                  <button type="button" onClick={() => insertFormat("**", "**")} className="px-2 py-1 text-xs font-bold border rounded hover:bg-muted" title="Bold">B</button>
-                  <button type="button" onClick={() => insertFormat("*", "*")} className="px-2 py-1 text-xs italic border rounded hover:bg-muted" title="Italic">I</button>
+                  <button type="button" onClick={(e) => { e.preventDefault(); insertFormat("**", "**"); }} className="px-2 py-1 text-xs font-bold border rounded hover:bg-muted" title="Bold">B</button>
+                  <button type="button" onClick={(e) => { e.preventDefault(); insertFormat("*", "*"); }} className="px-2 py-1 text-xs italic border rounded hover:bg-muted" title="Italic">I</button>
                 </div>
               </div>
               <Textarea
