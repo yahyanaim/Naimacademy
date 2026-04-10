@@ -14,7 +14,10 @@ async function checkAdmin(req: NextRequest) {
   return payload;
 }
 
-export async function DELETE(req: NextRequest) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const admin = await checkAdmin(req);
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -23,8 +26,7 @@ export async function DELETE(req: NextRequest) {
   await connectDB();
 
   try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json({ error: "Comment ID required" }, { status: 400 });

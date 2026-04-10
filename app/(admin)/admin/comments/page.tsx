@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2 } from "lucide-react";
+import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -35,12 +35,10 @@ export default function CommentsPage() {
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    fetchComments();
-  }, []);
-
-  async function fetchComments(page = 1) {
+  const fetchComments = useCallback(async (page = 1) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: page.toString(), limit: "20" });
@@ -55,7 +53,21 @@ export default function CommentsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    fetchComments(currentPage);
+  }, [currentPage, fetchComments]);
+
+  useEffect(() => {
+    if (!autoRefresh) return;
+    
+    const interval = setInterval(() => {
+      fetchComments(currentPage);
+    }, 15000);
+    
+    return () => clearInterval(interval);
+  }, [autoRefresh, currentPage, fetchComments]);
 
   async function handleDelete(comment: Comment) {
     if (!confirm(`Delete comment from "${comment.authorName}"?\n\n"${comment.content.substring(0, 50)}..."`)) return;
@@ -63,7 +75,7 @@ export default function CommentsPage() {
       const res = await fetch(`/api/admin/comments/${comment._id}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("Comment deleted");
-        fetchComments();
+        fetchComments(currentPage);
       } else {
         toast.error("Failed to delete comment");
       }
@@ -103,6 +115,27 @@ export default function CommentsPage() {
           <p className="text-sm text-muted-foreground">
             Manage article comments and replies
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => fetchComments(currentPage)}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            title="Refresh comments"
+          >
+            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+          <button
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full transition-colors ${
+              autoRefresh 
+                ? 'bg-green-100 text-green-700' 
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+            }`}
+            title="Auto-refresh every 15 seconds"
+          >
+            <RefreshCw className={`size-3 ${autoRefresh ? 'animate-spin' : ''}`} style={{ animationDuration: '2s' }} />
+            {autoRefresh ? 'Auto On' : 'Auto Off'}
+          </button>
         </div>
       </div>
 
@@ -238,14 +271,14 @@ export default function CommentsPage() {
         {pagination && pagination.pages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t bg-muted/30">
             <p className="text-sm text-muted-foreground">
-              Page {pagination.page} of {pagination.pages} ({pagination.total} total)
+              Page {currentPage} of {pagination.pages} ({pagination.total} total)
             </p>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => fetchComments(pagination.page - 1)}
-                disabled={pagination.page <= 1}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
               >
                 <ChevronLeft className="size-4 mr-1" />
                 Previous
@@ -253,8 +286,8 @@ export default function CommentsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => fetchComments(pagination.page + 1)}
-                disabled={pagination.page >= pagination.pages}
+                onClick={() => setCurrentPage(p => Math.min(pagination.pages, p + 1))}
+                disabled={currentPage >= pagination.pages}
               >
                 Next
                 <ChevronRight className="size-4 ml-1" />
