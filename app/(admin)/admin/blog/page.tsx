@@ -31,6 +31,7 @@ import {
   Calendar,
   Clock,
   Bell,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -210,6 +211,25 @@ export default function BlogManagementPage() {
     }
   }
 
+  async function handleResetVotes(post: BlogPost) {
+    if (!confirm(`Reset votes for "${post.title}"? This will set upvotes and downvotes to 0.`)) return;
+    try {
+      const res = await fetch("/api/admin/articles/reset-votes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: post.slug }),
+      });
+      if (res.ok) {
+        toast.success("Votes reset successfully!");
+        loadPosts();
+      } else {
+        toast.error("Failed to reset votes");
+      }
+    } catch {
+      toast.error("Failed to reset votes");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -279,6 +299,12 @@ export default function BlogManagementPage() {
                         <Eye className="size-3" />
                         {post.views} views
                       </span>
+                      {(post.upvotes > 0 || post.downvotes > 0) && (
+                        <span className="flex items-center gap-1">
+                          <span className="text-green-600">+{post.upvotes}</span>
+                          <span className="text-red-600">-{post.downvotes}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                   <DropdownMenu>
@@ -293,6 +319,10 @@ export default function BlogManagementPage() {
                       <DropdownMenuItem onClick={() => handleTogglePublish(post)}>
                         <Eye className="size-4 mr-2" />
                         {post.isPublished ? "Unpublish" : "Publish"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleResetVotes(post)}>
+                        <RotateCcw className="size-4 mr-2" />
+                        Reset Votes
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleDelete(post._id)}
