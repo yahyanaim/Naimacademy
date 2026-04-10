@@ -192,6 +192,29 @@ export default function BlogManagementPage() {
     }, 0);
   }
 
+  function insertFormat(before: string, after: string) {
+    const textarea = document.getElementById("content") as HTMLTextAreaElement;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selected = text.substring(start, end);
+    
+    const newText = text.substring(0, start) + before + (selected || "text") + after + text.substring(end);
+    
+    setFormData({ ...formData, content: newText });
+    
+    setTimeout(() => {
+      textarea.focus();
+      if (selected) {
+        textarea.setSelectionRange(start + before.length, start + before.length + selected.length);
+      } else {
+        textarea.setSelectionRange(start + before.length, start + before.length + 4);
+      }
+    }, 0);
+  }
+
   async function sendNewArticleNotification(articleTitle: string) {
     try {
       const res = await fetch("/api/admin/notifications", {
@@ -426,7 +449,8 @@ export default function BlogManagementPage() {
                   <button type="button" onClick={() => insertHeading("#### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H4</button>
                   <button type="button" onClick={() => insertHeading("##### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H5</button>
                   <button type="button" onClick={() => insertHeading("###### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H6</button>
-                  <button type="button" onClick={() => insertHeading("**")} className="px-2 py-1 text-xs font-bold border rounded hover:bg-muted" title="Bold">B</button>
+                  <button type="button" onClick={() => insertFormat("**", "**")} className="px-2 py-1 text-xs font-bold border rounded hover:bg-muted" title="Bold">B</button>
+                  <button type="button" onClick={() => insertFormat("*", "*")} className="px-2 py-1 text-xs italic border rounded hover:bg-muted" title="Italic">I</button>
                 </div>
               </div>
               <Textarea

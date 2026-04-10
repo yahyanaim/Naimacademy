@@ -57,32 +57,9 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
     const utterance = new SpeechSynthesisUtterance(text);
     utteranceRef.current = utterance;
     
-    const femaleNames = ["samantha", "victoria", "karen", "moira", "tessa", "fiona", "zira", "susan", "ellen", "heather", "lucy", "amanda"];
-    
-    const selectVoice = () => {
-      let voices = synth.getVoices();
-      
-      let femaleVoice = voices.find(v => 
-        v.lang.startsWith("en") && 
-        femaleNames.some(name => v.name.toLowerCase().includes(name))
-      );
-      
-      if (!femaleVoice) {
-        femaleVoice = voices.find(v => 
-          v.lang === "en-US" && 
-          !v.name.toLowerCase().includes("david") &&
-          !v.name.toLowerCase().includes("mark")
-        );
-      }
-      
-      if (!femaleVoice) {
-        femaleVoice = voices.find(v => v.lang.startsWith("en"));
-      }
-      
-      return femaleVoice;
-    };
-
-    const selectedVoice = selectVoice();
+    const selectedVoice = synth.getVoices().find(v => 
+      v.lang === "en-US" && !v.name.toLowerCase().includes("david") && !v.name.toLowerCase().includes("mark")
+    ) || synth.getVoices().find(v => v.lang.startsWith("en"));
     
     if (selectedVoice) {
       utterance.voice = selectedVoice;
