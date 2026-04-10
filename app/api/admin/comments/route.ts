@@ -30,10 +30,13 @@ export async function GET(request: Request) {
 
     const commentsWithVotes = comments.map((comment) => {
       const post = postsMap.get(comment.articleSlug);
+      const votesObj = (post as any)?.votes || {};
+      const userVote = votesObj[comment.authorEmail?.toLowerCase()] || null;
       return {
         ...comment,
         upvotes: post?.upvotes || 0,
         downvotes: post?.downvotes || 0,
+        userVote,
       };
     });
 

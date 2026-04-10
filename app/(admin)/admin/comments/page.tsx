@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown } from "lucide-react";
+import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface Comment {
   _id: string;
@@ -18,6 +19,7 @@ interface Comment {
   createdAt: string;
   upvotes?: number;
   downvotes?: number;
+  userVote?: string | null;
 }
 
 interface Pagination {
@@ -52,6 +54,21 @@ export default function CommentsPage() {
       // ignore
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(comment: Comment) {
+    if (!confirm(`Delete comment from "${comment.authorName}"?\n\n"${comment.content.substring(0, 50)}..."`)) return;
+    try {
+      const res = await fetch(`/api/admin/comments/${comment._id}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("Comment deleted");
+        fetchComments();
+      } else {
+        toast.error("Failed to delete comment");
+      }
+    } catch {
+      toast.error("Failed to delete comment");
     }
   }
 
@@ -112,7 +129,7 @@ export default function CommentsPage() {
                 <th className="px-4 py-3 text-left text-sm font-medium">User</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Article</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Comment</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">Votes</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">User Vote</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Date</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
@@ -122,27 +139,13 @@ export default function CommentsPage() {
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i}>
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-24 bg-muted rounded animate-pulse" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-32 bg-muted rounded animate-pulse" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-48 bg-muted rounded animate-pulse" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-16 bg-muted rounded animate-pulse" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-20 bg-muted rounded animate-pulse" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-16 bg-muted rounded animate-pulse" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="h-8 w-20 bg-muted rounded animate-pulse" />
-                    </td>
+                    <td className="px-4 py-3"><div className="h-4 w-24 bg-muted rounded animate-pulse" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-32 bg-muted rounded animate-pulse" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-48 bg-muted rounded animate-pulse" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-16 bg-muted rounded animate-pulse" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-20 bg-muted rounded animate-pulse" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-16 bg-muted rounded animate-pulse" /></td>
+                    <td className="px-4 py-3"><div className="h-8 w-20 bg-muted rounded animate-pulse" /></td>
                   </tr>
                 ))
               ) : filteredComments.length === 0 ? (
@@ -176,16 +179,19 @@ export default function CommentsPage() {
                       </p>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1 text-xs text-green-600">
+                      {comment.userVote === "up" ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
                           <ThumbsUp className="size-3" />
-                          {comment.upvotes || 0}
+                          Upvoted
                         </span>
-                        <span className="inline-flex items-center gap-1 text-xs text-red-600">
+                      ) : comment.userVote === "down" ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">
                           <ThumbsDown className="size-3" />
-                          {comment.downvotes || 0}
+                          Downvoted
                         </span>
-                      </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">No vote</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <p className="text-sm text-muted-foreground whitespace-nowrap">
@@ -206,7 +212,7 @@ export default function CommentsPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <Link href={`/blog/${comment.articleSlug}`} target="_blank">
                           <Button variant="ghost" size="sm">
                             <Eye className="size-4" />
@@ -217,6 +223,9 @@ export default function CommentsPage() {
                             <Reply className="size-4" />
                           </Button>
                         </Link>
+                        <Button variant="ghost" size="sm" onClick={() => handleDelete(comment)} className="text-red-500 hover:text-red-600 hover:bg-red-50">
+                          <Trash2 className="size-4" />
+                        </Button>
                       </div>
                     </td>
                   </tr>

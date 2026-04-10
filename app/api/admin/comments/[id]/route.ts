@@ -1,61 +1,40 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongoose";
 import { Comment } from "@/lib/models/comment.model";
+import { verifyToken } from "@/lib/auth/jwt";
+import { SESSION } from "@/lib/constants";
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    await connectDB();
-    const comment = await Comment.findById(id).lean();
-
-    if (!comment) {
-      return NextResponse.json({ error: "Comment not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ comment });
-  } catch (error) {
-    console.error("Error fetching comment:", error);
-    return NextResponse.json({ error: "Failed to fetch comment" }, { status: 500 });
-  }
+async function checkAdmin(req: NextRequest) {
+  const token = req.cookies.get(SESSION.COOKIE_NAME)?.value;
+  if (!token) return null;
+  
+  const payload = await verifyToken(token);
+  if (!payload || payload.role !== "admin") return null;
+  
+  return payload;
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: NextRequest) {
+  const admin = await checkAdmin(req);
+  if (!admin) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  await connectDB();
+
   try {
-    const { id } = await params;
-    const body = await request.json();
-    const { adminReply } = body;
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
 
-    if (!adminReply || adminReply.trim().length < 2) {
-      return NextResponse.json(
-        { error: "Reply must be at least 2 characters" },
-        { status: 400 }
-      );
+    if (!id) {
+      return NextResponse.json({ error: "Comment ID required" }, { status: 400 });
     }
 
-    await connectDB();
-    const comment = await Comment.findByIdAndUpdate(
-      id,
-      {
-        adminReply: adminReply.trim(),
-        isReplied: true,
-        repliedAt: new Date(),
-      },
-      { new: true }
-    );
+    await Comment.findByIdAndDelete(id);
 
-    if (!comment) {
-      return NextResponse.json({ error: "Comment not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ comment });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error updating comment:", error);
-    return NextResponse.json({ error: "Failed to update comment" }, { status: 500 });
+    console.error("Error deleting comment:", error);
+    return NextResponse.json({ error: "Failed to delete comment" }, { status: 500 });
   }
 }
