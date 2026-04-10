@@ -9,6 +9,7 @@ import ShareButtons from "@/components/blog/share-buttons";
 import VoteButtons from "@/components/blog/vote-buttons";
 import CommentsSection from "@/components/blog/comments-section";
 import ListenButton from "@/components/blog/listen-button";
+import TranslateSelection from "@/components/blog/translate-selection";
 
 async function getPost(slug: string) {
   try {
@@ -197,6 +198,7 @@ export default async function BlogPostPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Navbar />
+      <TranslateSelection />
       <main className="flex-1 pt-14" itemScope itemType="https://schema.org/Article">
         <div className="max-w-3xl mx-auto px-6 py-12">
           <article itemProp="articleBody">
