@@ -8,6 +8,7 @@ import Footer from "@/components/layout/footer";
 import ShareButtons from "@/components/blog/share-buttons";
 import VoteButtons from "@/components/blog/vote-buttons";
 import CommentsSection from "@/components/blog/comments-section";
+import ListenButton from "@/components/blog/listen-button";
 
 async function getPost(slug: string) {
   try {
@@ -279,11 +280,14 @@ export default async function BlogPostPage({
               dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
             />
 
-            <VoteButtons 
-              slug={post.slug} 
-              initialUpvotes={post.upvotes || 0} 
-              initialDownvotes={post.downvotes || 0} 
-            />
+            <div className="flex items-center justify-between py-4 border-y">
+              <ListenButton content={post.content} title={post.title} />
+              <VoteButtons 
+                slug={post.slug} 
+                initialUpvotes={post.upvotes || 0} 
+                initialDownvotes={post.downvotes || 0} 
+              />
+            </div>
 
             <ShareButtons title={post.title} />
 
