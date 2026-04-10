@@ -59,6 +59,38 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
   }, [slug]);
 
   useEffect(() => {
+    const handleIdentityUpdate = () => {
+      const stored = localStorage.getItem("user_identity");
+      if (!stored) return;
+      
+      try {
+        const identity = JSON.parse(stored);
+        if (identity.name && identity.email && !identityConfirmed) {
+          setName(identity.name);
+          setEmail(identity.email);
+          setIdentityConfirmed(true);
+          setShowIdentityForm(false);
+        }
+      } catch {}
+    };
+
+    window.addEventListener("identity-changed", handleIdentityUpdate);
+    
+    const interval = setInterval(() => {
+      const updated = localStorage.getItem("identity_updated");
+      if (updated) {
+        localStorage.removeItem("identity_updated");
+        handleIdentityUpdate();
+      }
+    }, 500);
+    
+    return () => {
+      window.removeEventListener("identity-changed", handleIdentityUpdate);
+      clearInterval(interval);
+    };
+  }, [identityConfirmed]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       fetchComments(page);
     }, 15000);
