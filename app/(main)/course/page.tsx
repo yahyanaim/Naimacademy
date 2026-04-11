@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ProgressBar } from "@/components/course/progress-bar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronDown, ChevronRight, CheckCircle, PlayCircle, BookOpen, Clock, Shield, Calendar, Users } from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCircle, PlayCircle, BookOpen, Clock, Shield, Calendar } from "lucide-react";
 import { getSectionDuration, parseDurationToMinutes, formatDuration } from "@/lib/utils/duration";
 import {
   Dialog,
@@ -445,28 +445,6 @@ END:VEVENT
           })}
         </div>
       </div>
-
-      {/* Community Section */}
-      {course && user && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Course Community</h2>
-          <Link
-            href={`/community/${course._id}`}
-            className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="size-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">Join the discussion</p>
-                <p className="text-sm text-muted-foreground">Share posts, chat with other students</p>
-              </div>
-            </div>
-            <ChevronRight className="size-5 text-muted-foreground" />
-          </Link>
-        </div>
-      )}
 
       {/* Schedule Dialog */}
       <Dialog open={scheduleDialogOpen} onOpenChange={setScheduleDialogOpen}>
