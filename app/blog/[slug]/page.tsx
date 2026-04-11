@@ -41,30 +41,30 @@ async function getAllPosts() {
 function renderMarkdown(content: string): string {
   let html = content;
 
-  html = html.replace(/^###### (.*$)/gm, '<h6 class="text-lg font-semibold mt-8 mb-3">$1</h6>');
-  html = html.replace(/^##### (.*$)/gm, '<h5 class="text-xl font-semibold mt-8 mb-3">$1</h5>');
-  html = html.replace(/^#### (.*$)/gm, '<h4 class="text-xl font-semibold mt-8 mb-3">$1</h4>');
-  html = html.replace(/^### (.*$)/gm, '<h3 class="text-2xl font-semibold mt-8 mb-3">$1</h3>');
-  html = html.replace(/^## (.*$)/gm, '<h2 class="text-2xl font-semibold mt-8 mb-3">$1</h2>');
-  html = html.replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold mt-8 mb-4">$1</h1>');
+  html = html.replace(/^###### (.*$)/gm, '<h6 class="text-base font-semibold mt-6 mb-2">$1</h6>');
+  html = html.replace(/^##### (.*$)/gm, '<h5 class="text-base font-semibold mt-6 mb-2">$1</h5>');
+  html = html.replace(/^#### (.*$)/gm, '<h4 class="text-base font-semibold mt-6 mb-2">$1</h4>');
+  html = html.replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold mt-6 mb-2">$1</h3>');
+  html = html.replace(/^## (.*$)/gm, '<h2 class="text-xl font-semibold mt-6 mb-2">$1</h2>');
+  html = html.replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold mt-6 mb-3">$1</h1>');
 
-  html = html.replace(/\!\[\]\((.*?)\)/g, '<div class="my-8"><img src="$1" alt="" class="rounded-xl border border-gray-200 shadow-lg mx-auto max-w-full" loading="lazy" /></div>');
-  html = html.replace(/\!\[(.*?)\]\((.*?)\)/g, '<div class="my-8"><img src="$2" alt="$1" class="rounded-xl border border-gray-200 shadow-lg mx-auto max-w-full" loading="lazy" /></div>');
+  html = html.replace(/\!\[\]\((.*?)\)/g, '<div class="my-6"><img src="$1" alt="" class="rounded-lg border border-gray-200 shadow-md mx-auto max-w-full" loading="lazy" /></div>');
+  html = html.replace(/\!\[(.*?)\]\((.*?)\)/g, '<div class="my-6"><img src="$2" alt="$1" class="rounded-lg border border-gray-200 shadow-md mx-auto max-w-full" loading="lazy" /></div>');
 
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">$1</a>');
 
   html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
-  html = html.replace(/`([^`]+)`/g, "<code class=\"bg-muted px-2 py-1 rounded text-base font-mono\">$1</code>");
+  html = html.replace(/`([^`]+)`/g, "<code class=\"bg-muted px-1.5 py-0.5 rounded text-sm font-mono\">$1</code>");
 
-  html = html.replace(/^\* (.*$)/gm, '<li class="ml-6 list-disc text-lg mb-2">$1</li>');
-  html = html.replace(/^\d+\. (.*$)/gm, '<li class="ml-6 list-decimal text-lg mb-2">$1</li>');
+  html = html.replace(/^\* (.*$)/gm, '<li class="ml-5 list-disc text-base mb-1">$1</li>');
+  html = html.replace(/^\d+\. (.*$)/gm, '<li class="ml-5 list-decimal text-base mb-1">$1</li>');
 
-  html = html.replace(/\n\n/g, '</p><p class="mb-4 text-lg leading-relaxed">');
+  html = html.replace(/\n\n/g, '</p><p class="mb-3 text-base leading-relaxed">');
   html = html.replace(/\n/g, "<br />");
 
   if (!html.startsWith("<")) {
-    html = "<p class=\"mb-4 text-lg leading-relaxed\">" + html;
+    html = "<p class=\"mb-3 text-base leading-relaxed\">" + html;
   }
 
   return html;
