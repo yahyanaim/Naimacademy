@@ -355,90 +355,72 @@ export default function BlogManagementPage() {
 
       {stats && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Total Articles</p>
-                    <p className="text-3xl font-bold">{stats.total}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      {stats.growth > 0 ? (
-                        <TrendingUp className="size-4 text-green-500" />
-                      ) : stats.growth < 0 ? (
-                        <TrendingDown className="size-4 text-red-500" />
-                      ) : null}
-                      <span className={`text-xs ${stats.growth > 0 ? "text-green-500" : stats.growth < 0 ? "text-red-500" : "text-muted-foreground"}`}>
-                        {stats.growth > 0 ? "+" : ""}{stats.growth}% this week
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-primary/10 rounded-full">
-                    <FileText className="size-6 text-primary" />
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Articles</CardTitle>
+                <FileText className="size-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total}</div>
+                <div className="flex items-center gap-1 mt-1">
+                  {stats.growth > 0 ? (
+                    <TrendingUp className="size-4 text-green-500" />
+                  ) : stats.growth < 0 ? (
+                    <TrendingDown className="size-4 text-red-500" />
+                  ) : null}
+                  <span className={`text-xs ${stats.growth > 0 ? "text-green-500" : stats.growth < 0 ? "text-red-500" : "text-muted-foreground"}`}>
+                    {stats.growth > 0 ? "+" : ""}{stats.growth}% this week
+                  </span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-3">
+                <p className="text-xs text-muted-foreground mt-2">
                   {stats.published} published, {stats.drafts} drafts
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Total Views</p>
-                    <p className="text-3xl font-bold">{stats.totalViews.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Across all articles</p>
-                  </div>
-                  <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
-                    <EyeIcon className="size-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-3">
+            <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Views</CardTitle>
+                <EyeIcon className="size-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground mt-1">Across all articles</p>
+                <p className="text-xs text-muted-foreground/70 mt-2 italic">
                   Average {Math.round(stats.totalViews / stats.total)} views per article
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Upvotes</p>
-                    <p className="text-3xl font-bold text-green-600">{stats.totalUpvotes}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <ThumbsUp className="size-4 text-green-500" />
-                      <span className="text-xs text-green-500">{Math.round((stats.totalUpvotes / (stats.totalUpvotes + stats.totalDownvotes || 1)) * 100)}% approval</span>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full">
-                    <ThumbsUp className="size-6 text-green-600 dark:text-green-400" />
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Students found these articles helpful
+            <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Upvotes</CardTitle>
+                <ThumbsUp className="size-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{stats.totalUpvotes}</div>
+                <p className="text-xs text-green-500 mt-1">
+                  {Math.round((stats.totalUpvotes / (stats.totalUpvotes + stats.totalDownvotes || 1)) * 100)}% approval
+                </p>
+                <p className="text-xs text-muted-foreground/70 mt-2 italic">
+                  Students found these helpful
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Downvotes</p>
-                    <p className="text-3xl font-bold text-red-600">{stats.totalDownvotes}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <ThumbsDown className="size-4 text-red-500" />
-                      <span className="text-xs text-muted-foreground">{stats.totalDownvotes} negative feedback</span>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-red-100 dark:bg-red-900 rounded-full">
-                    <ThumbsDown className="size-6 text-red-600 dark:text-red-400" />
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Use feedback to improve content quality
+            <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Downvotes</CardTitle>
+                <ThumbsDown className="size-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">{stats.totalDownvotes}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats.totalDownvotes} negative feedback
+                </p>
+                <p className="text-xs text-muted-foreground/70 mt-2 italic">
+                  Use feedback to improve
                 </p>
               </CardContent>
             </Card>

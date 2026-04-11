@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2, TrendingUp, TrendingDown, Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -140,65 +141,59 @@ export default function CommentsPage() {
 
       {stats && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-5 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 text-sm">Total Comments</p>
-                  <p className="text-3xl font-bold mt-1">{stats.total}</p>
-                  <div className="flex items-center gap-1 mt-2">
-                    {stats.growth > 0 ? (
-                      <TrendingUp className="size-4" />
-                    ) : stats.growth < 0 ? (
-                      <TrendingDown className="size-4" />
-                    ) : null}
-                    <span className="text-sm text-blue-100">
-                      {stats.growth > 0 ? "+" : ""}{stats.growth}% this week
-                    </span>
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Comments</CardTitle>
+                <MessageCircle className="size-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total}</div>
+                <div className="flex items-center gap-1 mt-1">
+                  {stats.growth > 0 ? (
+                    <TrendingUp className="size-4 text-green-500" />
+                  ) : stats.growth < 0 ? (
+                    <TrendingDown className="size-4 text-red-500" />
+                  ) : null}
+                  <span className={`text-xs ${stats.growth > 0 ? "text-green-500" : stats.growth < 0 ? "text-red-500" : "text-muted-foreground"}`}>
+                    {stats.growth > 0 ? "+" : ""}{stats.growth}% this week
+                  </span>
                 </div>
-                <div className="p-3 bg-white/20 rounded-full">
-                  <MessageCircle className="size-6" />
-                </div>
-              </div>
-              <p className="text-xs text-blue-100 mt-3">
-                {stats.commentsLastWeek} new comment{stats.commentsLastWeek !== 1 ? "s" : ""} this week
-              </p>
-            </div>
+                <p className="text-xs text-muted-foreground/70 mt-2 italic">
+                  {stats.commentsLastWeek} new comment{stats.commentsLastWeek !== 1 ? "s" : ""} this week
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg p-5 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-amber-100 text-sm">Pending Replies</p>
-                  <p className="text-3xl font-bold mt-1">{stats.pending}</p>
-                  <p className="text-sm text-amber-100 mt-2">Awaiting response</p>
-                </div>
-                <div className="p-3 bg-white/20 rounded-full">
-                  <Clock className="size-6" />
-                </div>
-              </div>
-              <p className="text-xs text-amber-100 mt-3">
-                {stats.pending > 0 ? "Respond to build engagement" : "All comments replied!"}
-              </p>
-            </div>
+            <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Pending Replies</CardTitle>
+                <Clock className="size-4 text-amber-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-amber-600">{stats.pending}</div>
+                <p className="text-xs text-muted-foreground mt-1">Awaiting response</p>
+                <p className="text-xs text-muted-foreground/70 mt-2 italic">
+                  {stats.pending > 0 ? "Respond to build engagement" : "All comments replied!"}
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg p-5 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100 text-sm">Replied Comments</p>
-                  <p className="text-3xl font-bold mt-1">{stats.replied}</p>
-                  <p className="text-sm text-green-100 mt-2">
-                    {Math.round((stats.replied / stats.total || 0) * 100)}% response rate
-                  </p>
-                </div>
-                <div className="p-3 bg-white/20 rounded-full">
-                  <CheckCircle className="size-6" />
-                </div>
-              </div>
-              <p className="text-xs text-green-100 mt-3">
-                {stats.replied > 0 ? "Great engagement with students!" : "Start replying to comments"}
-              </p>
-            </div>
+            <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Replied Comments</CardTitle>
+                <CheckCircle className="size-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{stats.replied}</div>
+                <p className="text-xs text-green-500 mt-1">
+                  {Math.round((stats.replied / stats.total || 0) * 100)}% response rate
+                </p>
+                <p className="text-xs text-muted-foreground/70 mt-2 italic">
+                  {stats.replied > 0 ? "Great engagement!" : "Start replying"}
+                </p>
+              </CardContent>
+            </Card>
           </div>
 
           <div className="bg-muted/50 rounded-lg p-4 border">
