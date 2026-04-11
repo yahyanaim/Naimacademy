@@ -83,8 +83,27 @@ export default function BlogManagementPage() {
     author: "Naim Academy",
     isPublished: true,
   });
+  const [initialFormData, setInitialFormData] = useState(formData);
   const [saving, setSaving] = useState(false);
   const [stats, setStats] = useState<any>(null);
+
+  function hasUnsavedChanges() {
+    return JSON.stringify(formData) !== JSON.stringify(initialFormData);
+  }
+
+  function handleCloseDialog(open: boolean) {
+    if (!open) {
+      if (hasUnsavedChanges()) {
+        if (confirm("You have unsaved changes. Are you sure you want to close? Your changes will be lost.")) {
+          setIsDialogOpen(false);
+        }
+      } else {
+        setIsDialogOpen(false);
+      }
+    } else {
+      setIsDialogOpen(true);
+    }
+  }
 
   async function loadStats() {
     try {
@@ -125,22 +144,24 @@ export default function BlogManagementPage() {
 
   function openCreateDialog() {
     setEditingPost(null);
-    setFormData({
+    const newForm = {
       title: "",
-      titleStyle: "h1",
+      titleStyle: "h1" as "h1" | "h2" | "h3",
       excerpt: "",
       content: "",
       coverImage: "",
       tags: "",
       author: "Naim Academy",
       isPublished: true,
-    });
+    };
+    setFormData(newForm);
+    setInitialFormData(newForm);
     setIsDialogOpen(true);
   }
 
   function openEditDialog(post: BlogPost) {
     setEditingPost(post);
-    setFormData({
+    const newForm = {
       title: post.title,
       titleStyle: post.titleStyle || "h1",
       excerpt: post.excerpt,
@@ -149,7 +170,9 @@ export default function BlogManagementPage() {
       tags: post.tags.join(", "),
       author: post.author,
       isPublished: post.isPublished,
-    });
+    };
+    setFormData(newForm);
+    setInitialFormData(newForm);
     setIsDialogOpen(true);
   }
 
@@ -538,7 +561,7 @@ export default function BlogManagementPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
         <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader className="pb-4 border-b">
             <DialogTitle className="text-lg">
