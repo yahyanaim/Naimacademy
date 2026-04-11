@@ -51,6 +51,8 @@ function renderMarkdown(content: string): string {
   html = html.replace(/\!\[\]\((.*?)\)/g, '<img src="$1" alt="" class="rounded-lg border border-gray-300 shadow-md my-4 max-w-full" />');
   html = html.replace(/\!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" class="rounded-lg border border-gray-300 shadow-md my-4 max-w-full" />');
 
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">$1</a>');
+
   html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
   html = html.replace(/`([^`]+)`/g, "<code class=\"bg-muted px-1.5 py-0.5 rounded text-sm font-mono\">$1</code>");

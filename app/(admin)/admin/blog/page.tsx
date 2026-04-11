@@ -39,6 +39,7 @@ import {
   Clock,
   Bell,
   Image,
+  Link as LinkIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -215,6 +216,24 @@ export default function BlogManagementPage() {
         textarea.setSelectionRange(start + before.length, start + before.length + 4);
       }
     }, 0);
+  }
+
+  function insertLink() {
+    const textarea = document.getElementById("content") as HTMLTextAreaElement;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selected = text.substring(start, end);
+    const linkText = selected || "link text";
+    const url = prompt("Enter URL:", "https://");
+    
+    if (url) {
+      const linkMarkdown = `[${linkText}](${url})`;
+      const newText = text.substring(0, start) + linkMarkdown + text.substring(end);
+      setFormData({ ...formData, content: newText });
+    }
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -483,6 +502,9 @@ export default function BlogManagementPage() {
                   <button type="button" onClick={() => insertHeading("###### ")} className="px-2 py-1 text-xs font-medium border rounded hover:bg-muted">H6</button>
                   <button type="button" onClick={(e) => { e.preventDefault(); insertFormat("**", "**"); }} className="px-2 py-1 text-xs font-bold border rounded hover:bg-muted" title="Bold">B</button>
                   <button type="button" onClick={(e) => { e.preventDefault(); insertFormat("*", "*"); }} className="px-2 py-1 text-xs italic border rounded hover:bg-muted" title="Italic">I</button>
+                  <button type="button" onClick={(e) => { e.preventDefault(); insertLink(); }} className="px-2 py-1 text-xs border rounded hover:bg-muted" title="Insert Link">
+                    <LinkIcon className="size-3" />
+                  </button>
                 </div>
               </div>
               <Textarea
