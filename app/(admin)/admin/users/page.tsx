@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert, Search, Award, Clock, UserPlus, RefreshCw, User, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckIcon, MinusIcon, Pencil, Trash2, ShieldAlert, Search, Award, Clock, UserPlus, RefreshCw, User, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, Eye, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -128,6 +128,8 @@ export default function UsersPage() {
   const [userToDelete, setUserToDelete] = useState<UserRecord | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [detailUser, setDetailUser] = useState<UserRecord | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
   function toggleUserSelection(userId: string) {
     setSelectedUsers(prev =>
@@ -135,6 +137,30 @@ export default function UsersPage() {
         ? prev.filter(id => id !== userId)
         : [...prev, userId]
     );
+  }
+
+  function openDetail(user: UserRecord) {
+    setDetailUser(user);
+    setDetailDialogOpen(true);
+  }
+
+  async function deleteSelectedUsers() {
+    if (selectedUsers.length === 0) return;
+    if (!confirm(`Delete ${selectedUsers.length} selected user(s)? This cannot be undone.`)) return;
+    
+    setDeleting(true);
+    try {
+      for (const userId of selectedUsers) {
+        await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
+      }
+      toast.success(`${selectedUsers.length} user(s) deleted`);
+      setSelectedUsers([]);
+      load();
+    } catch {
+      toast.error("Failed to delete some users");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   function toggleAllUsers() {
@@ -346,6 +372,17 @@ export default function UsersPage() {
             </SelectItem>
           </SelectContent>
         </Select>
+        {selectedUsers.length > 0 && (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={deleteSelectedUsers}
+            disabled={deleting}
+          >
+            <Trash2 className="size-4 mr-2" />
+            Delete Selected ({selectedUsers.length})
+          </Button>
+        )}
       </div>
 
       {loading ? (
@@ -473,7 +510,15 @@ export default function UsersPage() {
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => openDetail(user)}
+                        title="View Details"
+                      >
+                        <Eye />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon-sm"
@@ -594,6 +639,89 @@ export default function UsersPage() {
             </Button>
             <Button variant="destructive" onClick={handleDeleteUser} disabled={deleting}>
               {deleting ? "Deleting..." : "Delete User"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+          </DialogHeader>
+          {detailUser && (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-4">
+                {detailUser.avatar ? (
+                  <img src={detailUser.avatar} alt={detailUser.name} className="w-16 h-16 rounded-full object-cover border" />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                    <User className="size-8 text-muted-foreground" />
+                  </div>
+                )}
+                <div>
+                  <p className="font-semibold text-lg">{detailUser.name}</p>
+                  <p className="text-sm text-muted-foreground">{detailUser.email}</p>
+                  <Badge variant={detailUser.role === "admin" ? "destructive" : "default"} className="mt-1">
+                    {detailUser.role}
+                  </Badge>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                <div>
+                  <p className="text-xs text-muted-foreground">Progress</p>
+                  <p className="font-medium">{completionPct(detailUser)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Best Exam Score</p>
+                  <p className="font-medium">{bestScore(detailUser.examAttempts)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Account Created</p>
+                  <p className="font-medium">{detailUser.createdAt ? new Date(detailUser.createdAt).toLocaleDateString() : "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Last Activity</p>
+                  <p className="font-medium">{detailUser.lastActivityAt ? new Date(detailUser.lastActivityAt).toLocaleDateString() : "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Status</p>
+                  <Badge variant={detailUser.isBanned ? "destructive" : "default"} className={!detailUser.isBanned ? "bg-green-500" : ""}>
+                    {detailUser.isBanned ? "Banned" : "Active"}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Certificate</p>
+                  <p className="font-medium">
+                    {(detailUser.certifications && detailUser.certifications.length > 0) || detailUser.certificate?.issued ? "Issued" : "Not Issued"}
+                  </p>
+                </div>
+              </div>
+              
+              {detailUser.banReason && (
+                <div className="pt-4 border-t">
+                  <p className="text-xs text-muted-foreground">Ban Reason</p>
+                  <p className="text-sm mt-1">{detailUser.banReason}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetailDialogOpen(false)}>
+              Close
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (detailUser) {
+                  setDetailDialogOpen(false);
+                  openDelete(detailUser);
+                }
+              }}
+            >
+              <Trash2 className="size-4 mr-2" />
+              Delete User
             </Button>
           </DialogFooter>
         </DialogContent>
