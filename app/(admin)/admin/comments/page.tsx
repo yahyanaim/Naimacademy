@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2 } from "lucide-react";
+import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2, TrendingUp, TrendingDown, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -45,6 +45,7 @@ export default function CommentsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<"all" | "pending" | "replied">("all");
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [stats, setStats] = useState<any>(null);
 
   const fetchComments = useCallback(async (page = 1) => {
     setLoading(true);
@@ -63,8 +64,21 @@ export default function CommentsPage() {
     }
   }, [filter]);
 
+  const fetchStats = async () => {
+    try {
+      const res = await fetch("/api/admin/stats");
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data.comments);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   useEffect(() => {
     fetchComments(currentPage);
+    fetchStats();
   }, [currentPage, fetchComments]);
 
   useEffect(() => {
@@ -123,6 +137,100 @@ export default function CommentsPage() {
           Manage article comments and replies
         </p>
       </div>
+
+      {stats && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-5 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm">Total Comments</p>
+                  <p className="text-3xl font-bold mt-1">{stats.total}</p>
+                  <div className="flex items-center gap-1 mt-2">
+                    {stats.growth > 0 ? (
+                      <TrendingUp className="size-4" />
+                    ) : stats.growth < 0 ? (
+                      <TrendingDown className="size-4" />
+                    ) : null}
+                    <span className="text-sm text-blue-100">
+                      {stats.growth > 0 ? "+" : ""}{stats.growth}% this week
+                    </span>
+                  </div>
+                </div>
+                <div className="p-3 bg-white/20 rounded-full">
+                  <MessageCircle className="size-6" />
+                </div>
+              </div>
+              <p className="text-xs text-blue-100 mt-3">
+                {stats.commentsLastWeek} new comment{stats.commentsLastWeek !== 1 ? "s" : ""} this week
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg p-5 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-amber-100 text-sm">Pending Replies</p>
+                  <p className="text-3xl font-bold mt-1">{stats.pending}</p>
+                  <p className="text-sm text-amber-100 mt-2">Awaiting response</p>
+                </div>
+                <div className="p-3 bg-white/20 rounded-full">
+                  <Clock className="size-6" />
+                </div>
+              </div>
+              <p className="text-xs text-amber-100 mt-3">
+                {stats.pending > 0 ? "Respond to build engagement" : "All comments replied!"}
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg p-5 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-100 text-sm">Replied Comments</p>
+                  <p className="text-3xl font-bold mt-1">{stats.replied}</p>
+                  <p className="text-sm text-green-100 mt-2">
+                    {Math.round((stats.replied / stats.total || 0) * 100)}% response rate
+                  </p>
+                </div>
+                <div className="p-3 bg-white/20 rounded-full">
+                  <CheckCircle className="size-6" />
+                </div>
+              </div>
+              <p className="text-xs text-green-100 mt-3">
+                {stats.replied > 0 ? "Great engagement with students!" : "Start replying to comments"}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-muted/50 rounded-lg p-4 border">
+            <h3 className="font-semibold mb-2">Comments Engagement Overview</h3>
+            <p className="text-sm text-muted-foreground">
+              Your articles have received <span className="font-medium text-foreground">{stats.total}</span> total comments.{" "}
+              {stats.pending > 0 ? (
+                <>
+                  <span className="font-medium text-amber-600">{stats.pending}</span> comment{stats.pending > 1 ? "s are" : " is"} waiting for a reply.{" "}
+                  Responding promptly builds trust and encourages more participation.
+                </>
+              ) : (
+                <>
+                  <span className="font-medium text-green-600">All comments have been replied to!</span>{" "}
+                  This shows excellent engagement with your student community.
+                </>
+              )}{" "}
+              Your current response rate is{" "}
+              <span className="font-medium text-foreground">{Math.round((stats.replied / stats.total || 0) * 100)}%</span>.
+              {stats.growth > 0 ? (
+                <>
+                  {" "}Comment activity is growing with <span className="font-medium text-foreground">{stats.commentsLastWeek}</span> new comment{stats.commentsLastWeek !== 1 ? "s" : ""} this week.
+                </>
+              ) : stats.growth < 0 ? (
+                <>
+                  {" "}Comment activity has decreased compared to last week. Consider promoting discussion in your articles.
+                </>
+              ) : null}
+            </p>
+          </div>
+        </>
+      )}
 
       <div className="flex gap-2 items-center">
         <form onSubmit={handleSearch} className="flex gap-2 flex-1">

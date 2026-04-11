@@ -40,6 +40,11 @@ import {
   Bell,
   Image,
   Link as LinkIcon,
+  TrendingUp,
+  TrendingDown,
+  Eye as EyeIcon,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -79,6 +84,19 @@ export default function BlogManagementPage() {
     isPublished: true,
   });
   const [saving, setSaving] = useState(false);
+  const [stats, setStats] = useState<any>(null);
+
+  async function loadStats() {
+    try {
+      const res = await fetch("/api/admin/stats");
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data.blog);
+      }
+    } catch {
+      // ignore
+    }
+  }
 
   async function loadPosts() {
     try {
@@ -96,6 +114,7 @@ export default function BlogManagementPage() {
 
   useEffect(() => {
     loadPosts();
+    loadStats();
   }, []);
 
   const filteredPosts = posts.filter(
@@ -333,6 +352,116 @@ export default function BlogManagementPage() {
           </Button>
         </div>
       </div>
+
+      {stats && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Articles</p>
+                    <p className="text-3xl font-bold">{stats.total}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      {stats.growth > 0 ? (
+                        <TrendingUp className="size-4 text-green-500" />
+                      ) : stats.growth < 0 ? (
+                        <TrendingDown className="size-4 text-red-500" />
+                      ) : null}
+                      <span className={`text-xs ${stats.growth > 0 ? "text-green-500" : stats.growth < 0 ? "text-red-500" : "text-muted-foreground"}`}>
+                        {stats.growth > 0 ? "+" : ""}{stats.growth}% this week
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <FileText className="size-6 text-primary" />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  {stats.published} published, {stats.drafts} drafts
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Views</p>
+                    <p className="text-3xl font-bold">{stats.totalViews.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Across all articles</p>
+                  </div>
+                  <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                    <EyeIcon className="size-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Average {Math.round(stats.totalViews / stats.total)} views per article
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Upvotes</p>
+                    <p className="text-3xl font-bold text-green-600">{stats.totalUpvotes}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <ThumbsUp className="size-4 text-green-500" />
+                      <span className="text-xs text-green-500">{Math.round((stats.totalUpvotes / (stats.totalUpvotes + stats.totalDownvotes || 1)) * 100)}% approval</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full">
+                    <ThumbsUp className="size-6 text-green-600 dark:text-green-400" />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Students found these articles helpful
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Downvotes</p>
+                    <p className="text-3xl font-bold text-red-600">{stats.totalDownvotes}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <ThumbsDown className="size-4 text-red-500" />
+                      <span className="text-xs text-muted-foreground">{stats.totalDownvotes} negative feedback</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-red-100 dark:bg-red-900 rounded-full">
+                    <ThumbsDown className="size-6 text-red-600 dark:text-red-400" />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Use feedback to improve content quality
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="bg-muted/50 rounded-lg p-4 border">
+            <h3 className="font-semibold mb-2">Blog Performance Overview</h3>
+            <p className="text-sm text-muted-foreground">
+              Your blog has <span className="font-medium text-foreground">{stats.total}</span> articles generating{" "}
+              <span className="font-medium text-foreground">{stats.totalViews.toLocaleString()}</span> total views.{" "}
+              {stats.published} articles are published and attracting an average of{" "}
+              <span className="font-medium text-foreground">{Math.round(stats.totalViews / stats.total)}</span> views per article.{" "}
+              The upvote ratio of{" "}
+              <span className="font-medium text-green-600">{Math.round((stats.totalUpvotes / (stats.totalUpvotes + stats.totalDownvotes || 1)) * 100)}%</span>{" "}
+              indicates strong content quality. {stats.postsLastWeek > 0 ? (
+                <>
+                  You published <span className="font-medium text-foreground">{stats.postsLastWeek}</span> article{stats.postsLastWeek > 1 ? "s" : ""} this week.
+                </>
+              ) : "No new articles published this week."}
+            </p>
+          </div>
+        </>
+      )}
 
       <Card>
         <CardHeader>
