@@ -38,6 +38,22 @@ async function getAllPosts() {
   }
 }
 
+const tagColors = [
+  "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+  "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+  "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
+  "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300",
+  "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300",
+  "bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-300",
+  "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300",
+];
+
+function getTagColor(tag: string): string {
+  const hash = tag.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return tagColors[hash % tagColors.length];
+}
+
 function renderMarkdown(content: string): string {
   let html = content;
 
@@ -271,11 +287,11 @@ export default async function BlogPostPage({
                 </div>
               </div>
               {post.tags && post.tags.length > 0 && (
-                <div className="flex gap-2 mt-4" itemProp="keywords">
+                <div className="flex gap-2 mt-4 flex-wrap" itemProp="keywords">
                   {post.tags.map((tag: string) => (
                     <span
                       key={tag}
-                      className="px-3 py-1 text-xs bg-muted rounded-full"
+                      className={`px-3 py-1 text-xs rounded-full ${getTagColor(tag)}`}
                     >
                       {tag}
                     </span>
