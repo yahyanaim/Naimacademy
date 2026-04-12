@@ -294,22 +294,22 @@ export default function BlogManagementPage() {
   }
 
   const specialChars = [
-    { label: "Red Circle", char: "" },
-    { label: "Green Circle", char: "" },
-    { label: "Yellow Circle", char: "" },
-    { label: "Blue Circle", char: "" },
-    { label: "Check Mark", char: "" },
-    { label: "Cross Mark", char: "" },
-    { label: "Star", char: "" },
-    { label: "Heart", char: "" },
-    { label: "Arrow Right", char: "" },
-    { label: "Bullet Point", char: "" },
-    { label: "Warning", char: "" },
-    { label: "Info", char: "" },
-    { label: "Light Bulb", char: "" },
-    { label: "Rocket", char: "" },
-    { label: "Trophy", char: "" },
-    { label: "Fire", char: "" },
+    { label: "Red Circle", char: "\u25CF" },
+    { label: "Green Circle", char: "\u25CB" },
+    { label: "Yellow Square", char: "\u25A1" },
+    { label: "Blue Diamond", char: "\u25C7" },
+    { label: "Check Mark", char: "\u2713" },
+    { label: "Cross Mark", char: "\u2717" },
+    { label: "Star", char: "\u2605" },
+    { label: "Heart", char: "\u2665" },
+    { label: "Arrow Right", char: "\u2192" },
+    { label: "Bullet Point", char: "\u2022" },
+    { label: "Warning", char: "\u26A0" },
+    { label: "Info", char: "\u2139" },
+    { label: "Check Box", char: "\u2610" },
+    { label: "Sun", char: "\u2600" },
+    { label: "Music", char: "\u266B" },
+    { label: "Email", char: "\u2709" },
   ];
 
   function insertSpecialChar(char: string) {
