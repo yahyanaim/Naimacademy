@@ -261,6 +261,20 @@ export default function BlogManagementPage() {
     }, 0);
   }
 
+  function insertCode() {
+    const textarea = document.getElementById("content") as HTMLTextAreaElement;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selected = text.substring(start, end);
+    
+    const codeText = selected || "code";
+    const newText = text.substring(0, start) + "`" + codeText + "`" + text.substring(end);
+    setFormData({ ...formData, content: newText });
+  }
+
   function insertLink() {
     const textarea = document.getElementById("content") as HTMLTextAreaElement;
     if (!textarea) return;
@@ -673,6 +687,9 @@ export default function BlogManagementPage() {
                   <button type="button" onClick={(e) => { e.preventDefault(); insertFormat("*", "*"); }} className="px-2 py-1 text-xs italic border rounded hover:bg-muted" title="Italic">I</button>
                   <button type="button" onClick={(e) => { e.preventDefault(); insertLink(); }} className="px-2 py-1 text-xs border rounded hover:bg-muted" title="Insert Link">
                     <LinkIcon className="size-3" />
+                  </button>
+                  <button type="button" onClick={(e) => { e.preventDefault(); insertCode(); }} className="px-2 py-1 text-xs font-mono border rounded hover:bg-muted" title="Insert Code">
+                    {"</>"}
                   </button>
                   <div className="relative group">
                     <button type="button" className="px-2 py-1 text-xs border rounded hover:bg-muted" title="Special Characters">
