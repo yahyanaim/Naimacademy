@@ -45,6 +45,7 @@ import {
   Eye as EyeIcon,
   ThumbsUp,
   ThumbsDown,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -276,6 +277,40 @@ export default function BlogManagementPage() {
       const newText = text.substring(0, start) + linkMarkdown + text.substring(end);
       setFormData({ ...formData, content: newText });
     }
+  }
+
+  const specialChars = [
+    { label: "Red Circle", char: "" },
+    { label: "Green Circle", char: "" },
+    { label: "Yellow Circle", char: "" },
+    { label: "Blue Circle", char: "" },
+    { label: "Check Mark", char: "" },
+    { label: "Cross Mark", char: "" },
+    { label: "Star", char: "" },
+    { label: "Heart", char: "" },
+    { label: "Arrow Right", char: "" },
+    { label: "Bullet Point", char: "" },
+    { label: "Warning", char: "" },
+    { label: "Info", char: "" },
+    { label: "Light Bulb", char: "" },
+    { label: "Rocket", char: "" },
+    { label: "Trophy", char: "" },
+    { label: "Fire", char: "" },
+  ];
+
+  function insertSpecialChar(char: string) {
+    const textarea = document.getElementById("content") as HTMLTextAreaElement;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const text = textarea.value;
+    const newText = text.substring(0, start) + char + text.substring(start);
+    setFormData({ ...formData, content: newText });
+    
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + char.length, start + char.length);
+    }, 0);
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -639,6 +674,27 @@ export default function BlogManagementPage() {
                   <button type="button" onClick={(e) => { e.preventDefault(); insertLink(); }} className="px-2 py-1 text-xs border rounded hover:bg-muted" title="Insert Link">
                     <LinkIcon className="size-3" />
                   </button>
+                  <div className="relative group">
+                    <button type="button" className="px-2 py-1 text-xs border rounded hover:bg-muted" title="Special Characters">
+                      <Star className="size-3" />
+                    </button>
+                    <div className="absolute right-0 top-full mt-1 bg-background border rounded-lg shadow-lg p-2 z-50 hidden group-hover:block w-48">
+                      <p className="text-xs text-muted-foreground mb-2 px-2">Click to insert:</p>
+                      <div className="grid grid-cols-4 gap-1">
+                        {specialChars.map((item, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => insertSpecialChar(item.char)}
+                            className="px-2 py-1 text-lg hover:bg-muted rounded text-center"
+                            title={item.label}
+                          >
+                            {item.char}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <Textarea
