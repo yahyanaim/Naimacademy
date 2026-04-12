@@ -268,10 +268,10 @@ export default function BlogManagementPage() {
     const end = textarea.selectionEnd;
     const text = textarea.value;
     const selected = text.substring(start, end);
-    const linkText = selected || "link text";
+    const linkText = selected || prompt("Enter link text:") || "Click here";
     const url = prompt("Enter URL:", "https://");
     
-    if (url) {
+    if (url && linkText) {
       const linkMarkdown = `[${linkText}](${url})`;
       const newText = text.substring(0, start) + linkMarkdown + text.substring(end);
       setFormData({ ...formData, content: newText });
