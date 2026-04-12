@@ -67,7 +67,10 @@ function renderMarkdown(content: string): string {
   html = html.replace(/\!\[\]\((.*?)\)/g, '<div class="my-4 sm:my-6"><img src="$1" alt="" class="rounded-lg border border-gray-200 shadow-md mx-auto max-w-full" loading="lazy" /></div>');
   html = html.replace(/\!\[(.*?)\]\((.*?)\)/g, '<div class="my-4 sm:my-6"><img src="$2" alt="$1" class="rounded-lg border border-gray-200 shadow-md mx-auto max-w-full" loading="lazy" /></div>');
 
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">$1</a>');
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+    const displayText = text.toLowerCase() === "link text" || text.toLowerCase() === "click here" ? url : text;
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${displayText}</a>`;
+  });
 
   html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
