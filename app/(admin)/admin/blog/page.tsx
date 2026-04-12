@@ -294,22 +294,22 @@ export default function BlogManagementPage() {
   }
 
   const specialChars = [
-    { label: "Red Circle", char: "\u25CF" },
-    { label: "Green Circle", char: "\u25CB" },
-    { label: "Yellow Square", char: "\u25A1" },
-    { label: "Blue Diamond", char: "\u25C7" },
-    { label: "Check Mark", char: "\u2713" },
-    { label: "Cross Mark", char: "\u2717" },
-    { label: "Star", char: "\u2605" },
-    { label: "Heart", char: "\u2665" },
-    { label: "Arrow Right", char: "\u2192" },
-    { label: "Bullet Point", char: "\u2022" },
-    { label: "Warning", char: "\u26A0" },
-    { label: "Info", char: "\u2139" },
-    { label: "Check Box", char: "\u2610" },
-    { label: "Sun", char: "\u2600" },
-    { label: "Music", char: "\u266B" },
-    { label: "Email", char: "\u2709" },
+    { label: "Red Dot", char: "\u25CF", color: "text-red-500" },
+    { label: "Green Dot", char: "\u25CF", color: "text-green-500" },
+    { label: "Blue Dot", char: "\u25CF", color: "text-blue-500" },
+    { label: "Yellow Dot", char: "\u25CF", color: "text-yellow-500" },
+    { label: "Purple Dot", char: "\u25CF", color: "text-purple-500" },
+    { label: "Check Mark", char: "\u2713", color: "text-green-500" },
+    { label: "Cross Mark", char: "\u2717", color: "text-red-500" },
+    { label: "Star", char: "\u2605", color: "text-yellow-500" },
+    { label: "Heart", char: "\u2665", color: "text-red-400" },
+    { label: "Arrow Right", char: "\u2192", color: "" },
+    { label: "Bullet Point", char: "\u2022", color: "" },
+    { label: "Warning", char: "\u26A0", color: "text-amber-500" },
+    { label: "Info", char: "\u2139", color: "text-blue-500" },
+    { label: "Check Box", char: "\u2610", color: "" },
+    { label: "Sun", char: "\u2600", color: "text-yellow-500" },
+    { label: "Music", char: "\u266B", color: "text-pink-500" },
   ];
 
   function insertSpecialChar(char: string) {
@@ -703,7 +703,7 @@ export default function BlogManagementPage() {
                             key={i}
                             type="button"
                             onClick={() => insertSpecialChar(item.char)}
-                            className="px-2 py-1 text-lg hover:bg-muted rounded text-center"
+                            className={`px-2 py-1 text-lg hover:bg-muted rounded text-center ${item.color}`}
                             title={item.label}
                           >
                             {item.char}
