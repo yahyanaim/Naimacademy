@@ -8,7 +8,7 @@ export interface IBlogPost extends Document {
   content: string;
   coverImage?: string;
   author: string;
-  authorAvatar?: string;
+  authorId?: string;
   tags: string[];
   isPublished: boolean;
   readingTime: number;
@@ -31,7 +31,7 @@ const BlogPostSchema = new Schema<IBlogPost>(
     content: { type: String, required: true },
     coverImage: { type: String, default: "" },
     author: { type: String, required: true, default: "Naim Academy" },
-    authorAvatar: { type: String, default: "" },
+    authorId: { type: String, default: "" },
     tags: [{ type: String, default: [] }],
     isPublished: { type: Boolean, default: false },
     readingTime: { type: Number, default: 5 },

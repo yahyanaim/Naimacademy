@@ -40,7 +40,6 @@ export async function POST(req: NextRequest) {
       }
 
       const admin = await Admin.findById(ctx.user.userId).lean();
-      const adminAvatar = admin?.avatar || "";
 
       const slug = title
         .toLowerCase()
@@ -55,7 +54,7 @@ export async function POST(req: NextRequest) {
         coverImage: coverImage || "",
         tags: tags || [],
         author: author || admin?.name || "Naim Academy",
-        authorAvatar: adminAvatar,
+        authorId: ctx.user.userId,
         titleStyle: titleStyle || "h1",
         isPublished: isPublished ?? true,
         publishedAt: isPublished ? new Date() : undefined,
@@ -85,9 +84,6 @@ export async function PUT(req: NextRequest) {
         return NextResponse.json({ error: "Post ID is required" }, { status: 400 });
       }
 
-      const admin = await Admin.findById(ctx.user.userId).lean();
-      const adminAvatar = admin?.avatar || "";
-
       const updateData: Record<string, unknown> = {};
       if (title !== undefined) updateData.title = title;
       if (excerpt !== undefined) updateData.excerpt = excerpt;
@@ -96,7 +92,6 @@ export async function PUT(req: NextRequest) {
       if (tags !== undefined) updateData.tags = tags;
       if (author !== undefined) updateData.author = author;
       if (titleStyle !== undefined) updateData.titleStyle = titleStyle;
-      updateData.authorAvatar = adminAvatar;
       if (isPublished !== undefined) {
         updateData.isPublished = isPublished;
         if (isPublished) updateData.publishedAt = new Date();

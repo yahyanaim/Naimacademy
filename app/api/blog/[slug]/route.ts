@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongoose";
 import { BlogPost } from "@/lib/models/blog-post.model";
+import { Admin } from "@/lib/models/admin.model";
 
 export async function GET(
   request: Request,
@@ -19,7 +20,13 @@ export async function GET(
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    return NextResponse.json(post);
+    let authorAvatar = "";
+    if (post.authorId) {
+      const admin = await Admin.findById(post.authorId).lean();
+      authorAvatar = admin?.avatar || "";
+    }
+
+    return NextResponse.json({ ...post, authorAvatar });
   } catch (error) {
     console.error("Error fetching blog post:", error);
     return NextResponse.json(
