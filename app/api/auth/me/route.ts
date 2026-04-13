@@ -23,6 +23,7 @@ export const GET = withAuth(
               id: admin._id.toString(),
               name: admin.name,
               email: admin.email,
+              avatar: admin.avatar || "",
               role: "admin",
               examAttempts: [],
               certifications: [],
