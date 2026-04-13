@@ -351,7 +351,11 @@ export default function BlogManagementPage() {
     uploadFormData.append("file", file);
 
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: uploadFormData });
+      const res = await fetch("/api/upload", { 
+        method: "POST", 
+        body: uploadFormData,
+        credentials: "include"
+      });
       const data = await res.json();
 
       if (res.ok && data.url) {
