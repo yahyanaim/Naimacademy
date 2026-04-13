@@ -255,9 +255,9 @@ export default function CommentsPage() {
       </div>
 
       <div className="border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-auto max-h-[500px]">
           <table className="w-full">
-            <thead className="bg-muted/50">
+            <thead className="bg-muted/50 sticky top-0">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-medium">User</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">Article</th>
