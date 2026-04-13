@@ -36,6 +36,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalComments, setTotalComments] = useState(0);
+  const [userAvatar, setUserAvatar] = useState<string>("");
   const COMMENTS_PER_PAGE = 10;
 
   const fetchComments = useCallback(async (pageNum: number = 1) => {
@@ -108,6 +109,7 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
           setIdentityConfirmed(true);
           setName(data.user.name || data.user.email?.split("@")[0] || "User");
           setEmail(data.user.email || "");
+          setUserAvatar(data.user.avatar || "");
         }
       } else {
         const stored = localStorage.getItem("user_identity");
@@ -298,10 +300,14 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
       {identityConfirmed ? (
         <div className="bg-card border rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <div className="size-10 rounded-full bg-black/80 flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-bold text-white">
-                {name.charAt(0).toUpperCase()}
-              </span>
+            <div className="size-10 rounded-full bg-black/80 flex items-center justify-center flex-shrink-0 overflow-hidden">
+              {userAvatar ? (
+                <img src={userAvatar} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-sm font-bold text-white">
+                  {name.charAt(0).toUpperCase()}
+                </span>
+              )}
             </div>
             <form onSubmit={handleCommentSubmit} className="flex-1">
               <Textarea
