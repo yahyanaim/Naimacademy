@@ -9,6 +9,17 @@ export async function GET(request: Request) {
     await connectDB();
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get("limit") || "50");
+    const migrate = searchParams.get("migrate") === "true";
+
+    if (migrate) {
+      const firstAdmin = await Admin.findOne().lean();
+      if (firstAdmin) {
+        await BlogPost.updateMany(
+          { $or: [{ authorId: { $exists: false } }, { authorId: "" }] },
+          { authorId: firstAdmin._id.toString() }
+        );
+      }
+    }
 
     const posts = await BlogPost.find()
       .sort({ createdAt: -1 })
