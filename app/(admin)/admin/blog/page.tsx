@@ -559,69 +559,71 @@ export default function BlogManagementPage() {
             </div>
           ) : (
             <>
-              <div className="space-y-4">
-                {paginatedPosts.map((post) => (
-                <div
-                  key={post._id}
-                  className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium truncate">{post.title}</h3>
-                      {!post.isPublished && (
-                        <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded">
-                          Draft
-                        </span>
-                      )}
+              <div className="max-h-[400px] overflow-y-auto pr-2">
+                <div className="space-y-3">
+                  {paginatedPosts.map((post) => (
+                    <div
+                      key={post._id}
+                      className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium truncate">{post.title}</h3>
+                          {!post.isPublished && (
+                            <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded">
+                              Draft
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground truncate mt-1">
+                          {post.excerpt}
+                        </p>
+                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="size-3" />
+                            {new Date(post.createdAt).toLocaleDateString()}
+                          </span>
+                          <span className="flex items-center gap-1 whitespace-nowrap">
+                            <Clock className="size-3 flex-shrink-0" />
+                            <span>{post.readingTime} min read</span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Eye className="size-3" />
+                            {post.views} views
+                          </span>
+                          {(post.upvotes > 0 || post.downvotes > 0) && (
+                            <span className="flex items-center gap-1">
+                              <span className="text-green-600">+{post.upvotes}</span>
+                              <span className="text-red-600">-{post.downvotes}</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground">
+                          <MoreVertical className="size-4" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openEditDialog(post)}>
+                            <Edit className="size-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleTogglePublish(post)}>
+                            <Eye className="size-4 mr-2" />
+                            {post.isPublished ? "Unpublish" : "Publish"}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(post._id)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="size-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                    <p className="text-sm text-muted-foreground truncate mt-1">
-                      {post.excerpt}
-                    </p>
-                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="size-3" />
-                        {new Date(post.createdAt).toLocaleDateString()}
-                      </span>
-                      <span className="flex items-center gap-1 whitespace-nowrap">
-                        <Clock className="size-3 flex-shrink-0" />
-                        <span>{post.readingTime} min read</span>
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="size-3" />
-                        {post.views} views
-                      </span>
-                      {(post.upvotes > 0 || post.downvotes > 0) && (
-                        <span className="flex items-center gap-1">
-                          <span className="text-green-600">+{post.upvotes}</span>
-                          <span className="text-red-600">-{post.downvotes}</span>
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground">
-                      <MoreVertical className="size-4" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => openEditDialog(post)}>
-                        <Edit className="size-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleTogglePublish(post)}>
-                        <Eye className="size-4 mr-2" />
-                        {post.isPublished ? "Unpublish" : "Publish"}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleDelete(post._id)}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="size-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  ))}
                 </div>
-              ))}
               </div>
 
               {totalPages > 1 && (
