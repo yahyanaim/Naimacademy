@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import { User } from "@/lib/models/user.model";
+import { Admin } from "@/lib/models/admin.model";
 import { connectDB } from "@/lib/db/mongoose";
 import { PASSWORD } from "@/lib/constants";
 import { sanitizeInput } from "@/lib/utils/sanitize";
@@ -11,6 +12,7 @@ const profileSchema = z.object({
   name: z.string().min(1, "Name is required").optional().transform((val) => val ? sanitizeInput(val) : undefined),
   email: z.string().email("Invalid email address").optional().transform((val) => val ? sanitizeInput(val).toLowerCase() : undefined),
   password: z.string().min(PASSWORD.MIN_LENGTH, `Password must be at least ${PASSWORD.MIN_LENGTH} characters`).optional(),
+  role: z.string().optional(),
 });
 
 export async function PUT(req: NextRequest) {
@@ -31,7 +33,30 @@ export async function PUT(req: NextRequest) {
 
     await connectDB();
 
-    const { name, email, password } = parsed.data;
+    const { name, email, password, role } = parsed.data;
+
+    if (role === "admin") {
+      const updateData: Record<string, unknown> = {};
+      if (name) updateData.name = name;
+      if (email) updateData.email = email;
+      if (password) updateData.password = await bcrypt.hash(password, PASSWORD.BCRYPT_ROUNDS);
+
+      if (Object.keys(updateData).length === 0) {
+        return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+      }
+
+      const updatedAdmin = await Admin.findByIdAndUpdate(
+        session.userId,
+        updateData,
+        { new: true }
+      ).select("-password -__v");
+
+      if (!updatedAdmin) {
+        return NextResponse.json({ error: "Admin not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({ success: true, user: updatedAdmin });
+    }
 
     if (email) {
       const existing = await User.findOne({ email, _id: { $ne: session.userId } });

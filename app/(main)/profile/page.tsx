@@ -45,6 +45,18 @@ export default function ProfilePage() {
       .catch(() => router.push("/login"));
   }, [router]);
 
+  const [userRole, setUserRole] = useState("student");
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.user) {
+          setUserRole(data.user.role || "student");
+        }
+      });
+  }, []);
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -95,7 +107,7 @@ export default function ProfilePage() {
       const res = await fetch("/api/user/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password: password || undefined }),
+        body: JSON.stringify({ name, email, password: password || undefined, role: userRole }),
       });
       if (!res.ok) throw new Error();
       
