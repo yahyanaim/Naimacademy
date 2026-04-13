@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/auth/guards";
 import { User } from "@/lib/models/user.model";
+import { Admin } from "@/lib/models/admin.model";
 import { connectDB } from "@/lib/db/mongoose";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -62,7 +63,11 @@ export const POST = withAuth(
         uploadStream.end(buffer);
       });
 
-      await User.findByIdAndUpdate(ctx.user.userId, { avatar: result.secure_url });
+      if (ctx.user.role === "admin") {
+        await Admin.findByIdAndUpdate(ctx.user.userId, { avatar: result.secure_url });
+      } else {
+        await User.findByIdAndUpdate(ctx.user.userId, { avatar: result.secure_url });
+      }
 
       return NextResponse.json(
         { url: result.secure_url, message: "Avatar uploaded successfully" },
