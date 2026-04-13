@@ -559,9 +559,8 @@ export default function BlogManagementPage() {
             </div>
           ) : (
             <>
-              <div className="max-h-[400px] overflow-y-auto pr-2">
-                <div className="space-y-3">
-                  {paginatedPosts.map((post) => (
+              <div className="space-y-3">
+                {paginatedPosts.map((post) => (
                     <div
                       key={post._id}
                       className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
@@ -623,7 +622,6 @@ export default function BlogManagementPage() {
                       </DropdownMenu>
                     </div>
                   ))}
-                </div>
               </div>
 
               {totalPages > 1 && (
