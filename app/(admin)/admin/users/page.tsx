@@ -395,7 +395,7 @@ export default function UsersPage() {
         <p className="text-muted-foreground text-sm">No users found.</p>
       ) : (
         <div className="rounded-xl border border-border overflow-hidden">
-          <div className="overflow-auto max-h-[500px]">
+          <div className="overflow-auto max-h-[500px] min-w-[900px]">
             <Table>
               <TableHeader className="sticky top-0 bg-background z-10">
                 <TableRow>
