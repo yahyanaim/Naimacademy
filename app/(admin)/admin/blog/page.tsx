@@ -28,6 +28,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import {
   Plus,
   Edit,
   Trash2,
@@ -87,6 +91,8 @@ export default function BlogManagementPage() {
   const [initialFormData, setInitialFormData] = useState(formData);
   const [saving, setSaving] = useState(false);
   const [stats, setStats] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   function hasUnsavedChanges() {
     return JSON.stringify(formData) !== JSON.stringify(initialFormData);
@@ -142,6 +148,16 @@ export default function BlogManagementPage() {
       post.title.toLowerCase().includes(search.toLowerCase()) ||
       post.excerpt.toLowerCase().includes(search.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredPosts.length / itemsPerPage);
+  const paginatedPosts = filteredPosts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   function openCreateDialog() {
     setEditingPost(null);
@@ -542,8 +558,9 @@ export default function BlogManagementPage() {
               <p className="text-muted-foreground">No articles found</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {filteredPosts.map((post) => (
+            <>
+              <div className="space-y-4">
+                {paginatedPosts.map((post) => (
                 <div
                   key={post._id}
                   className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
@@ -605,7 +622,50 @@ export default function BlogManagementPage() {
                   </DropdownMenu>
                 </div>
               ))}
-            </div>
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t bg-muted/30">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredPosts.length)} of {filteredPosts.length} articles
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Select value={String(itemsPerPage)} onValueChange={(v) => { setItemsPerPage(Number(v)); setCurrentPage(1); }}>
+                      <SelectTrigger className="w-[100px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5">5 / page</SelectItem>
+                        <SelectItem value="10">10 / page</SelectItem>
+                        <SelectItem value="20">20 / page</SelectItem>
+                        <SelectItem value="50">50 / page</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage <= 1}
+                    >
+                      <ChevronLeft className="size-4 mr-1" />
+                      Previous
+                    </Button>
+                    <span className="text-sm text-muted-foreground px-2">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage >= totalPages}
+                    >
+                      Next
+                      <ChevronRight className="size-4 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
