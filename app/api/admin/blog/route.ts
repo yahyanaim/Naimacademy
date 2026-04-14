@@ -103,6 +103,7 @@ export async function PUT(req: NextRequest) {
       if (tags !== undefined) updateData.tags = tags;
       if (author !== undefined) updateData.author = author;
       if (titleStyle !== undefined) updateData.titleStyle = titleStyle;
+      updateData.authorId = ctx.user.userId;
       if (isPublished !== undefined) {
         updateData.isPublished = isPublished;
         if (isPublished) updateData.publishedAt = new Date();
