@@ -14,13 +14,10 @@ const createCommentSchema = z.object({
 });
 
 async function getAvatarByEmail(email: string): Promise<string> {
-  console.log("[getAvatarByEmail] Looking up avatar for:", email);
   const user = await User.findOne({ email: email.toLowerCase() }).lean();
-  console.log("[getAvatarByEmail] User found:", user ? "yes" : "no", "avatar:", user?.avatar || "empty");
   if (user?.avatar) return user.avatar;
   
   const admin = await Admin.findOne({ email: email.toLowerCase() }).lean();
-  console.log("[getAvatarByEmail] Admin found:", admin ? "yes" : "no", "avatar:", admin?.avatar || "empty");
   if (admin?.avatar) return admin.avatar;
   
   return "";
@@ -60,12 +57,10 @@ export async function GET(request: Request) {
     const commentsWithAvatars = await Promise.all(
       comments.map(async (comment) => {
         const authorAvatar = comment.authorAvatar || await getAvatarByEmail(comment.authorEmail);
-        console.log("[GET] Comment:", comment.authorName, "savedAvatar:", comment.authorAvatar, "finalAvatar:", authorAvatar);
         return { ...comment, authorAvatar };
       })
     );
 
-    console.log("[GET] Returning:", commentsWithAvatars.length, "comments");
     return NextResponse.json({
       comments: commentsWithAvatars,
       pagination: {
@@ -95,15 +90,12 @@ export async function POST(request: Request) {
 
     await connectDB();
     
-    console.log("[POST comment] authorEmail:", parsed.data.authorEmail);
     const authorAvatar = await getAvatarByEmail(parsed.data.authorEmail);
-    console.log("[POST comment] Got avatar:", authorAvatar);
     
     const comment = await Comment.create({
       ...parsed.data,
       authorAvatar,
     });
-    console.log("[POST comment] Created comment with avatar:", comment.authorAvatar);
 
     return NextResponse.json({ comment }, { status: 201 });
   } catch (error) {

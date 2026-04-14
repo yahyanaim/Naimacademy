@@ -48,18 +48,13 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
       const res = await fetch(`/api/blog/comments?slug=${slug}&page=${pageNum}&limit=${COMMENTS_PER_PAGE}`);
       if (res.ok) {
         const data = await res.json();
-        console.log("[fetchComments] Got comments:", data.comments?.length, "First comment avatar:", data.comments?.[0]?.authorAvatar);
         setComments(data.comments || []);
         if (data.pagination) {
           setTotalPages(data.pagination.pages);
           setTotalComments(data.pagination.total);
         }
-      } else {
-        console.log("[fetchComments] Failed:", res.status);
       }
-    } catch (err) {
-      console.error("[fetchComments] Error:", err);
-    }
+    } catch {}
     setLoading(false);
   }, [slug]);
 
@@ -186,22 +181,18 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
 
     setSubmitting(true);
 
-    const payload = {
-      articleSlug: slug,
-      articleTitle,
-      authorName: name.trim(),
-      authorEmail: email.trim().toLowerCase(),
-      content: content.trim(),
-    };
-    console.log("[handleCommentSubmit] Posting:", payload);
-
     try {
       const res = await fetch("/api/blog/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          articleSlug: slug,
+          articleTitle,
+          authorName: name.trim(),
+          authorEmail: email.trim().toLowerCase(),
+          content: content.trim(),
+        }),
       });
-      console.log("[handleCommentSubmit] Response status:", res.status);
 
       if (res.ok) {
         setSuccess(true);
@@ -212,8 +203,7 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
         const data = await res.json();
         setError(data.error || "Failed to post comment");
       }
-    } catch (err) {
-      console.error("[handleCommentSubmit] Error:", err);
+    } catch {
       setError("Failed to post comment");
     } finally {
       setSubmitting(false);
