@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Clock } from "lucide-react";
 import { connectDB } from "@/lib/db/mongoose";
 import { BlogPost } from "@/lib/models/blog-post.model";
+import { Admin } from "@/lib/models/admin.model";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import ShareButtons from "@/components/blog/share-buttons";
@@ -19,6 +20,12 @@ async function getPost(slug: string) {
       { $inc: { views: 1 } },
       { new: true }
     ).lean();
+    
+    if (post) {
+      const firstAdmin = await Admin.findOne().lean();
+      (post as any).authorAvatar = firstAdmin?.avatar || "";
+    }
+    
     return post;
   } catch {
     return null;
@@ -32,7 +39,11 @@ async function getAllPosts() {
       .sort({ publishedAt: -1 })
       .limit(5)
       .lean();
-    return posts;
+    
+    const firstAdmin = await Admin.findOne().lean();
+    const fallbackAvatar = firstAdmin?.avatar || "";
+    
+    return posts.map(post => ({ ...post, authorAvatar: fallbackAvatar }));
   } catch {
     return [];
   }
