@@ -45,14 +45,13 @@ export const POST = withAuth(
       const buffer = Buffer.from(await file.arrayBuffer());
 
       const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
+        cloudinary.uploader.upload(
+          `data:${file.type};base64,${buffer.toString("base64")}`,
           {
             folder: "naim-academy/avatars",
-            width: 200,
-            height: 200,
-            crop: "fill",
-            gravity: "face",
-            format: "jpg",
+            transformation: [
+              { width: 200, height: 200, crop: "fill", gravity: "face" }
+            ],
           },
           (error, result) => {
             if (error) reject(error);
@@ -60,7 +59,6 @@ export const POST = withAuth(
             else reject(new Error("Upload failed"));
           }
         );
-        uploadStream.end(buffer);
       });
 
       if (ctx.user.role === "admin") {
