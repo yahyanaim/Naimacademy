@@ -27,22 +27,11 @@ export async function GET(request: Request) {
     ]);
 
     const firstAdmin = await Admin.findOne().lean();
+    const fallbackAvatar = firstAdmin?.avatar || "";
 
-    const postsWithAvatars = await Promise.all(
-      posts.map(async (post) => {
-        let authorAvatar = "";
-        if (post.authorId) {
-          const admin = await Admin.findById(post.authorId).lean();
-          if (admin?.avatar) {
-            authorAvatar = admin.avatar;
-          }
-        }
-        if (!authorAvatar && firstAdmin?.avatar) {
-          authorAvatar = firstAdmin.avatar;
-        }
-        return { ...post, authorAvatar };
-      })
-    );
+    const postsWithAvatars = posts.map((post) => {
+      return { ...post, authorAvatar: fallbackAvatar };
+    });
 
     return NextResponse.json({
       posts: postsWithAvatars,
