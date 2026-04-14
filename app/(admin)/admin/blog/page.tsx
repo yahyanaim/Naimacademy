@@ -652,7 +652,7 @@ export default function BlogManagementPage() {
                 </div>
               </div>
 
-              {totalPages > 1 && (
+              {totalPages > 0 && (
                 <div className="flex items-center justify-between px-4 py-3 border-t bg-muted/30">
                   <p className="text-sm text-muted-foreground">
                     Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredPosts.length)} of {filteredPosts.length} articles

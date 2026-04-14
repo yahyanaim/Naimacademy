@@ -403,7 +403,7 @@ export default function CommentsPage() {
           </table>
         </div>
 
-        {pagination && pagination.pages > 1 && (
+        {pagination && pagination.pages > 0 && (
           <div className="flex items-center justify-between px-4 py-3 border-t bg-muted/30">
             <p className="text-sm text-muted-foreground">
               Page {currentPage} of {pagination.pages} ({pagination.total} total)
