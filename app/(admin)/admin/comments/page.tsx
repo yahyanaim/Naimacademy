@@ -70,7 +70,7 @@ export default function CommentsPage() {
     setLoading(true);
     setLoadingError(null);
     try {
-      const params = new URLSearchParams({ page: page.toString(), limit: "20", filter });
+      const params = new URLSearchParams({ page: page.toString(), limit: "10", filter });
       const res = await fetch(`/api/admin/comments?${params}`);
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ error: "Failed to fetch comments" }));
