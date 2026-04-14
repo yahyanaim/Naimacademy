@@ -5,6 +5,7 @@ export interface IComment extends Document {
   articleTitle: string;
   authorName: string;
   authorEmail: string;
+  authorAvatar?: string;
   content: string;
   isReplied: boolean;
   adminReply?: string;
@@ -19,6 +20,7 @@ const CommentSchema = new Schema<IComment>(
     articleTitle: { type: String, required: true },
     authorName: { type: String, required: true },
     authorEmail: { type: String, required: true },
+    authorAvatar: { type: String, default: "" },
     content: { type: String, required: true },
     isReplied: { type: Boolean, default: false },
     adminReply: { type: String, default: "" },

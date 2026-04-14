@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongoose";
 import { Comment } from "@/lib/models/comment.model";
+import { User } from "@/lib/models/user.model";
+import { Admin } from "@/lib/models/admin.model";
 import { z } from "zod";
 
 const createCommentSchema = z.object({
@@ -10,6 +12,19 @@ const createCommentSchema = z.object({
   authorEmail: z.string().email("Invalid email address"),
   content: z.string().min(10, "Comment must be at least 10 characters"),
 });
+
+async function getAvatarByEmail(email: string): Promise<string> {
+  console.log("[getAvatarByEmail] Looking up avatar for:", email);
+  const user = await User.findOne({ email: email.toLowerCase() }).lean();
+  console.log("[getAvatarByEmail] User found:", user ? "yes" : "no", "avatar:", user?.avatar || "empty");
+  if (user?.avatar) return user.avatar;
+  
+  const admin = await Admin.findOne({ email: email.toLowerCase() }).lean();
+  console.log("[getAvatarByEmail] Admin found:", admin ? "yes" : "no", "avatar:", admin?.avatar || "empty");
+  if (admin?.avatar) return admin.avatar;
+  
+  return "";
+}
 
 export async function GET(request: Request) {
   try {
@@ -42,8 +57,17 @@ export async function GET(request: Request) {
       Comment.countDocuments(baseQuery),
     ]);
 
+    const commentsWithAvatars = await Promise.all(
+      comments.map(async (comment) => {
+        const authorAvatar = comment.authorAvatar || await getAvatarByEmail(comment.authorEmail);
+        console.log("[GET] Comment:", comment.authorName, "savedAvatar:", comment.authorAvatar, "finalAvatar:", authorAvatar);
+        return { ...comment, authorAvatar };
+      })
+    );
+
+    console.log("[GET] Returning:", commentsWithAvatars.length, "comments");
     return NextResponse.json({
-      comments,
+      comments: commentsWithAvatars,
       pagination: {
         page,
         limit,
@@ -70,7 +94,16 @@ export async function POST(request: Request) {
     }
 
     await connectDB();
-    const comment = await Comment.create(parsed.data);
+    
+    console.log("[POST comment] authorEmail:", parsed.data.authorEmail);
+    const authorAvatar = await getAvatarByEmail(parsed.data.authorEmail);
+    console.log("[POST comment] Got avatar:", authorAvatar);
+    
+    const comment = await Comment.create({
+      ...parsed.data,
+      authorAvatar,
+    });
+    console.log("[POST comment] Created comment with avatar:", comment.authorAvatar);
 
     return NextResponse.json({ comment }, { status: 201 });
   } catch (error) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { MessageSquare, Send, User, Mail, CheckCircle, Lock, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +10,7 @@ interface Comment {
   _id: string;
   authorName: string;
   authorEmail: string;
+  authorAvatar?: string;
   content: string;
   isReplied: boolean;
   adminReply?: string;
@@ -19,9 +21,10 @@ interface Comment {
 interface CommentsSectionProps {
   slug: string;
   articleTitle: string;
+  adminAvatar?: string;
 }
 
-export default function CommentsSection({ slug, articleTitle }: CommentsSectionProps) {
+export default function CommentsSection({ slug, articleTitle, adminAvatar }: CommentsSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -45,13 +48,18 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
       const res = await fetch(`/api/blog/comments?slug=${slug}&page=${pageNum}&limit=${COMMENTS_PER_PAGE}`);
       if (res.ok) {
         const data = await res.json();
+        console.log("[fetchComments] Got comments:", data.comments?.length, "First comment avatar:", data.comments?.[0]?.authorAvatar);
         setComments(data.comments || []);
         if (data.pagination) {
           setTotalPages(data.pagination.pages);
           setTotalComments(data.pagination.total);
         }
+      } else {
+        console.log("[fetchComments] Failed:", res.status);
       }
-    } catch {}
+    } catch (err) {
+      console.error("[fetchComments] Error:", err);
+    }
     setLoading(false);
   }, [slug]);
 
@@ -171,20 +179,29 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
       return;
     }
 
+    if (!name.trim() || !email.trim()) {
+      setError("Please enter your name and email");
+      return;
+    }
+
     setSubmitting(true);
+
+    const payload = {
+      articleSlug: slug,
+      articleTitle,
+      authorName: name.trim(),
+      authorEmail: email.trim().toLowerCase(),
+      content: content.trim(),
+    };
+    console.log("[handleCommentSubmit] Posting:", payload);
 
     try {
       const res = await fetch("/api/blog/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          articleSlug: slug,
-          articleTitle,
-          authorName: name.trim(),
-          authorEmail: email.trim().toLowerCase(),
-          content: content.trim(),
-        }),
+        body: JSON.stringify(payload),
       });
+      console.log("[handleCommentSubmit] Response status:", res.status);
 
       if (res.ok) {
         setSuccess(true);
@@ -195,7 +212,8 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         const data = await res.json();
         setError(data.error || "Failed to post comment");
       }
-    } catch {
+    } catch (err) {
+      console.error("[handleCommentSubmit] Error:", err);
       setError("Failed to post comment");
     } finally {
       setSubmitting(false);
@@ -410,10 +428,20 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
         <div className="space-y-6 mt-6">
           {comments.map((comment) => (
             <div key={comment._id} className="flex gap-3">
-              <div className="size-10 rounded-full bg-black/80 flex items-center justify-center flex-shrink-0">
-                <span className="text-sm font-bold text-white">
-                  {comment.authorName.charAt(0).toUpperCase()}
-                </span>
+              <div className="size-10 rounded-full bg-black/80 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {comment.authorAvatar ? (
+                  <Image
+                    src={comment.authorAvatar}
+                    alt={comment.authorName}
+                    width={40}
+                    height={40}
+                    className="object-cover"
+                  />
+                ) : (
+                  <span className="text-sm font-bold text-white">
+                    {comment.authorName.charAt(0).toUpperCase()}
+                  </span>
+                )}
               </div>
               <div className="flex-1">
                 <div className="bg-muted/50 rounded-2xl px-4 py-2">
@@ -428,8 +456,18 @@ export default function CommentsSection({ slug, articleTitle }: CommentsSectionP
 
                 {comment.isReplied && comment.adminReply && (
                   <div className="flex gap-2 mt-3 ml-4">
-                    <div className="size-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                      <span className="text-xs font-bold text-white">A</span>
+                    <div className="size-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      {adminAvatar ? (
+                        <Image
+                          src={adminAvatar}
+                          alt="Admin"
+                          width={32}
+                          height={32}
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="text-xs font-bold text-white">A</span>
+                      )}
                     </div>
                     <div className="bg-primary/10 rounded-2xl px-4 py-2 flex-1">
                       <p className="font-semibold text-sm mb-1">Admin</p>

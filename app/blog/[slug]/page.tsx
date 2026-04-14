@@ -327,7 +327,7 @@ export default async function BlogPostPage({
 
             <ShareButtons title={post.title} />
 
-            <CommentsSection slug={post.slug} articleTitle={post.title} />
+            <CommentsSection slug={post.slug} articleTitle={post.title} adminAvatar={(post as any).authorAvatar} />
           </article>
 
           {relatedPosts.length > 0 && (
