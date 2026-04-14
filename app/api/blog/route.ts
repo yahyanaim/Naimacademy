@@ -26,12 +26,19 @@ export async function GET(request: Request) {
       BlogPost.countDocuments(query),
     ]);
 
+    const firstAdmin = await Admin.findOne().lean();
+
     const postsWithAvatars = await Promise.all(
       posts.map(async (post) => {
         let authorAvatar = "";
         if (post.authorId) {
           const admin = await Admin.findById(post.authorId).lean();
-          authorAvatar = admin?.avatar || "";
+          if (admin?.avatar) {
+            authorAvatar = admin.avatar;
+          }
+        }
+        if (!authorAvatar && firstAdmin?.avatar) {
+          authorAvatar = firstAdmin.avatar;
         }
         return { ...post, authorAvatar };
       })

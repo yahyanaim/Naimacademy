@@ -21,9 +21,19 @@ export async function GET(
     }
 
     let authorAvatar = "";
+
     if (post.authorId) {
       const admin = await Admin.findById(post.authorId).lean();
-      authorAvatar = admin?.avatar || "";
+      if (admin?.avatar) {
+        authorAvatar = admin.avatar;
+      }
+    }
+
+    if (!authorAvatar) {
+      const firstAdmin = await Admin.findOne().lean();
+      if (firstAdmin?.avatar) {
+        authorAvatar = firstAdmin.avatar;
+      }
     }
 
     return NextResponse.json({ ...post, authorAvatar });
