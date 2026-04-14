@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2, TrendingUp, TrendingDown, Users } from "lucide-react";
+import { MessageCircle, Search, Eye, Reply, CheckCircle, Clock, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Trash2, TrendingUp, TrendingDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,50 +37,73 @@ interface Pagination {
   pages: number;
 }
 
+interface CommentStats {
+  total: number;
+  pending: number;
+  replied: number;
+  growth: number;
+  commentsLastWeek: number;
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export default function CommentsPage() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<"all" | "pending" | "replied">("all");
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<CommentStats | null>(null);
 
   const fetchComments = useCallback(async (page = 1) => {
     setLoading(true);
+    setLoadingError(null);
     try {
       const params = new URLSearchParams({ page: page.toString(), limit: "20", filter });
       const res = await fetch(`/api/admin/comments?${params}`);
-      if (res.ok) {
-        const data = await res.json();
-        setComments(data.comments || []);
-        setPagination(data.pagination);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: "Failed to fetch comments" }));
+        throw new Error(errorData.error || "Failed to fetch comments");
       }
-    } catch {
-      // ignore
+      const data = await res.json();
+      setComments(data.comments || []);
+      setPagination(data.pagination);
+    } catch (err) {
+      console.error("Error fetching comments:", err);
+      setLoadingError(err instanceof Error ? err.message : "Failed to load comments");
     } finally {
       setLoading(false);
     }
   }, [filter]);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/stats");
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data.comments);
+      if (!res.ok) {
+        throw new Error("Failed to fetch stats");
       }
-    } catch {
-      // ignore
+      const data = await res.json();
+      setStats(data.comments as CommentStats);
+    } catch (err) {
+      console.error("Error fetching stats:", err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchComments(currentPage);
     fetchStats();
-  }, [currentPage, fetchComments]);
+  }, [currentPage, fetchComments, fetchStats]);
 
   useEffect(() => {
     if (!autoRefresh) return;
@@ -94,15 +117,18 @@ export default function CommentsPage() {
 
   async function handleDelete(comment: Comment) {
     if (!confirm(`Delete comment from "${comment.authorName}"?\n\n"${comment.content.substring(0, 50)}..."`)) return;
+    
     try {
       const res = await fetch(`/api/admin/comments/${comment._id}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("Comment deleted");
         fetchComments(currentPage);
       } else {
-        toast.error("Failed to delete comment");
+        const errorData = await res.json().catch(() => ({ error: "Failed to delete comment" }));
+        toast.error(errorData.error || "Failed to delete comment");
       }
-    } catch {
+    } catch (err) {
+      console.error("Error deleting comment:", err);
       toast.error("Failed to delete comment");
     }
   }
@@ -281,6 +307,15 @@ export default function CommentsPage() {
                     <td className="px-4 py-3"><div className="h-8 w-20 bg-muted rounded animate-pulse" /></td>
                   </tr>
                 ))
+              ) : loadingError ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-12 text-center text-red-500">
+                    <p>{loadingError}</p>
+                    <Button variant="outline" size="sm" onClick={() => fetchComments(currentPage)} className="mt-2">
+                      Try Again
+                    </Button>
+                  </td>
+                </tr>
               ) : filteredComments.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
@@ -293,8 +328,8 @@ export default function CommentsPage() {
                   <tr key={comment._id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
                       <div>
-                        <p className="font-medium text-sm">{comment.authorName}</p>
-                        <p className="text-xs text-muted-foreground">{comment.authorEmail}</p>
+                        <p className="font-medium text-sm">{escapeHtml(comment.authorName)}</p>
+                        <p className="text-xs text-muted-foreground">{escapeHtml(comment.authorEmail)}</p>
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -303,12 +338,12 @@ export default function CommentsPage() {
                         target="_blank"
                         className="text-sm text-primary hover:underline line-clamp-1 max-w-[200px]"
                       >
-                        {comment.articleTitle}
+                        {escapeHtml(comment.articleTitle)}
                       </Link>
                     </td>
                     <td className="px-4 py-3">
                       <p className="text-sm text-muted-foreground line-clamp-2 max-w-[250px]">
-                        {comment.content}
+                        {escapeHtml(comment.content)}
                       </p>
                     </td>
                     <td className="px-4 py-3">
@@ -377,7 +412,10 @@ export default function CommentsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onClick={() => {
+                  const newPage = Math.max(1, currentPage - 1);
+                  setCurrentPage(newPage);
+                }}
                 disabled={currentPage <= 1}
               >
                 <ChevronLeft className="size-4 mr-1" />
@@ -386,7 +424,10 @@ export default function CommentsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.min(pagination.pages, p + 1))}
+                onClick={() => {
+                  const newPage = Math.min(pagination.pages, currentPage + 1);
+                  setCurrentPage(newPage);
+                }}
                 disabled={currentPage >= pagination.pages}
               >
                 Next

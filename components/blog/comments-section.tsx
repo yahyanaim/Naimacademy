@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { MessageSquare, Send, User, Mail, CheckCircle, Lock, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,9 +24,24 @@ interface CommentsSectionProps {
   adminAvatar?: string;
 }
 
+function escapeHtml(text: string): string {
+  const div = typeof document !== "undefined" ? document.createElement("div") : null;
+  if (div) {
+    div.textContent = text;
+    return div.innerHTML;
+  }
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export default function CommentsSection({ slug, articleTitle, adminAvatar }: CommentsSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [content, setContent] = useState("");
@@ -42,20 +57,27 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
   const [userAvatar, setUserAvatar] = useState<string>("");
   const COMMENTS_PER_PAGE = 10;
 
-  const fetchComments = useCallback(async (pageNum: number = 1) => {
+  const fetchComments = useCallback(async (pageNum: number) => {
     setLoading(true);
+    setLoadingError(null);
     try {
       const res = await fetch(`/api/blog/comments?slug=${slug}&page=${pageNum}&limit=${COMMENTS_PER_PAGE}`);
-      if (res.ok) {
-        const data = await res.json();
-        setComments(data.comments || []);
-        if (data.pagination) {
-          setTotalPages(data.pagination.pages);
-          setTotalComments(data.pagination.total);
-        }
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: "Failed to fetch comments" }));
+        throw new Error(errorData.error || "Failed to fetch comments");
       }
-    } catch {}
-    setLoading(false);
+      const data = await res.json();
+      setComments(data.comments || []);
+      if (data.pagination) {
+        setTotalPages(data.pagination.pages);
+        setTotalComments(data.pagination.total);
+      }
+    } catch (err) {
+      console.error("Error fetching comments:", err);
+      setLoadingError(err instanceof Error ? err.message : "Failed to load comments");
+    } finally {
+      setLoading(false);
+    }
   }, [slug]);
 
   useEffect(() => {
@@ -64,10 +86,10 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
 
   useEffect(() => {
     const handleIdentityUpdate = () => {
-      const stored = localStorage.getItem("user_identity");
-      if (!stored) return;
-      
       try {
+        const stored = localStorage.getItem("user_identity");
+        if (!stored) return;
+        
         const identity = JSON.parse(stored);
         if (identity.name && identity.email && !identityConfirmed) {
           setName(identity.name);
@@ -75,16 +97,22 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
           setIdentityConfirmed(true);
           setShowIdentityForm(false);
         }
-      } catch {}
+      } catch (err) {
+        console.error("Error parsing identity:", err);
+      }
     };
 
     window.addEventListener("identity-changed", handleIdentityUpdate);
     
     const interval = setInterval(() => {
-      const updated = localStorage.getItem("identity_updated");
-      if (updated) {
-        localStorage.removeItem("identity_updated");
-        handleIdentityUpdate();
+      try {
+        const updated = localStorage.getItem("identity_updated");
+        if (updated) {
+          localStorage.removeItem("identity_updated");
+          handleIdentityUpdate();
+        }
+      } catch (err) {
+        console.error("Error checking identity update:", err);
       }
     }, 500);
     
@@ -102,7 +130,7 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
     return () => clearInterval(interval);
   }, [page, fetchComments]);
 
-  async function checkAuthAndLoadComments() {
+  const checkAuthAndLoadComments = useCallback(async () => {
     try {
       const res = await fetch("/api/auth/me");
       if (res.ok) {
@@ -124,13 +152,17 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
               setEmail(identity.email);
               setIdentityConfirmed(true);
             }
-          } catch {}
+          } catch (err) {
+            console.error("Error parsing stored identity:", err);
+          }
         }
       }
-    } catch {}
+    } catch (err) {
+      console.error("Error checking auth:", err);
+    }
     
     fetchComments(page);
-  }
+  }, [page, fetchComments]);
 
   function handleStartCommenting() {
     setShowIdentityForm(true);
@@ -155,9 +187,13 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
       email: trimmedEmail.toLowerCase(),
     };
     
-    localStorage.setItem("user_identity", JSON.stringify(identityData));
-    localStorage.setItem("identity_updated", Date.now().toString());
-    window.dispatchEvent(new Event("identity-changed"));
+    try {
+      localStorage.setItem("user_identity", JSON.stringify(identityData));
+      localStorage.setItem("identity_updated", Date.now().toString());
+      window.dispatchEvent(new Event("identity-changed"));
+    } catch (err) {
+      console.error("Error saving identity:", err);
+    }
 
     setIdentityConfirmed(true);
     setShowIdentityForm(false);
@@ -203,7 +239,8 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
         const data = await res.json();
         setError(data.error || "Failed to post comment");
       }
-    } catch {
+    } catch (err) {
+      console.error("Error posting comment:", err);
       setError("Failed to post comment");
     } finally {
       setSubmitting(false);
@@ -216,6 +253,18 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
       day: "numeric",
     });
   }
+
+  const handlePrevPage = useCallback(() => {
+    const newPage = Math.max(1, page - 1);
+    setPage(newPage);
+    fetchComments(newPage);
+  }, [page, fetchComments]);
+
+  const handleNextPage = useCallback(() => {
+    const newPage = Math.min(totalPages, page + 1);
+    setPage(newPage);
+    fetchComments(newPage);
+  }, [page, totalPages, fetchComments]);
 
   const [showComments, setShowComments] = useState(true);
 
@@ -310,7 +359,13 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
           <div className="flex items-start gap-3">
             <div className="size-10 rounded-full bg-black/80 flex items-center justify-center flex-shrink-0 overflow-hidden">
               {userAvatar ? (
-                <img src={userAvatar} alt="" className="w-full h-full object-cover" />
+                <Image
+                  src={userAvatar}
+                  alt="User avatar"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <span className="text-sm font-bold text-white">
                   {name.charAt(0).toUpperCase()}
@@ -372,10 +427,7 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setPage(p => Math.max(1, p - 1));
-                  fetchComments(page - 1);
-                }}
+                onClick={handlePrevPage}
                 disabled={page <= 1}
                 className="h-8 px-2"
               >
@@ -387,10 +439,7 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setPage(p => Math.min(totalPages, p + 1));
-                  fetchComments(page + 1);
-                }}
+                onClick={handleNextPage}
                 disabled={page >= totalPages}
                 className="h-8 px-2"
               >
@@ -414,6 +463,13 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
             </div>
           ))}
         </div>
+      ) : loadingError ? (
+        <div className="text-center py-8 text-red-500">
+          <p>{loadingError}</p>
+          <Button variant="outline" size="sm" onClick={() => fetchComments(page)} className="mt-2">
+            Try Again
+          </Button>
+        </div>
       ) : comments.length > 0 ? (
         <div className="space-y-6 mt-6">
           {comments.map((comment) => (
@@ -422,7 +478,7 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
                 {comment.authorAvatar ? (
                   <Image
                     src={comment.authorAvatar}
-                    alt={comment.authorName}
+                    alt={escapeHtml(comment.authorName)}
                     width={40}
                     height={40}
                     className="object-cover"
@@ -435,8 +491,8 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
               </div>
               <div className="flex-1">
                 <div className="bg-muted/50 rounded-2xl px-4 py-2">
-                  <p className="font-semibold text-sm mb-1">{comment.authorName}</p>
-                  <p className="text-sm text-muted-foreground">{comment.content}</p>
+                  <p className="font-semibold text-sm mb-1">{escapeHtml(comment.authorName)}</p>
+                  <p className="text-sm text-muted-foreground">{escapeHtml(comment.content)}</p>
                 </div>
                 <div className="flex items-center gap-3 mt-1 px-1">
                   <span className="text-xs text-muted-foreground">
@@ -461,7 +517,7 @@ export default function CommentsSection({ slug, articleTitle, adminAvatar }: Com
                     </div>
                     <div className="bg-primary/10 rounded-2xl px-4 py-2 flex-1">
                       <p className="font-semibold text-sm mb-1">Admin</p>
-                      <p className="text-sm text-muted-foreground">{comment.adminReply}</p>
+                      <p className="text-sm text-muted-foreground">{escapeHtml(comment.adminReply)}</p>
                     </div>
                   </div>
                 )}

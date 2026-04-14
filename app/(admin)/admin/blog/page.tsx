@@ -72,6 +72,17 @@ interface BlogPost {
   createdAt: string;
 }
 
+interface BlogStats {
+  total: number;
+  published: number;
+  drafts: number;
+  totalViews: number;
+  totalUpvotes: number;
+  totalDownvotes: number;
+  growth: number;
+  postsLastWeek: number;
+}
+
 export default function BlogManagementPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,7 +101,7 @@ export default function BlogManagementPage() {
   });
   const [initialFormData, setInitialFormData] = useState(formData);
   const [saving, setSaving] = useState(false);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<BlogStats | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -115,24 +126,26 @@ export default function BlogManagementPage() {
   async function loadStats() {
     try {
       const res = await fetch("/api/admin/stats");
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data.blog);
+      if (!res.ok) {
+        throw new Error("Failed to fetch stats");
       }
-    } catch {
-      // ignore
+      const data = await res.json();
+      setStats(data.blog as BlogStats);
+    } catch (err) {
+      console.error("Error loading stats:", err);
     }
   }
 
   async function loadPosts() {
     try {
       const res = await fetch("/api/admin/blog");
-      if (res.ok) {
-        const data = await res.json();
-        setPosts(data);
+      if (!res.ok) {
+        throw new Error("Failed to fetch posts");
       }
-    } catch {
-      // ignore
+      const data = await res.json();
+      setPosts(data);
+    } catch (err) {
+      console.error("Error loading posts:", err);
     } finally {
       setLoading(false);
     }
@@ -402,28 +415,38 @@ export default function BlogManagementPage() {
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this post?")) return;
     try {
-      await fetch(`/api/admin/blog?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/blog?id=${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        throw new Error("Failed to delete post");
+      }
       await loadPosts();
-    } catch {
-      // ignore
+      toast.success("Post deleted successfully");
+    } catch (err) {
+      console.error("Error deleting post:", err);
+      toast.error("Failed to delete post");
     }
   }
 
   async function handleTogglePublish(post: BlogPost) {
     const newStatus = !post.isPublished;
     try {
-      await fetch("/api/admin/blog", {
+      const res = await fetch("/api/admin/blog", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: post._id, isPublished: newStatus }),
       });
+      if (!res.ok) {
+        throw new Error("Failed to update publish status");
+      }
       await loadPosts();
       
       if (newStatus) {
         await sendNewArticleNotification(post.title, `/blog/${post.slug}`);
       }
-    } catch {
-      // ignore
+      toast.success(newStatus ? "Post published" : "Post unpublished");
+    } catch (err) {
+      console.error("Error toggling publish status:", err);
+      toast.error("Failed to update publish status");
     }
   }
 
@@ -649,7 +672,7 @@ export default function BlogManagementPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                       disabled={currentPage <= 1}
                     >
                       <ChevronLeft className="size-4 mr-1" />
@@ -661,7 +684,7 @@ export default function BlogManagementPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage >= totalPages}
                     >
                       Next

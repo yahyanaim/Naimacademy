@@ -13,22 +13,77 @@ const createCommentSchema = z.object({
   content: z.string().min(10, "Comment must be at least 10 characters"),
 });
 
-async function getAvatarByEmail(email: string): Promise<string> {
-  const user = await User.findOne({ email: email.toLowerCase() }).lean();
-  if (user?.avatar) return user.avatar;
+const MAX_LIMIT = 100;
+
+async function getAvatarsBatch(emails: string[]): Promise<Map<string, string>> {
+  const avatarMap = new Map<string, string>();
   
-  const admin = await Admin.findOne({ email: email.toLowerCase() }).lean();
-  if (admin?.avatar) return admin.avatar;
+  const uniqueEmails = [...new Set(emails.map(e => e.toLowerCase()))];
+  if (uniqueEmails.length === 0) return avatarMap;
+
+  const [users, admins] = await Promise.all([
+    User.find({ email: { $in: uniqueEmails } }).select("email avatar").lean(),
+    Admin.find({ email: { $in: uniqueEmails } }).select("email avatar").lean(),
+  ]);
+
+  users.forEach(user => {
+    if (user.email && user.avatar) {
+      avatarMap.set(user.email.toLowerCase(), user.avatar);
+    }
+  });
+
+  admins.forEach(admin => {
+    if (admin.email && admin.avatar && !avatarMap.has(admin.email.toLowerCase())) {
+      avatarMap.set(admin.email.toLowerCase(), admin.avatar);
+    }
+  });
+
+  return avatarMap;
+}
+
+async function checkForDuplicate(
+  articleSlug: string,
+  authorEmail: string,
+  content: string
+): Promise<boolean> {
+  const oneMinuteAgo = new Date(Date.now() - 60000);
+  const existing = await Comment.findOne({
+    articleSlug,
+    authorEmail: authorEmail.toLowerCase(),
+    content,
+    createdAt: { $gte: oneMinuteAgo },
+  });
+  return !!existing;
+}
+
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW = 60000;
+const RATE_LIMIT_MAX = 10;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
   
-  return "";
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+  
+  if (record.count >= RATE_LIMIT_MAX) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
 }
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get("slug");
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
+    
+    const page = Math.max(parseInt(searchParams.get("page") || "1"), 1);
+    const limit = Math.min(parseInt(searchParams.get("limit") || "10"), MAX_LIMIT);
     const filter = searchParams.get("filter") || "all";
 
     if (!slug) {
@@ -54,12 +109,16 @@ export async function GET(request: Request) {
       Comment.countDocuments(baseQuery),
     ]);
 
-    const commentsWithAvatars = await Promise.all(
-      comments.map(async (comment) => {
-        const authorAvatar = comment.authorAvatar || await getAvatarByEmail(comment.authorEmail);
-        return { ...comment, authorAvatar };
-      })
-    );
+    const emailsNeedingAvatar = comments
+      .filter(c => !c.authorAvatar)
+      .map(c => c.authorEmail);
+    
+    const avatarMap = await getAvatarsBatch(emailsNeedingAvatar);
+
+    const commentsWithAvatars = comments.map(comment => {
+      const authorAvatar = comment.authorAvatar || avatarMap.get(comment.authorEmail.toLowerCase()) || "";
+      return { ...comment, authorAvatar };
+    });
 
     return NextResponse.json({
       comments: commentsWithAvatars,
@@ -78,6 +137,14 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const parsed = createCommentSchema.safeParse(body);
 
@@ -89,11 +156,26 @@ export async function POST(request: Request) {
     }
 
     await connectDB();
+
+    const isDuplicate = await checkForDuplicate(
+      parsed.data.articleSlug,
+      parsed.data.authorEmail,
+      parsed.data.content
+    );
+
+    if (isDuplicate) {
+      return NextResponse.json(
+        { error: "Duplicate comment detected. Please wait before posting again." },
+        { status: 400 }
+      );
+    }
     
-    const authorAvatar = await getAvatarByEmail(parsed.data.authorEmail);
+    const authorAvatar = await getAvatarsBatch([parsed.data.authorEmail])
+      .then(m => m.get(parsed.data.authorEmail.toLowerCase()) || "");
     
     const comment = await Comment.create({
       ...parsed.data,
+      authorEmail: parsed.data.authorEmail.toLowerCase(),
       authorAvatar,
     });
 
