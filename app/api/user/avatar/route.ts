@@ -62,7 +62,10 @@ export const POST = withAuth(
       });
 
       if (ctx.user.role === "admin") {
+        console.log("[AVATAR UPLOAD] Saving avatar for admin:", ctx.user.userId);
         await Admin.findByIdAndUpdate(ctx.user.userId, { avatar: result.secure_url });
+        const updatedAdmin = await Admin.findById(ctx.user.userId).lean();
+        console.log("[AVATAR UPLOAD] Admin avatar after save:", updatedAdmin?.avatar);
       } else {
         await User.findByIdAndUpdate(ctx.user.userId, { avatar: result.secure_url });
       }

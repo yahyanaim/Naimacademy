@@ -21,20 +21,27 @@ export async function GET(
     }
 
     let authorAvatar = "";
+    let authorIdDebug = post.authorId || "no authorId";
 
     if (post.authorId) {
+      console.log("[BLOG POST] Looking for admin with ID:", post.authorId);
       const admin = await Admin.findById(post.authorId).lean();
+      console.log("[BLOG POST] Admin found:", admin ? "yes" : "no", "avatar:", admin?.avatar || "none");
       if (admin?.avatar) {
         authorAvatar = admin.avatar;
       }
     }
 
     if (!authorAvatar) {
+      console.log("[BLOG POST] Using fallback - finding first admin");
       const firstAdmin = await Admin.findOne().lean();
+      console.log("[BLOG POST] First admin avatar:", firstAdmin?.avatar || "none");
       if (firstAdmin?.avatar) {
         authorAvatar = firstAdmin.avatar;
       }
     }
+
+    console.log("[BLOG POST] Final authorAvatar:", authorAvatar);
 
     return NextResponse.json({ ...post, authorAvatar });
   } catch (error) {
