@@ -40,7 +40,7 @@ interface ChatMessage {
   createdAt: string;
 }
 
-const navItems = [
+const baseNavItems = [
   { label: "Questions", href: "/community", icon: MessageCircle },
   { label: "Saved", href: "/community/saved", icon: Bookmark },
 ];
@@ -275,7 +275,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
         {/* Navigation */}
         <nav className="flex-1 py-4 px-3 mt-2">
           <div className="space-y-1">
-            {navItems.map((item) => {
+            {baseNavItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -293,6 +293,20 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                 </Link>
               );
             })}
+            
+            {/* Profile Link */}
+            <Link
+              href={user ? `/community/profile/${user.id}` : "/community"}
+              className={cn(
+                "flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
+                pathname?.startsWith("/community/profile")
+                  ? "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-bold"
+                  : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+              )}
+            >
+              <Users className="size-6" />
+              <span>Profile</span>
+            </Link>
 
             {/* Chat Toggle Button */}
             <button
@@ -325,7 +339,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       {chatOpen && (
         <div
           className={cn(
-            "fixed right-0 bottom-0 w-80 bg-white dark:bg-[#15202b] border border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-40 rounded-l-2xl shadow-2xl",
+            "fixed right-2 bottom-0 w-80 bg-white dark:bg-[#15202b] border border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-40 rounded-l-2xl shadow-2xl",
             chatCollapsed ? "h-14" : "h-[450px]"
           )}
         >

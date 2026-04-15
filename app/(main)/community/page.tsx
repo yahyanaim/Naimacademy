@@ -460,6 +460,31 @@ function CommunityContent({
                 className="w-full min-h-[120px] resize-none border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-gray-500"
               />
               
+              {/* Manual tag input */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Add a tag..."
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === ",") {
+                      e.preventDefault();
+                      handleAddTag(tagInput);
+                    }
+                  }}
+                  className="flex-1 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                />
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleAddTag(tagInput)}
+                  disabled={!tagInput.trim()}
+                >
+                  Add Tag
+                </Button>
+              </div>
+              
               <div className="flex flex-wrap gap-2">
                 {newTags.map(tag => (
                   <span key={tag} className="px-2.5 py-1 text-xs rounded-full bg-gray-200 text-gray-700 flex items-center gap-1">
