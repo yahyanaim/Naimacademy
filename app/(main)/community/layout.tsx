@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   Home, 
   MessageCircle, 
@@ -13,7 +13,6 @@ import {
   GraduationCap,
   Loader2
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface User {
@@ -24,21 +23,16 @@ interface User {
   role: string;
 }
 
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ReactNode;
-}
-
-const navItems: NavItem[] = [
-  { label: "Home", href: "/community", icon: <Home className="size-5" /> },
-  { label: "Chat", href: "/community/chat", icon: <MessageCircle className="size-5" /> },
+const navItems = [
+  { label: "Home", href: "/community", icon: Home },
+  { label: "Chat", href: "/community/chat", icon: MessageCircle },
 ];
 
 export default function CommunityLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -46,18 +40,23 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
         const res = await fetch("/api/auth/me");
         if (res.ok) {
           const data = await res.json();
-          setUser(data.user);
+          if (data.user) {
+            setUser(data.user);
+          } else {
+            router.push("/login");
+          }
         } else {
-          window.location.href = "/login";
+          router.push("/login");
         }
-      } catch {
-        window.location.href = "/login";
+      } catch (err) {
+        console.error("Error fetching user:", err);
+        router.push("/login");
       } finally {
         setLoading(false);
       }
     };
     fetchUser();
-  }, []);
+  }, [router]);
 
   if (loading) {
     return (
@@ -67,7 +66,15 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <p className="text-muted-foreground">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)] bg-muted/30">
@@ -115,7 +122,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                {item.icon}
+                <item.icon className="size-5" />
                 {item.label}
               </Link>
             );
@@ -125,7 +132,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
         {/* Bottom Actions */}
         <div className="p-3 border-t space-y-1">
           <Link
-            href="/settings"
+            href="/profile"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             <Settings className="size-5" />
@@ -134,7 +141,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
           <button
             onClick={async () => {
               await fetch("/api/auth/logout", { method: "POST" });
-              window.location.href = "/";
+              router.push("/");
             }}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
           >

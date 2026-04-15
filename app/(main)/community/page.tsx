@@ -106,22 +106,32 @@ export default function CommunityHomePage() {
   const [sortBy, setSortBy] = useState<"newest" | "votes" | "unanswered">("newest");
   const [filterTag, setFilterTag] = useState<string | null>(null);
 
-  const fetchUser = useCallback(async () => {
-    try {
-      const res = await fetch("/api/auth/me");
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data.user);
-        return data.user;
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const userRes = await fetch("/api/auth/me");
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setUser(userData.user);
+          
+          if (userData.user) {
+            const postsRes = await fetch("/api/community?type=posts");
+            if (postsRes.ok) {
+              const postsData = await postsRes.json();
+              setPosts(postsData.posts || []);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error initializing:", err);
+      } finally {
+        setLoading(false);
       }
-      return null;
-    } catch (err) {
-      console.error("Error fetching user:", err);
-      return null;
-    }
+    };
+    init();
   }, []);
 
-  const fetchPosts = useCallback(async () => {
+  const fetchPosts = async () => {
     try {
       const res = await fetch("/api/community?type=posts");
       if (res.ok) {
@@ -130,22 +140,8 @@ export default function CommunityHomePage() {
       }
     } catch (err) {
       console.error("Error fetching posts:", err);
-    } finally {
-      setLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    const init = async () => {
-      const currentUser = await fetchUser();
-      if (currentUser) {
-        fetchPosts();
-      } else {
-        setLoading(false);
-      }
-    };
-    init();
-  }, []);
+  };
 
   const handleAddTag = (tag: string) => {
     const normalizedTag = tag.toLowerCase().trim();
