@@ -94,6 +94,18 @@ export default function SavedQuestionsPage() {
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [newComment, setNewComment] = useState<{ [postId: string]: string }>({});
 
+  const fetchPosts = async () => {
+    try {
+      const res = await fetch("/api/community?type=saved");
+      if (res.ok) {
+        const data = await res.json();
+        setPosts(data.posts || []);
+      }
+    } catch {
+      toast.error("Failed to load saved posts");
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
       const [userRes, postsRes] = await Promise.all([

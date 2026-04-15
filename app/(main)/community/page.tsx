@@ -109,6 +109,18 @@ export default function CommunityHomePage() {
   const [sortBy, setSortBy] = useState<"newest" | "votes" | "unanswered">("newest");
   const [filterTag, setFilterTag] = useState<string | null>(null);
 
+  const fetchPosts = async () => {
+    try {
+      const res = await fetch("/api/community?type=posts");
+      if (res.ok) {
+        const data = await res.json();
+        setPosts(data.posts || []);
+      }
+    } catch {
+      toast.error("Failed to load posts");
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
       const [userRes, postsRes] = await Promise.all([
