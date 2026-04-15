@@ -23,6 +23,19 @@ interface ArticlesSearchProps {
   placeholder?: string;
 }
 
+const tagColors = [
+  "bg-blue-100 text-blue-700 hover:bg-blue-200",
+  "bg-green-100 text-green-700 hover:bg-green-200",
+  "bg-purple-100 text-purple-700 hover:bg-purple-200",
+  "bg-orange-100 text-orange-700 hover:bg-orange-200",
+  "bg-pink-100 text-pink-700 hover:bg-pink-200",
+  "bg-indigo-100 text-indigo-700 hover:bg-indigo-200",
+];
+
+function getTagColor(tag: string, index: number): string {
+  return tagColors[tag.length % tagColors.length];
+}
+
 export default function ArticlesSearch({ placeholder = "Search articles..." }: ArticlesSearchProps) {
   const [articles, setArticles] = useState<Article[]>([]);
   const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
@@ -154,8 +167,8 @@ export default function ArticlesSearch({ placeholder = "Search articles..." }: A
                         <div className="flex items-center gap-4">
                           {article.tags && article.tags.length > 0 && (
                             <div className="flex gap-2">
-                              {article.tags.slice(0, 2).map((tag: string) => (
-                                <span key={tag} className="px-2 py-0.5 text-xs bg-muted text-muted-foreground rounded-md">
+                              {article.tags.slice(0, 2).map((tag: string, idx: number) => (
+                                <span key={tag} className={`px-2 py-0.5 text-xs rounded-md transition-colors ${getTagColor(tag, idx)}`}>
                                   {tag}
                                 </span>
                               ))}
@@ -233,8 +246,8 @@ export default function ArticlesSearch({ placeholder = "Search articles..." }: A
                     <div className="flex items-center gap-4">
                       {featuredPost.tags && featuredPost.tags.length > 0 && (
                         <div className="flex gap-2">
-                          {featuredPost.tags.slice(0, 2).map((tag: string) => (
-                            <span key={tag} className="px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
+                          {featuredPost.tags.slice(0, 2).map((tag: string, idx: number) => (
+                            <span key={tag} className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${getTagColor(tag, idx)}`}>
                               {tag}
                             </span>
                           ))}
@@ -300,8 +313,8 @@ export default function ArticlesSearch({ placeholder = "Search articles..." }: A
                           <div className="flex items-center gap-4">
                             {post.tags && post.tags.length > 0 && (
                               <div className="flex gap-2">
-                                {post.tags.slice(0, 2).map((tag: string) => (
-                                  <span key={tag} className="px-2 py-0.5 text-xs bg-muted text-muted-foreground rounded-md">
+                                {post.tags.slice(0, 2).map((tag: string, idx: number) => (
+                                  <span key={tag} className={`px-2 py-0.5 text-xs rounded-md transition-colors ${getTagColor(tag, idx)}`}>
                                     {tag}
                                   </span>
                                 ))}
