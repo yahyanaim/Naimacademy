@@ -384,6 +384,7 @@ function CommunityHomePageContent() {
     setNewComment={setNewComment}
     posting={posting}
     setPosting={setPosting}
+    loading={loading}
     handleAddTag={handleAddTag}
     handleRemoveTag={handleRemoveTag}
     handleCreatePost={handleCreatePost}
@@ -400,7 +401,7 @@ function CommunityContent({
   user, posts, setPosts, searchQuery, sortBy, setSortBy, filterTag, setFilterTag,
   newPost, setNewPost, newTags, setNewTags, tagInput, setTagInput,
   expandedComments, setExpandedComments, newComment, setNewComment,
-  posting, setPosting, handleAddTag, handleRemoveTag, handleCreatePost,
+  posting, setPosting, loading, handleAddTag, handleRemoveTag, handleCreatePost,
   toggleComments, handleLike, handleSave, handleDeletePost, handleAddComment, handlePin
 }: any) {
   if (loading) {
