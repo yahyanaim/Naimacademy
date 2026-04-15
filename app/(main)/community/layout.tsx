@@ -69,6 +69,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [chatOpen, setChatOpen] = useState(true);
+  const [chatCollapsed, setChatCollapsed] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -269,48 +270,57 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       </main>
 
       {/* Chat Side Panel - Facebook Style */}
-      <div
-        className={cn(
-          "fixed right-0 bottom-0 h-[400px] w-80 bg-card border border-t-2 border-l flex flex-col transition-transform duration-300 z-40 rounded-tl-lg shadow-xl",
-          chatOpen ? "translate-x-0" : "translate-x-full"
-        )}
-      >
-        {/* Chat Header */}
-        <div className="flex items-center justify-between p-3 border-b bg-muted/30">
-          <div className="flex items-center gap-2">
-            <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-              <Users className="size-4 text-white" />
+      {chatOpen && (
+        <div
+          className={cn(
+            "fixed right-0 bottom-0 w-80 bg-card border border-t-2 border-l flex flex-col transition-all duration-300 z-40 rounded-tl-lg shadow-xl",
+            chatCollapsed ? "h-12" : "h-[400px]"
+          )}
+        >
+          {/* Chat Header */}
+          <div className="flex items-center justify-between p-3 border-b bg-muted/30 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+                <Users className="size-4 text-white" />
+              </div>
+              {!chatCollapsed && (
+                <div>
+                  <h2 className="font-semibold text-sm">Group Chat</h2>
+                  <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <span className="size-1.5 rounded-full bg-green-500" />
+                    Active now
+                  </p>
+                </div>
+              )}
             </div>
-            <div>
-              <h2 className="font-semibold text-sm">Group Chat</h2>
-              <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <span className="size-1.5 rounded-full bg-green-500" />
-                Active now
-              </p>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="size-8 p-0"
+                onClick={() => setChatCollapsed(!chatCollapsed)}
+                title={chatCollapsed ? "Expand" : "Collapse"}
+              >
+                {chatCollapsed ? (
+                  <div className="size-3 border-2 border-muted-foreground rounded-sm" />
+                ) : (
+                  <Minus className="size-4" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="size-8 p-0"
+                onClick={() => { setChatOpen(false); setChatCollapsed(false); }}
+              >
+                <X className="size-4" />
+              </Button>
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="size-8 p-0"
-              onClick={() => setChatOpen(false)}
-            >
-              <Minus className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="size-8 p-0"
-              onClick={() => setChatOpen(false)}
-            >
-              <X className="size-4" />
-            </Button>
-          </div>
-        </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-3">
+          {/* Messages */}
+          {!chatCollapsed && (
+            <div className="flex-1 overflow-y-auto p-3 space-y-3">
           {false ? (
             <div className="flex items-center justify-center h-full">
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
@@ -370,7 +380,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Input */}
-        <div className="p-3 border-t">
+        <div className="p-3 border-t flex-shrink-0">
           <div className="flex gap-2">
             <input
               type="text"
@@ -390,7 +400,9 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
             </Button>
           </div>
         </div>
+        )}
       </div>
+      )}
     </div>
   );
 }
