@@ -137,6 +137,43 @@ export default function UserProfilePage() {
     ? posts.filter(p => p.isPinned)
     : posts.filter(p => p.likes.length > 0);
 
+  const activityData = posts.map(p => ({
+    date: new Date(p.createdAt).toISOString().split('T')[0],
+    count: 1
+  }));
+
+  const activityMap = new Map<string, number>();
+  activityData.forEach(item => {
+    activityMap.set(item.date, (activityMap.get(item.date) || 0) + item.count);
+  });
+
+  const generateGrid = () => {
+    const cells = [];
+    const today = new Date();
+    for (let i = 53; i >= 0; i--) {
+      const week = [];
+      for (let j = 0; j < 7; j++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - (i * 7 + (6 - j)));
+        const dateStr = date.toISOString().split('T')[0];
+        const count = activityMap.get(dateStr) || 0;
+        week.push({ date: dateStr, count, isToday: dateStr === today.toISOString().split('T')[0] });
+      }
+      cells.push(week);
+    }
+    return cells;
+  };
+
+  const getIntensityColor = (count: number) => {
+    if (count === 0) return "bg-muted/50";
+    if (count === 1) return "bg-green-300";
+    if (count === 2) return "bg-green-400";
+    if (count === 3) return "bg-green-500";
+    return "bg-green-600";
+  };
+
+  const totalContributions = posts.length;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -154,8 +191,37 @@ export default function UserProfilePage() {
 
       {/* Profile Header - Twitter Style */}
       <div className="max-w-2xl mx-auto">
-        {/* Banner */}
-        <div className="h-32 bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400" />
+        {/* GitHub-style Activity Banner */}
+        <div className="h-40 bg-card border-b p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Activity</h3>
+            <span className="text-xs text-muted-foreground">{totalContributions} contributions this year</span>
+          </div>
+          <div className="flex gap-[3px] overflow-hidden rounded">
+            {generateGrid().map((week, weekIndex) => (
+              <div key={weekIndex} className="flex flex-col gap-[3px]">
+                {week.map((day, dayIndex) => (
+                  <div
+                    key={`${weekIndex}-${dayIndex}`}
+                    className={`size-3 rounded-sm ${getIntensityColor(day.count)} ${day.isToday ? 'ring-1 ring-primary' : ''}`}
+                    title={`${day.date}: ${day.count} question${day.count !== 1 ? 's' : ''}`}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-end gap-2 mt-2 text-xs text-muted-foreground">
+            <span>Less</span>
+            <div className="flex gap-1">
+              <div className="size-3 rounded-sm bg-muted/50" />
+              <div className="size-3 rounded-sm bg-green-300" />
+              <div className="size-3 rounded-sm bg-green-400" />
+              <div className="size-3 rounded-sm bg-green-500" />
+              <div className="size-3 rounded-sm bg-green-600" />
+            </div>
+            <span>More</span>
+          </div>
+        </div>
         
         {/* Profile Info */}
         <div className="px-4 pb-4">
