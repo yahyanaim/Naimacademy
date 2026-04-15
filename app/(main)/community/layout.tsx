@@ -321,87 +321,88 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
           {/* Messages */}
           {!chatCollapsed && (
             <div className="flex-1 overflow-y-auto p-3 space-y-3">
-          {false ? (
-            <div className="flex items-center justify-center h-full">
-              <Loader2 className="size-5 animate-spin text-muted-foreground" />
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <MessageCircle className="size-8 text-muted-foreground mb-2" />
-              <p className="text-xs text-muted-foreground">No messages yet</p>
-            </div>
-          ) : (
-            messages.map((message) => {
-              const isOwn = message.authorId === user?.id;
-              return (
-                <div
-                  key={message._id}
-                  className={cn("flex gap-2", isOwn ? "flex-row-reverse" : "")}
-                >
-                  {!isOwn && (
-                    <div className="size-6 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {message.authorAvatar ? (
-                        <Image src={message.authorAvatar} alt="" width={24} height={24} className="object-cover" />
-                      ) : (
-                        <span className="text-[8px] font-bold text-white">
-                          {message.authorName.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  <div className={cn("max-w-[75%]", isOwn ? "items-end" : "")}>
-                    {!isOwn && (
-                      <span className="text-[10px] font-medium text-primary">
-                        {escapeHtml(message.authorName)}
-                      </span>
-                    )}
-                    <div
-                      className={cn(
-                        "px-2.5 py-1.5 rounded-lg text-xs mt-0.5",
-                        isOwn
-                          ? "bg-primary text-white rounded-br-sm"
-                          : "bg-muted rounded-bl-sm"
-                      )}
-                    >
-                      <p className="leading-relaxed">{escapeHtml(message.content)}</p>
-                    </div>
-                    <span className={cn(
-                      "text-[9px] text-muted-foreground mt-0.5 block",
-                      isOwn ? "text-right" : ""
-                    )}>
-                      {formatTimeAgo(message.createdAt)}
-                    </span>
-                  </div>
+              {false ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="size-5 animate-spin text-muted-foreground" />
                 </div>
-              );
-            })
+              ) : messages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <MessageCircle className="size-8 text-muted-foreground mb-2" />
+                  <p className="text-xs text-muted-foreground">No messages yet</p>
+                </div>
+              ) : (
+                messages.map((message) => {
+                  const isOwn = message.authorId === user?.id;
+                  return (
+                    <div
+                      key={message._id}
+                      className={cn("flex gap-2", isOwn ? "flex-row-reverse" : "")}
+                    >
+                      {!isOwn && (
+                        <div className="size-6 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          {message.authorAvatar ? (
+                            <Image src={message.authorAvatar} alt="" width={24} height={24} className="object-cover" />
+                          ) : (
+                            <span className="text-[8px] font-bold text-white">
+                              {message.authorName.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <div className={cn("max-w-[75%]", isOwn ? "items-end" : "")}>
+                        {!isOwn && (
+                          <span className="text-[10px] font-medium text-primary">
+                            {escapeHtml(message.authorName)}
+                          </span>
+                        )}
+                        <div
+                          className={cn(
+                            "px-2.5 py-1.5 rounded-lg text-xs mt-0.5",
+                            isOwn
+                              ? "bg-primary text-white rounded-br-sm"
+                              : "bg-muted rounded-bl-sm"
+                          )}
+                        >
+                          <p className="leading-relaxed">{escapeHtml(message.content)}</p>
+                        </div>
+                        <span className={cn(
+                          "text-[9px] text-muted-foreground mt-0.5 block",
+                          isOwn ? "text-right" : ""
+                        )}>
+                          {formatTimeAgo(message.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+              <div ref={chatEndRef} />
+            </div>
           )}
-          <div ref={chatEndRef} />
-        </div>
 
-        {/* Input */}
-        <div className="p-3 border-t flex-shrink-0">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Type a message..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-              className="flex-1 px-3 py-2 text-xs border rounded-full bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-            <Button
-              size="sm"
-              className="size-8 p-0 rounded-full"
-              onClick={handleSendMessage}
-              disabled={sending || !newMessage.trim()}
-            >
-              <Send className="size-3" />
-            </Button>
+          {/* Input */}
+          <div className="p-3 border-t flex-shrink-0">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Type a message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                className="flex-1 px-3 py-2 text-xs border rounded-full bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+              <Button
+                size="sm"
+                className="size-8 p-0 rounded-full"
+                onClick={handleSendMessage}
+                disabled={sending || !newMessage.trim()}
+              >
+                <Send className="size-3" />
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
     </div>
   );
 }
