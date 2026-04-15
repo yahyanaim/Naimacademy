@@ -264,7 +264,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
 
       {/* Main Content */}
       <main className={cn(
-        "flex-1 min-h-full transition-all duration-300 ml-0 md:ml-64 pb-48"
+        "flex-1 min-h-full transition-all duration-300 ml-0 md:ml-64 pb-96"
       )}>
         {children}
       </main>
@@ -273,7 +273,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       {chatOpen && (
         <div
           className={cn(
-            "fixed left-6 bottom-6 w-80 bg-white dark:bg-[#15202b] border border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-40 rounded-2xl shadow-2xl",
+            "fixed left-72 bottom-6 w-80 bg-white dark:bg-[#15202b] border border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-40 rounded-2xl shadow-2xl",
             chatCollapsed ? "h-14" : "h-[450px]"
           )}
         >
