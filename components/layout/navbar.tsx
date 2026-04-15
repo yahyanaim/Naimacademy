@@ -16,6 +16,7 @@ import {
   UserPlus,
   Bell,
   FileText,
+  Users,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -73,6 +74,17 @@ export default function Navbar() {
       >
         Articles
       </Link>
+      {user && (
+        <Link
+          href="/community"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <span className="flex items-center gap-1.5">
+            <Users className="size-4" />
+            Community
+          </span>
+        </Link>
+      )}
       {user && (
         <Link
           href="/certificates"
@@ -207,6 +219,14 @@ export default function Navbar() {
                 >
                   <FileText className="size-5" />
                   Articles
+                </Link>
+                <Link
+                  href="/community"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
+                >
+                  <Users className="size-5" />
+                  Community
                 </Link>
                 
                 <div className="my-1 border-t mx-4" />

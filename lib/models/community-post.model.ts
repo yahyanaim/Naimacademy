@@ -1,0 +1,57 @@
+import mongoose, { Schema, Document, Types } from "mongoose";
+
+export interface ICommunityPost extends Document {
+  authorId: Types.ObjectId;
+  authorName: string;
+  authorEmail: string;
+  authorAvatar?: string;
+  content: string;
+  isPinned: boolean;
+  pinnedBy?: Types.ObjectId;
+  expiresAt: Date;
+  isExpired: boolean;
+  likes: Types.ObjectId[];
+  comments: {
+    authorId: Types.ObjectId;
+    authorName: string;
+    authorEmail: string;
+    authorAvatar?: string;
+    content: string;
+    createdAt: Date;
+  }[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const CommunityPostSchema = new Schema<ICommunityPost>(
+  {
+    authorId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    authorName: { type: String, required: true },
+    authorEmail: { type: String, required: true },
+    authorAvatar: { type: String, default: "" },
+    content: { type: String, required: true },
+    isPinned: { type: Boolean, default: false },
+    pinnedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    expiresAt: { type: Date, required: true, index: true },
+    isExpired: { type: Boolean, default: false },
+    likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    comments: [
+      {
+        authorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+        authorName: { type: String, required: true },
+        authorEmail: { type: String, required: true },
+        authorAvatar: { type: String, default: "" },
+        content: { type: String, required: true },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+  },
+  { timestamps: true }
+);
+
+CommunityPostSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+CommunityPostSchema.index({ createdAt: -1 });
+CommunityPostSchema.index({ isPinned: -1, createdAt: -1 });
+
+export const CommunityPost =
+  mongoose.models.CommunityPost || mongoose.model<ICommunityPost>("CommunityPost", CommunityPostSchema);
