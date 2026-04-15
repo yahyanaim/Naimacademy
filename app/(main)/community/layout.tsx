@@ -263,7 +263,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
 
       {/* Main Content */}
       <main className={cn(
-        "flex-1 min-h-full transition-all duration-300",
+        "flex-1 min-h-full transition-all duration-300 ml-0 md:ml-64",
         chatOpen ? "mr-80" : ""
       )}>
         {children}
