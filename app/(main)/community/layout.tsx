@@ -15,7 +15,8 @@ import {
   Bookmark,
   Send,
   X,
-  Minus
+  Minus,
+  MoreHorizontal
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -171,94 +172,70 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-3.5rem)] bg-muted/30">
-      {/* Left Sidebar */}
-      <aside className="w-64 bg-card border-r flex flex-col fixed left-0 top-14 bottom-0 z-30 hidden md:flex">
-        {/* Logo/Brand */}
-        <div className="p-4 border-b">
-          <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-              <GraduationCap className="size-4 text-white" />
-            </div>
-            <span>Community</span>
-          </Link>
-        </div>
-
-        {/* User Profile Card */}
-        <div className="p-4 border-b">
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-            <div className="size-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden flex-shrink-0">
-              {user.avatar ? (
-                <Image src={user.avatar} alt="" width={48} height={48} className="object-cover" />
-              ) : (
-                <span className="text-lg font-bold text-white">{user.name?.charAt(0).toUpperCase()}</span>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm truncate">{user.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-            </div>
-          </div>
-        </div>
-
+    <div className="flex min-h-[calc(100vh-3.5rem)]">
+      {/* Left Sidebar - Twitter Style */}
+      <aside className="w-64 fixed left-0 top-14 bottom-0 z-30 hidden md:flex flex-col bg-background">
         {/* Navigation */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                <item.icon className="size-5" />
-                {item.label}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 py-4 px-3">
+          <div className="space-y-1">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
+                    isActive
+                      ? "bg-primary/10 text-primary font-bold"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  )}
+                >
+                  <item.icon className="size-6" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
 
-          {/* Chat Toggle Button */}
-          <button
-            onClick={() => setChatOpen(!chatOpen)}
-            className={cn(
-              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-              chatOpen
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            )}
-          >
-            <MessageCircle className="size-5" />
-            Chat
-            {!chatOpen && (
-              <span className="ml-auto size-2 rounded-full bg-green-500" />
-            )}
-          </button>
+            {/* Chat Toggle Button */}
+            <button
+              onClick={() => setChatOpen(!chatOpen)}
+              className={cn(
+                "w-full flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
+                chatOpen
+                  ? "bg-primary/10 text-primary font-bold"
+                  : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+              )}
+            >
+              <MessageCircle className="size-6" />
+              <span>Chat</span>
+              {!chatOpen && (
+                <span className="ml-auto size-2 rounded-full bg-green-500" />
+              )}
+            </button>
+          </div>
         </nav>
 
-        {/* Bottom Actions */}
-        <div className="p-3 border-t space-y-1">
-          <Link
-            href="/profile"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-          >
-            <Settings className="size-5" />
-            Settings
-          </Link>
-          <button
-            onClick={async () => {
-              await fetch("/api/auth/logout", { method: "POST" });
-              router.push("/");
-            }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
-          >
-            <LogOut className="size-5" />
-            Logout
-          </button>
+        {/* User Profile Section */}
+        <div className="p-3">
+          <div className="flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+            <div className="size-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {user.avatar ? (
+                <Image src={user.avatar} alt="" width={40} height={40} className="object-cover" />
+              ) : (
+                <span className="text-base font-bold text-white">{user.name?.charAt(0).toUpperCase()}</span>
+              )}
+            </div>
+            <div className="flex-1 min-w-0 hidden xl:block">
+              <p className="font-bold text-sm truncate">{user.name}</p>
+              <p className="text-xs text-gray-500 truncate">@{user.name?.toLowerCase().replace(/\s+/g, "")}</p>
+            </div>
+            <div className="hidden xl:block">
+              <button className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <MoreHorizontal className="size-5 text-gray-500" />
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
 
