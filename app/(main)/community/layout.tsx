@@ -309,7 +309,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-3 space-y-3">
-          {chatLoading ? (
+          {false ? (
             <div className="flex items-center justify-center h-full">
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
             </div>
