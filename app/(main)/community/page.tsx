@@ -544,63 +544,60 @@ export default function CommunityHomePage() {
                         </div>
                       )}
 
-                      {/* Footer with Author */}
-                      <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center gap-4">
-                          <button onClick={() => toggleComments(post._id)} className="text-sm text-muted-foreground hover:text-primary">
+                      {/* Footer */}
+                      <div className="flex items-center justify-between pt-3 border-t">
+                        {/* Left: Meta info */}
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <button onClick={() => toggleComments(post._id)} className="hover:text-primary">
                             {post.comments?.length || 0} answers
                           </button>
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <span className="flex items-center gap-1">
                             <Clock className="size-3" />
                             {getHoursUntilExpiry(post.expiresAt)}h left
                           </span>
                         </div>
 
-                        {/* Author with Avatar */}
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-2">
-                            <Avatar className="size-8">
-                              {post.authorAvatar ? (
-                                <AvatarImage src={post.authorAvatar} alt={post.authorName} />
-                              ) : null}
-                              <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                                {post.authorName?.charAt(0).toUpperCase() || "?"}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                              <Link href={`/community/profile/${post.authorId}`} className="text-sm font-medium text-primary hover:underline leading-tight">
-                                {escapeHtml(post.authorName || "Anonymous")}
-                              </Link>
-                              <span className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(post.createdAt))}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                        {/* Right: Author */}
+                        <Link href={`/community/profile/${post.authorId}`} className="flex items-center gap-2 hover:bg-muted/50 px-2 py-1 rounded-lg transition-colors">
+                          <span className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(post.createdAt))}
+                          </span>
+                          <Avatar className="size-6">
+                            {post.authorAvatar ? (
+                              <AvatarImage src={post.authorAvatar} alt={post.authorName} />
+                            ) : null}
+                            <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">
+                              {post.authorName?.charAt(0).toUpperCase() || "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium text-foreground hover:text-primary">
+                            {escapeHtml(post.authorName || "Anonymous")}
+                          </span>
+                        </Link>
                       </div>
 
-                      {/* Actions */}
-                      <div className="flex items-center gap-2 pt-2 border-t">
-                        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handleLike(post._id)}>
-                          <Heart className={`size-3 mr-1 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
-                          {isLiked ? "Liked" : "Like"}
+                      {/* Actions - Compact */}
+                      <div className="flex items-center gap-1 pt-2">
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={() => handleLike(post._id)}>
+                          <Heart className={`size-3 ${isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+                          <span className={isLiked ? "text-red-500" : "text-muted-foreground"}>{isLiked ? "Liked" : "Like"}</span>
                         </Button>
-                        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handleShare(post.content)}>
-                          <Share2 className="size-3 mr-1" />
-                          Share
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={() => handleShare(post.content)}>
+                          <Share2 className="size-3 text-muted-foreground" />
+                          <span className="text-muted-foreground">Share</span>
                         </Button>
-                        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handleFlag(post._id)}>
-                          <Flag className="size-3 mr-1" />
-                          Flag
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={() => handleFlag(post._id)}>
+                          <Flag className="size-3 text-muted-foreground" />
+                          <span className="text-muted-foreground">Flag</span>
                         </Button>
-                        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handlePin(post._id)}>
-                          <Pin className={`size-3 mr-1 ${post.isPinned ? "fill-current" : ""}`} />
-                          {post.isPinned ? "Unpin" : "Pin"}
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={() => handlePin(post._id)}>
+                          <Pin className={`size-3 ${post.isPinned ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+                          <span className={post.isPinned ? "text-primary" : "text-muted-foreground"}>{post.isPinned ? "Pinned" : "Pin"}</span>
                         </Button>
                         {(isOwner || user?.role === "admin") && (
-                          <Button variant="ghost" size="sm" className="h-8 text-xs text-destructive hover:text-destructive" onClick={() => handleDeletePost(post._id)}>
-                            <Trash2 className="size-3 mr-1" />
-                            Delete
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1 text-destructive" onClick={() => handleDeletePost(post._id)}>
+                            <Trash2 className="size-3" />
+                            <span>Delete</span>
                           </Button>
                         )}
                       </div>
