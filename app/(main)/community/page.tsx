@@ -516,7 +516,7 @@ function CommunityContent({
       </div>
 
       {/* Questions List */}
-      {sortedPosts.length === 0 ? (
+      {posts.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <MessageCircle className="size-12 mx-auto mb-4 text-muted-foreground opacity-50" />
@@ -526,7 +526,7 @@ function CommunityContent({
         </Card>
       ) : (
         <div className="space-y-3">
-          {sortedPosts.map((post) => {
+          {posts.map((post: any) => {
             const isLiked = user && post.likes?.includes(user.id);
             const isSaved = user && post.saved?.includes(user.id);
             const isOwner = user && post.authorId === user.id;
