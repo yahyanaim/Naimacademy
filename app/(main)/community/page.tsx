@@ -391,7 +391,7 @@ function CommunityHomePageContent() {
     handleLike={handleLike}
     handleSave={handleSave}
     handleDeletePost={handleDeletePost}
-    handleSubmitComment={handleSubmitComment}
+    handleAddComment={handleAddComment}
     handlePinPost={handlePinPost}
   />;
 }
@@ -401,7 +401,7 @@ function CommunityContent({
   newPost, setNewPost, newTags, setNewTags, tagInput, setTagInput,
   expandedComments, setExpandedComments, newComment, setNewComment,
   posting, setPosting, handleAddTag, handleRemoveTag, handleCreatePost,
-  toggleComments, handleLike, handleSave, handleDeletePost, handleSubmitComment, handlePinPost
+  toggleComments, handleLike, handleSave, handleDeletePost, handleAddComment, handlePinPost
 }: any) {
   if (loading) {
     return (
