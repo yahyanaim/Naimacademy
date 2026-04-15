@@ -103,7 +103,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
         const data = await res.json();
         setMessages(data.messages || []);
       }
-    } catch {
+    } catch (err) {
       console.error("Error fetching messages:", err);
     }
   }, [chatOpen]);
