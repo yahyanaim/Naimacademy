@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { 
   Pin, 
@@ -14,10 +13,15 @@ import {
   X, 
   Share2,
   Flag,
-  Trash2
+  Trash2,
+  MoreHorizontal
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 
@@ -240,9 +244,9 @@ export default function CommunityHomePage() {
   const handleShare = async (postContent: string) => {
     try {
       await navigator.clipboard.writeText(postContent.substring(0, 100) + "...");
-      toast.success("Link copied to clipboard!");
+      toast.success("Link copied!");
     } catch {
-      toast.error("Failed to copy link");
+      toast.error("Failed to copy");
     }
   };
 
@@ -274,7 +278,7 @@ export default function CommunityHomePage() {
   };
 
   const handleDeleteComment = async (postId: string, commentId: string) => {
-    if (!confirm("Are you sure you want to delete this answer?")) return;
+    if (!confirm("Delete this answer?")) return;
 
     try {
       const res = await fetch("/api/community", {
@@ -333,61 +337,52 @@ export default function CommunityHomePage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Questions</h1>
-          <p className="text-muted-foreground mt-1">{filteredPosts.length} questions</p>
+          <h1 className="text-3xl font-bold tracking-tight">Questions</h1>
+          <p className="text-muted-foreground">{filteredPosts.length} questions</p>
         </div>
-        <Button onClick={() => setShowNewPostForm(true)} className="gap-2">
-          <Plus className="size-4" />
+        <Button onClick={() => setShowNewPostForm(true)} size="lg">
+          <Plus className="size-4 mr-2" />
           Ask Question
         </Button>
       </div>
 
       {/* New Post Form */}
       {showNewPostForm && (
-        <div className="bg-card border rounded-lg p-6 mb-6 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Ask a public question</h2>
-            <button 
-              onClick={() => setShowNewPostForm(false)}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <X className="size-5" />
-            </button>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Body</label>
-              <Textarea
-                placeholder="What's your programming question? Include all details..."
-                value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
-                rows={6}
-                className="resize-none w-full"
-              />
+        <Card className="border-2 border-primary/20">
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Ask a public question</h2>
+              <Button variant="ghost" size="sm" onClick={() => setShowNewPostForm(false)}>
+                <X className="size-4" />
+              </Button>
             </div>
+            
+            <Textarea
+              placeholder="Describe your question in detail..."
+              value={newPost}
+              onChange={(e) => setNewPost(e.target.value)}
+              rows={5}
+              className="resize-none"
+            />
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Tags</label>
-              <div className="flex flex-wrap gap-2 mb-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tags</label>
+              <div className="flex flex-wrap gap-2">
                 {newTags.map(tag => (
-                  <span 
-                    key={tag} 
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary text-primary-foreground text-sm rounded-md"
-                  >
+                  <Badge key={tag} variant="secondary" className="gap-1">
                     {tag}
-                    <button onClick={() => handleRemoveTag(tag)} className="hover:opacity-70">
+                    <button onClick={() => handleRemoveTag(tag)} className="ml-1 hover:text-destructive">
                       <X className="size-3" />
                     </button>
-                  </span>
+                  </Badge>
                 ))}
               </div>
               <Input
-                placeholder="Add tags (press Enter)..."
+                placeholder="Add tags..."
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -396,228 +391,250 @@ export default function CommunityHomePage() {
                     handleAddTag(tagInput);
                   }
                 }}
-                className="w-full"
               />
-              <div className="flex flex-wrap gap-1 mt-2">
-                <span className="text-xs text-muted-foreground mr-2">Suggested:</span>
+              <div className="flex flex-wrap gap-1">
                 {SUGGESTED_TAGS.filter(t => !newTags.includes(t)).slice(0, 6).map(tag => (
-                  <button
-                    key={tag}
-                    onClick={() => handleAddTag(tag)}
-                    className="text-xs px-2 py-0.5 bg-muted rounded hover:bg-muted/80 text-muted-foreground"
-                  >
+                  <Badge key={tag} variant="outline" className="cursor-pointer hover:bg-secondary" onClick={() => handleAddTag(tag)}>
                     {tag}
-                  </button>
+                  </Badge>
                 ))}
               </div>
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t">
-              <span className="text-sm text-muted-foreground flex items-center gap-2">
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Clock className="size-4" />
                 Expires in 24 hours
-              </span>
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setShowNewPostForm(false)}>Discard</Button>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setShowNewPostForm(false)}>Cancel</Button>
                 <Button onClick={handleCreatePost} disabled={posting || newPost.trim().length < 10}>
                   {posting ? "Posting..." : "Post Question"}
                 </Button>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-4 mb-6 pb-4 border-b">
+      <div className="flex flex-wrap items-center gap-4">
         <Input
           placeholder="Search questions..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-xs"
+          className="max-w-sm"
         />
         
-        <div className="flex gap-1 bg-muted/50 p-1 rounded-lg">
-          <button onClick={() => setSortBy("newest")} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${sortBy === "newest" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>Newest</button>
-          <button onClick={() => setSortBy("votes")} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${sortBy === "votes" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>Most Voted</button>
-          <button onClick={() => setSortBy("unanswered")} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${sortBy === "unanswered" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>Unanswered</button>
+        <div className="flex gap-1 p-1 bg-muted rounded-lg">
+          <Button variant={sortBy === "newest" ? "default" : "ghost"} size="sm" onClick={() => setSortBy("newest")}>Newest</Button>
+          <Button variant={sortBy === "votes" ? "default" : "ghost"} size="sm" onClick={() => setSortBy("votes")}>Most Voted</Button>
+          <Button variant={sortBy === "unanswered" ? "default" : "ghost"} size="sm" onClick={() => setSortBy("unanswered")}>Unanswered</Button>
         </div>
 
         {filterTag && (
-          <button onClick={() => setFilterTag(null)} className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm">
-            Tag: {filterTag} <X className="size-3" />
-          </button>
+          <Badge variant="default" className="gap-1 cursor-pointer" onClick={() => setFilterTag(null)}>
+            {filterTag} <X className="size-3" />
+          </Badge>
         )}
       </div>
 
       {/* Tags Cloud */}
       {allTags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-2">
           {allTags.map(tag => (
-            <button
+            <Badge
               key={tag}
+              variant={filterTag === tag ? "default" : "outline"}
+              className="cursor-pointer"
               onClick={() => setFilterTag(filterTag === tag ? null : tag)}
-              className={`px-2.5 py-1 text-xs rounded-md transition-colors ${filterTag === tag ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
             >
               {tag}
-            </button>
+            </Badge>
           ))}
         </div>
       )}
 
-      {/* Questions List - StackOverflow Style */}
+      {/* Questions List */}
       {sortedPosts.length === 0 ? (
-        <div className="bg-card border rounded-lg p-12 text-center">
-          <MessageCircle className="size-12 mx-auto mb-3 text-muted-foreground opacity-30" />
-          <h3 className="font-semibold text-lg">No questions found</h3>
-          <p className="text-muted-foreground mt-1">Be the first to ask a question!</p>
-        </div>
+        <Card>
+          <CardContent className="py-12 text-center">
+            <MessageCircle className="size-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <h3 className="font-semibold text-lg">No questions found</h3>
+            <p className="text-muted-foreground">Be the first to ask!</p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="divide-y divide-border">
+        <div className="space-y-3">
           {sortedPosts.map((post) => {
             const isLiked = user && post.likes?.includes(user.id);
             const isOwner = user && post.authorId === user.id;
             
             return (
-              <div key={post._id} className="py-4 hover:bg-muted/30 -mx-4 px-4 transition-colors">
-                <div className="flex gap-4">
-                  {/* Stats - StackOverflow Style */}
-                  <div className="flex flex-col items-end gap-2 min-w-[80px] text-sm">
-                    <div className="text-center">
-                      <div className={`font-bold ${(post.likes?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`}>
-                        {(post.likes?.length || 0)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">votes</div>
+              <Card key={post._id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-5">
+                  {post.isPinned && (
+                    <div className="flex items-center gap-1 text-xs font-medium text-primary mb-3">
+                      <Pin className="size-3" />
+                      Pinned
                     </div>
-                    
-                    <div className={`text-center px-2 py-1 rounded ${(post.comments?.length || 0) > 0 ? "bg-green-100 text-green-700 border border-green-300" : "text-muted-foreground"}`}>
-                      <div className="font-bold">{post.comments?.length || 0}</div>
-                      <div className="text-xs">answers</div>
-                    </div>
-
-                    <div className="text-center text-xs text-muted-foreground">
-                      <div>{getHoursUntilExpiry(post.expiresAt)}h</div>
-                      <div>left</div>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    {/* Title/Content */}
-                    <h3 className="text-base font-medium text-primary hover:text-primary/80 cursor-pointer mb-2">
-                      {escapeHtml(post.content)}
-                    </h3>
-                    
-                    {/* Tags as Badges */}
-                    {post.tags && post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {post.tags.map(tag => (
-                          <button
-                            key={tag}
-                            onClick={() => setFilterTag(filterTag === tag ? null : tag)}
-                            className={`px-2 py-0.5 text-xs rounded-md transition-colors ${
-                              filterTag === tag 
-                                ? "bg-primary text-primary-foreground" 
-                                : "bg-primary/10 text-primary hover:bg-primary/20"
-                            }`}
-                          >
-                            {tag}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Footer - Author & Actions */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <button onClick={() => handleShare(post.content)} className="hover:text-primary flex items-center gap-1">
-                          <Share2 className="size-3" /> Share
-                        </button>
-                        <button onClick={() => handleFlag(post._id)} className="hover:text-primary flex items-center gap-1">
-                          <Flag className="size-3" /> Flag
-                        </button>
-                        <button onClick={() => toggleComments(post._id)} className="hover:text-primary">
-                          {expandedComments.has(post._id) ? "Hide answers" : `${post.comments?.length || 0} answers`}
-                        </button>
-                        {(isOwner || user?.role === "admin") && (
-                          <button onClick={() => handleDeletePost(post._id)} className="hover:text-red-500 flex items-center gap-1">
-                            <Trash2 className="size-3" /> Delete
-                          </button>
-                        )}
-                        {user?.role === "admin" && (
-                          <button onClick={() => handlePin(post._id)} className={`flex items-center gap-1 ${post.isPinned ? "text-primary" : "hover:text-primary"}`}>
-                            <Pin className={`size-3 ${post.isPinned ? "fill-current" : ""}`} /> {post.isPinned ? "Unpin" : "Pin"}
-                          </button>
-                        )}
-                        <button onClick={() => handleLike(post._id)} className={`flex items-center gap-1 ${isLiked ? "text-red-500" : "hover:text-red-500"}`}>
-                          <Heart className={`size-3 ${isLiked ? "fill-current" : ""}`} /> {isLiked ? "Liked" : "Like"}
-                        </button>
-                      </div>
-
-                      {/* Author Info - StackOverflow Style */}
-                      <div className="flex items-center gap-2 text-xs">
-                        <span className="text-muted-foreground">
-                          asked {formatDistanceToNow(new Date(post.createdAt))}
-                        </span>
-                        <Link 
-                          href={`/community/profile/${post.authorId}`}
-                          className="text-primary hover:underline font-medium"
+                  )}
+                  
+                  <div className="flex gap-4">
+                    {/* Stats */}
+                    <div className="flex flex-col items-center gap-3 min-w-[60px]">
+                      <div className="flex flex-col items-center">
+                        <button
+                          onClick={() => handleLike(post._id)}
+                          className={`transition-colors ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"}`}
                         >
-                          {escapeHtml(post.authorName || "Anonymous")}
-                        </Link>
+                          <Heart className={`size-5 ${isLiked ? "fill-current" : ""}`} />
+                        </button>
+                        <span className="text-sm font-semibold">{post.likes?.length || 0}</span>
+                      </div>
+                      
+                      <Separator className="w-full" />
+                      
+                      <div className="flex flex-col items-center">
+                        <MessageCircle className={`size-5 ${(post.comments?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`} />
+                        <span className={`text-sm font-semibold ${(post.comments?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`}>
+                          {post.comments?.length || 0}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Answers Section */}
-                    {expandedComments.has(post._id) && (
-                      <div className="mt-4 pt-4 border-t">
-                        <h4 className="text-sm font-semibold mb-3">{post.comments?.length || 0} Answers</h4>
-                        
-                        {post.comments && post.comments.length > 0 && (
-                          <div className="space-y-3 mb-4">
-                            {post.comments.map((comment) => (
-                              <div key={comment._id} className="flex gap-3 pb-3 border-b last:border-0">
-                                <div className="flex flex-col items-center gap-1 text-muted-foreground">
-                                  <Heart className="size-4 hover:text-red-500 cursor-pointer" />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center justify-between mb-1">
-                                    <div className="flex items-center gap-2">
-                                      <Link href={`/community/profile/${comment.authorId}`} className="text-xs font-medium text-primary hover:underline">
-                                        {escapeHtml(comment.authorName)}
-                                      </Link>
-                                      <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(comment.createdAt))}</span>
-                                    </div>
-                                    {(comment.authorId === user?.id || user?.role === "admin") && (
-                                      <button onClick={() => handleDeleteComment(post._id, comment._id)} className="text-muted-foreground hover:text-red-500">
-                                        <Trash2 className="size-3.5" />
-                                      </button>
-                                    )}
-                                  </div>
-                                  <p className="text-sm">{escapeHtml(comment.content)}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                    {/* Content */}
+                    <div className="flex-1 min-w-0 space-y-3">
+                      <h3 className="text-lg font-medium leading-snug hover:text-primary cursor-pointer line-clamp-2">
+                        {escapeHtml(post.content)}
+                      </h3>
 
-                        <div className="flex gap-2">
-                          <Input
-                            placeholder="Write your answer..."
-                            value={newComment[post._id] || ""}
-                            onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
-                            onKeyDown={(e) => e.key === "Enter" && handleAddComment(post._id)}
-                            className="flex-1"
-                          />
-                          <Button size="sm" onClick={() => handleAddComment(post._id)}>
-                            <Send className="size-4" />
-                          </Button>
+                      {/* Tags */}
+                      {post.tags && post.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {post.tags.map(tag => (
+                            <Badge
+                              key={tag}
+                              variant={filterTag === tag ? "default" : "secondary"}
+                              className="cursor-pointer text-xs"
+                              onClick={() => setFilterTag(filterTag === tag ? null : tag)}
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Footer */}
+                      <div className="flex items-center justify-between pt-2">
+                        <div className="flex items-center gap-4">
+                          <button onClick={() => toggleComments(post._id)} className="text-sm text-muted-foreground hover:text-primary">
+                            {post.comments?.length || 0} answers
+                          </button>
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="size-3" />
+                            {getHoursUntilExpiry(post.expiresAt)}h left
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            <Avatar className="size-6">
+                              <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                                {post.authorName?.charAt(0).toUpperCase() || "?"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <Link href={`/community/profile/${post.authorId}`} className="text-sm text-primary hover:underline">
+                              {escapeHtml(post.authorName || "Anonymous")}
+                            </Link>
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(post.createdAt))}
+                          </span>
                         </div>
                       </div>
-                    )}
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2 pt-2 border-t">
+                        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handleLike(post._id)}>
+                          <Heart className={`size-3 mr-1 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+                          {isLiked ? "Liked" : "Like"}
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handleShare(post.content)}>
+                          <Share2 className="size-3 mr-1" />
+                          Share
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handleFlag(post._id)}>
+                          <Flag className="size-3 mr-1" />
+                          Flag
+                        </Button>
+                        {user?.role === "admin" && (
+                          <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handlePin(post._id)}>
+                            <Pin className={`size-3 mr-1 ${post.isPinned ? "fill-current" : ""}`} />
+                            {post.isPinned ? "Unpin" : "Pin"}
+                          </Button>
+                        )}
+                        {(isOwner || user?.role === "admin") && (
+                          <Button variant="ghost" size="sm" className="h-8 text-xs text-destructive hover:text-destructive" onClick={() => handleDeletePost(post._id)}>
+                            <Trash2 className="size-3 mr-1" />
+                            Delete
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Answers Section */}
+                      {expandedComments.has(post._id) && (
+                        <div className="pt-4 border-t space-y-4">
+                          <h4 className="font-semibold text-sm">{post.comments?.length || 0} Answers</h4>
+                          
+                          {post.comments && post.comments.length > 0 && (
+                            <div className="space-y-3">
+                              {post.comments.map((comment) => (
+                                <div key={comment._id} className="flex gap-3 p-3 bg-muted/50 rounded-lg">
+                                  <div className="flex flex-col items-center gap-1">
+                                    <Heart className="size-4 text-muted-foreground cursor-pointer hover:text-red-500" />
+                                  </div>
+                                  <div className="flex-1 space-y-1">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <Link href={`/community/profile/${comment.authorId}`} className="text-sm font-medium text-primary hover:underline">
+                                          {escapeHtml(comment.authorName)}
+                                        </Link>
+                                        <span className="text-xs text-muted-foreground">
+                                          {formatDistanceToNow(new Date(comment.createdAt))}
+                                        </span>
+                                      </div>
+                                      {(comment.authorId === user?.id || user?.role === "admin") && (
+                                        <Button variant="ghost" size="sm" className="h-6 text-xs text-destructive hover:text-destructive" onClick={() => handleDeleteComment(post._id, comment._id)}>
+                                          <Trash2 className="size-3" />
+                                        </Button>
+                                      )}
+                                    </div>
+                                    <p className="text-sm">{escapeHtml(comment.content)}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Write your answer..."
+                              value={newComment[post._id] || ""}
+                              onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
+                              onKeyDown={(e) => e.key === "Enter" && handleAddComment(post._id)}
+                              className="flex-1"
+                            />
+                            <Button size="sm" onClick={() => handleAddComment(post._id)}>
+                              <Send className="size-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
