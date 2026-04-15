@@ -420,75 +420,72 @@ function CommunityContent({
   }
 
   return (
-    <div className="w-full">
-      {/* Twitter-style Question Composer */}
-      <div className="border-b">
-        <div className="p-4">
-          <h1 className="text-xl font-bold mb-4">Questions</h1>
-          <div className="flex gap-3">
-            <div className="size-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center overflow-hidden flex-shrink-0">
-              {user?.avatar ? (
-                <img src={user.avatar} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-sm font-bold text-white">{user?.name?.charAt(0).toUpperCase()}</span>
-              )}
+    <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">Questions</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">{filteredPosts.length} questions</p>
+        </div>
+          <Button onClick={() => setShowNewPostForm(true)} className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4">
+          Ask Question
+        </Button>
+      </div>
+
+      {/* New Post Form Modal */}
+      {showNewPostForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-background rounded-xl w-full max-w-lg mx-4 shadow-xl">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-bold">Ask a question</h2>
+              <Button variant="ghost" size="sm" onClick={() => setShowNewPostForm(false)}>
+                <X className="size-5" />
+              </Button>
             </div>
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Title of your question"
-                value={newPost.split('\n')[0]}
-                onChange={(e) => setNewPost(e.target.value + '\n' + (newPost.split('\n').slice(1).join('\n')))}
-                className="w-full text-lg font-semibold border-0 focus:outline-none placeholder:text-gray-400 bg-transparent mb-2"
-              />
+            <div className="p-4 space-y-4">
               <textarea
-                placeholder="Add more details..."
-                value={newPost.split('\n').slice(1).join('\n')}
-                onChange={(e) => setNewPost(newPost.split('\n')[0] + '\n' + e.target.value)}
-                className="w-full min-h-[60px] resize-none border-0 focus:outline-none placeholder:text-gray-400 bg-transparent text-base"
+                placeholder="What's your question?"
+                value={newPost}
+                onChange={(e) => setNewPost(e.target.value)}
+                className="w-full min-h-[120px] resize-none border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-gray-500"
               />
               
-              {/* Tags */}
-              {newTags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {newTags.map(tag => (
-                    <span key={tag} className="px-2.5 py-1 text-xs rounded-full bg-blue-100 text-blue-600 flex items-center gap-1">
-                      #{tag}
-                      <button onClick={() => handleRemoveTag(tag)} className="hover:text-blue-800">
-                        <X className="size-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-              
-              <div className="flex items-center justify-between pt-3 border-t">
-                <div className="flex gap-2">
-                  {SUGGESTED_TAGS.filter(t => !newTags.includes(t)).slice(0, 4).map((tag) => (
-                    <button
-                      key={tag}
-                      onClick={() => handleAddTag(tag)}
-                      className="px-2 py-1 text-xs rounded-full text-blue-500 hover:bg-blue-50 transition-colors"
-                    >
-                      +{tag}
+              <div className="flex flex-wrap gap-2">
+                {newTags.map(tag => (
+                  <span key={tag} className="px-2.5 py-1 text-xs rounded-full bg-gray-200 text-gray-700 flex items-center gap-1">
+                    #{tag}
+                    <button onClick={() => handleRemoveTag(tag)} className="hover:text-gray-900">
+                      <X className="size-3" />
                     </button>
-                  ))}
-                </div>
-                <Button 
-                  onClick={handleCreatePost} 
-                  disabled={posting || newPost.trim().length < 10}
-                  className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4"
-                >
-                  {posting ? "Posting..." : "Post"}
+                  </span>
+                ))}
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                {SUGGESTED_TAGS.filter(t => !newTags.includes(t)).slice(0, 6).map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => handleAddTag(tag)}
+                    className="px-2 py-1 text-xs rounded-full border hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    +{tag}
+                  </button>
+                ))}
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => setShowNewPostForm(false)}>Cancel</Button>
+                <Button onClick={handleCreatePost} disabled={posting || newPost.trim().length < 10} className="bg-blue-500 hover:bg-blue-600">
+                  Post
                 </Button>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Filters */}
-      <div className="flex gap-1 p-1 bg-muted/50 mx-4 my-4 rounded-lg max-w-md">
+      <div className="flex gap-1 p-1 bg-muted/50 rounded-lg w-fit">
         <Button 
           variant={sortBy === "newest" ? "default" : "ghost"} 
           size="sm" 
