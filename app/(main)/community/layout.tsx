@@ -400,9 +400,8 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
             </Button>
           </div>
         </div>
-        )}
       </div>
-      )}
+    )}
     </div>
   );
 }
