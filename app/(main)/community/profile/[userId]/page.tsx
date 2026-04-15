@@ -161,7 +161,7 @@ export default function UserProfilePage() {
         {/* Content */}
         <div className="flex-1 p-4">
           {post.isPinned && (
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded mb-2">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-black bg-black/10 px-2 py-1 rounded mb-2">
               <Pin className="size-3" />
               Pinned
             </span>
