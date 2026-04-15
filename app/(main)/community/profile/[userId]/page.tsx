@@ -192,7 +192,7 @@ export default function UserProfilePage() {
       {/* Profile Header - Twitter Style */}
       <div className="max-w-2xl mx-auto">
         {/* GitHub-style Activity Banner */}
-        <div className="bg-[#ebedf0] dark:bg-[#161b22] p-4">
+        <div className="bg-gray-100 dark:bg-[#161b22] p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">Question Activity</h3>
             <span className="text-xs text-gray-500">{totalContributions} questions this year</span>
@@ -203,7 +203,7 @@ export default function UserProfilePage() {
                 {week.map((day, dayIndex) => (
                   <div
                     key={`${weekIndex}-${dayIndex}`}
-                    className={`w-3 h-3 rounded-sm ${day.count > 0 ? 'bg-green-500' : 'bg-[#d0d4da] dark:bg-[#21262d]'} ${day.isToday ? 'ring-1 ring-blue-500 ring-offset-1 dark:ring-offset-[#161b22]' : ''}`}
+                    className={`w-3 h-3 rounded-sm ${day.count > 0 ? 'bg-green-500' : 'bg-gray-200 dark:bg-[#21262d]'} ${day.isToday ? 'ring-1 ring-blue-500 ring-offset-1 dark:ring-offset-[#161b22]' : ''}`}
                     title={`${day.date}: ${day.count} question${day.count !== 1 ? 's' : ''}`}
                   />
                 ))}
@@ -213,7 +213,7 @@ export default function UserProfilePage() {
           <div className="flex items-center justify-end gap-1.5 mt-3 text-xs text-gray-500">
             <span>Less</span>
             <div className="flex gap-[2px]">
-              <div className="w-3 h-3 rounded-sm bg-[#ebedf0] dark:bg-[#161b22] border border-[#d0d4da] dark:border-[#21262d]" />
+              <div className="w-3 h-3 rounded-sm bg-gray-200 dark:bg-[#161b22] border border-gray-300 dark:border-[#21262d]" />
               <div className="w-3 h-3 rounded-sm bg-[#9be9a8]" />
               <div className="w-3 h-3 rounded-sm bg-[#40c463]" />
               <div className="w-3 h-3 rounded-sm bg-[#30a14e]" />
