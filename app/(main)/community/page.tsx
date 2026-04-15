@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -95,6 +96,18 @@ const SUGGESTED_TAGS = [
 ];
 
 export default function CommunityHomePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <CommunityHomePageContent />
+    </Suspense>
+  );
+}
+
+function CommunityHomePageContent() {
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,9 +118,10 @@ export default function CommunityHomePage() {
   const [showNewPostForm, setShowNewPostForm] = useState(false);
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [newComment, setNewComment] = useState<{ [postId: string]: string }>({});
-  const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "votes" | "unanswered">("newest");
   const [filterTag, setFilterTag] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q") || "";
 
   const fetchPosts = async () => {
     try {
@@ -348,6 +362,47 @@ export default function CommunityHomePage() {
 
   const allTags = Array.from(new Set(posts.flatMap(p => p.tags || []))).slice(0, 15);
 
+  // Separate content into its own component to use useSearchParams
+  return <CommunityContent 
+    user={user} 
+    posts={posts} 
+    setPosts={setPosts}
+    searchQuery={searchQuery}
+    sortBy={sortBy}
+    setSortBy={setSortBy}
+    filterTag={filterTag}
+    setFilterTag={setFilterTag}
+    newPost={newPost}
+    setNewPost={setNewPost}
+    newTags={newTags}
+    setNewTags={setNewTags}
+    tagInput={tagInput}
+    setTagInput={setTagInput}
+    expandedComments={expandedComments}
+    setExpandedComments={setExpandedComments}
+    newComment={newComment}
+    setNewComment={setNewComment}
+    posting={posting}
+    setPosting={setPosting}
+    handleAddTag={handleAddTag}
+    handleRemoveTag={handleRemoveTag}
+    handleCreatePost={handleCreatePost}
+    toggleComments={toggleComments}
+    handleLike={handleLike}
+    handleSave={handleSave}
+    handleDeletePost={handleDeletePost}
+    handleSubmitComment={handleSubmitComment}
+    handlePinPost={handlePinPost}
+  />;
+}
+
+function CommunityContent({
+  user, posts, setPosts, searchQuery, sortBy, setSortBy, filterTag, setFilterTag,
+  newPost, setNewPost, newTags, setNewTags, tagInput, setTagInput,
+  expandedComments, setExpandedComments, newComment, setNewComment,
+  posting, setPosting, handleAddTag, handleRemoveTag, handleCreatePost,
+  toggleComments, handleLike, handleSave, handleDeletePost, handleSubmitComment, handlePinPost
+}: any) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">

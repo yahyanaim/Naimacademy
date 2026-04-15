@@ -76,6 +76,9 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [savedCount, setSavedCount] = useState(0);
+  const [questionsCount, setQuestionsCount] = useState(0);
   const pathname = usePathname();
   const router = useRouter();
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -87,6 +90,20 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
+        
+        // Fetch saved posts count
+        const savedRes = await fetch("/api/community?type=saved");
+        if (savedRes.ok) {
+          const savedData = await savedRes.json();
+          setSavedCount(savedData.posts?.length || 0);
+        }
+        
+        // Fetch all posts count
+        const postsRes = await fetch("/api/community?type=posts");
+        if (postsRes.ok) {
+          const postsData = await postsRes.json();
+          setQuestionsCount(postsData.posts?.length || 0);
+        }
       } else {
         router.push("/login");
       }
@@ -184,6 +201,18 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
             <input
               type="text"
               placeholder="Search questions..."
+              value={searchQuery}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchQuery(value);
+                const url = new URL(window.location.href);
+                if (value) {
+                  url.searchParams.set("q", value);
+                } else {
+                  url.searchParams.delete("q");
+                }
+                router.push(url.pathname + url.search);
+              }}
               className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-sm focus:outline-none transition-all border border-transparent focus:border-blue-400"
             />
           </div>
@@ -229,6 +258,17 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                   </button>
                 </div>
               </div>
+            </div>
+            {/* Stats */}
+            <div className="flex gap-4 text-sm">
+              <Link href="/community/saved" className="hover:underline">
+                <span className="font-bold">{savedCount}</span>
+                <span className="text-gray-500 ml-1">Saved</span>
+              </Link>
+              <span>
+                <span className="font-bold">{questionsCount}</span>
+                <span className="text-gray-500 ml-1">Questions</span>
+              </span>
             </div>
           </Link>
         </div>
