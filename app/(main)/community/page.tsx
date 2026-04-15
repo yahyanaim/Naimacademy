@@ -357,17 +357,15 @@ export default function CommunityHomePage() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Questions</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">{filteredPosts.length} questions</p>
+    <div className="w-full max-w-4xl mx-auto">
+      {/* Header - Twitter Style */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold">Questions</h1>
+          <Button onClick={() => setShowNewPostForm(true)} className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4">
+            Ask Question
+          </Button>
         </div>
-        <Button onClick={() => setShowNewPostForm(true)} size="lg" className="w-full sm:w-auto">
-          <Plus className="size-4 mr-2" />
-          Ask Question
-        </Button>
       </div>
 
       {/* New Post Form */}
@@ -447,52 +445,32 @@ export default function CommunityHomePage() {
       )}
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-4">
-        <Input
-          placeholder="Search questions..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-sm"
-        />
-        
-        <div className="flex gap-1 p-1 bg-muted rounded-lg">
-          <Button variant={sortBy === "newest" ? "default" : "ghost"} size="sm" onClick={() => setSortBy("newest")}>Newest</Button>
-          <Button variant={sortBy === "votes" ? "default" : "ghost"} size="sm" onClick={() => setSortBy("votes")}>Most Voted</Button>
-          <Button variant={sortBy === "unanswered" ? "default" : "ghost"} size="sm" onClick={() => setSortBy("unanswered")}>Unanswered</Button>
-        </div>
-
-        {filterTag && (
-          <Badge variant="default" className="gap-1 cursor-pointer" onClick={() => setFilterTag(null)}>
-            {filterTag} <X className="size-3" />
-          </Badge>
-        )}
+      <div className="flex gap-1 p-1 bg-muted/50 mx-4">
+        <Button 
+          variant={sortBy === "newest" ? "default" : "ghost"} 
+          size="sm" 
+          className={`flex-1 rounded-full ${sortBy === "newest" ? "bg-primary" : ""}`}
+          onClick={() => setSortBy("newest")}
+        >
+          Newest
+        </Button>
+        <Button 
+          variant={sortBy === "votes" ? "default" : "ghost"} 
+          size="sm" 
+          className={`flex-1 rounded-full ${sortBy === "votes" ? "bg-primary" : ""}`}
+          onClick={() => setSortBy("votes")}
+        >
+          Most Voted
+        </Button>
+        <Button 
+          variant={sortBy === "unanswered" ? "default" : "ghost"} 
+          size="sm" 
+          className={`flex-1 rounded-full ${sortBy === "unanswered" ? "bg-primary" : ""}`}
+          onClick={() => setSortBy("unanswered")}
+        >
+          Unanswered
+        </Button>
       </div>
-
-      {/* Tags Cloud */}
-      {allTags.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {allTags.map((tag, index) => {
-            const tagColors = [
-              "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200",
-              "bg-green-100 text-green-700 hover:bg-green-200 border-green-200", 
-              "bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-200",
-              "bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-200",
-              "bg-pink-100 text-pink-700 hover:bg-pink-200 border-pink-200",
-              "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border-indigo-200",
-            ];
-            const colorClass = tagColors[index % tagColors.length];
-            return (
-              <button
-                key={tag}
-                onClick={() => setFilterTag(filterTag === tag ? null : tag)}
-                className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${colorClass} ${filterTag === tag ? "ring-2 ring-primary" : ""}`}
-              >
-                {tag}
-              </button>
-            );
-          })}
-        </div>
-      )}
 
       {/* Questions List */}
       {sortedPosts.length === 0 ? (

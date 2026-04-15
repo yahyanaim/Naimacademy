@@ -16,7 +16,8 @@ import {
   Send,
   X,
   Minus,
-  MoreHorizontal
+  MoreHorizontal,
+  Search
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -213,6 +214,18 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                 <span className="ml-auto size-2 rounded-full bg-green-500" />
               )}
             </button>
+          </div>
+
+          {/* Search Bar */}
+          <div className="px-3 mt-4">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search questions..."
+                className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              />
+            </div>
           </div>
         </nav>
 
