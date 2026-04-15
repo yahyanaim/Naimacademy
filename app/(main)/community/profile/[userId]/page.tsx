@@ -192,7 +192,7 @@ export default function UserProfilePage() {
       {/* Profile Header - Twitter Style */}
       <div className="max-w-2xl mx-auto">
         {/* GitHub-style Activity Banner */}
-        <div className="p-4 border-b">
+        <div className="p-4 border rounded-2xl mx-4 mt-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">Question Activity</h3>
             <span className="text-xs text-gray-500">{totalContributions} questions this year</span>
