@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { 
   Home, 
   MessageCircle,
-  Users, 
+  Users,
   Settings, 
   LogOut, 
   GraduationCap,
@@ -43,7 +43,6 @@ interface ChatMessage {
 const navItems = [
   { label: "Questions", href: "/community", icon: MessageCircle },
   { label: "Saved", href: "/community/saved", icon: Bookmark },
-  { label: "Profile", href: "/profile", icon: Users },
 ];
 
 function escapeHtml(text: string): string {
@@ -285,7 +284,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                   className={cn(
                     "flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
                     isActive
-                      ? "bg-gray-900 text-white font-bold"
+                      ? "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-bold"
                       : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
                   )}
                 >
@@ -301,7 +300,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
               className={cn(
                 "w-full flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
                 chatOpen
-                  ? "bg-gray-900 text-white font-bold"
+                  ? "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-bold"
                   : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
               )}
             >
