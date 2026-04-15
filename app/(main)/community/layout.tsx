@@ -278,7 +278,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
           )}
         >
           {/* Chat Header */}
-          <div className="flex items-center justify-between p-3 border-b bg-muted/30 flex-shrink-0">
+          <div className="flex items-center justify-between p-3 border-b flex-shrink-0">
             <div className="flex items-center gap-2">
               <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
                 <Users className="size-4 text-white" />
