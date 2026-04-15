@@ -79,10 +79,7 @@ export default function Navbar() {
           href="/community"
           className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
-          <span className="flex items-center gap-1.5">
-            <Users className="size-4" />
-            Community
-          </span>
+          Community
         </Link>
       )}
       {user && (
@@ -225,7 +222,6 @@ export default function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
                 >
-                  <Users className="size-5" />
                   Community
                 </Link>
                 

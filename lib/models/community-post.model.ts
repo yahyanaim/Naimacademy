@@ -12,6 +12,7 @@ export interface ICommunityPost extends Document {
   expiresAt: Date;
   isExpired: boolean;
   likes: Types.ObjectId[];
+  saved: Types.ObjectId[];
   comments: {
     authorId: Types.ObjectId;
     authorName: string;
@@ -37,6 +38,7 @@ const CommunityPostSchema = new Schema<ICommunityPost>(
     expiresAt: { type: Date, required: true, index: true },
     isExpired: { type: Boolean, default: false },
     likes: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
+    saved: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     comments: [
       {
         authorId: { type: Schema.Types.ObjectId, ref: "User", required: true },

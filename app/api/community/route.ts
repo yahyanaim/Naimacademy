@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
       ...post,
       tags: post.tags || [],
       likes: post.likes || [],
+      saved: post.saved || [],
       comments: post.comments || [],
     }));
 
@@ -155,6 +156,32 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ 
         isPinned: post.isPinned,
+        postId: post._id.toString()
+      });
+    }
+
+    if (type === "save") {
+      const { postId } = body;
+      const post = await CommunityPost.findById(postId);
+
+      if (!post) {
+        return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      }
+
+      const userId = payload.userId;
+      const saveIndex = post.saved.indexOf(userId);
+
+      if (saveIndex > -1) {
+        post.saved.splice(saveIndex, 1);
+      } else {
+        post.saved.push(userId);
+      }
+
+      await post.save();
+
+      return NextResponse.json({ 
+        saved: post.saved.length, 
+        isSaved: saveIndex === -1,
         postId: post._id.toString()
       });
     }

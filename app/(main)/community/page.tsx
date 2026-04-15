@@ -14,7 +14,8 @@ import {
   X, 
   Share2,
   Flag,
-  Trash2
+  Trash2,
+  Bookmark
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,6 +36,7 @@ interface Post {
   tags: string[];
   isPinned: boolean;
   likes: string[];
+  saved: string[];
   comments: Comment[];
   createdAt: string;
   expiresAt: string;
@@ -234,6 +236,24 @@ export default function CommunityHomePage() {
       }
     } catch {
       toast.error("Failed to pin");
+    }
+  };
+
+  const handleSave = async (postId: string) => {
+    try {
+      const res = await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "save", postId }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(data.isSaved ? "Question saved" : "Question unsaved");
+        fetchPosts();
+      }
+    } catch {
+      toast.error("Failed to save");
     }
   };
 
@@ -487,23 +507,24 @@ export default function CommunityHomePage() {
         <div className="space-y-3">
           {sortedPosts.map((post) => {
             const isLiked = user && post.likes?.includes(user.id);
+            const isSaved = user && post.saved?.includes(user.id);
             const isOwner = user && post.authorId === user.id;
             
-            return (
-              <Card key={post._id} className={`hover:shadow-md transition-shadow ${post.isPinned ? "border-2 border-primary bg-primary/5" : ""}`}>
-                <CardContent className="p-5">
-                  <div className="flex gap-4">
+              return (
+              <Card key={post._id} className={`hover:shadow-sm transition-shadow ${post.isPinned ? "border border-primary/50" : ""}`}>
+                <CardContent className="p-4">
+                  <div className="flex gap-3">
                     {/* Stats Column */}
-                    <div className="flex flex-col items-center gap-3 min-w-[50px]">
+                    <div className="flex flex-col items-center gap-2 min-w-[40px]">
                       {/* Like */}
                       <div className="flex flex-col items-center">
                         <button
                           onClick={() => handleLike(post._id)}
                           className={`transition-colors ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"}`}
                         >
-                          <Heart className={`size-5 ${isLiked ? "fill-current" : ""}`} />
+                          <Heart className={`size-4 ${isLiked ? "fill-current" : ""}`} />
                         </button>
-                        <span className="text-sm font-semibold">{post.likes?.length || 0}</span>
+                        <span className="text-xs font-semibold">{post.likes?.length || 0}</span>
                       </div>
                       
                       <Separator className="w-full" />
@@ -511,9 +532,9 @@ export default function CommunityHomePage() {
                       {/* Comments */}
                       <div className="flex flex-col items-center">
                         <button onClick={() => toggleComments(post._id)} className="text-muted-foreground hover:text-primary">
-                          <MessageCircle className={`size-5 ${(post.comments?.length || 0) > 0 ? "text-green-600" : ""}`} />
+                          <MessageCircle className={`size-4 ${(post.comments?.length || 0) > 0 ? "text-green-600" : ""}`} />
                         </button>
-                        <span className={`text-sm font-semibold ${(post.comments?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`}>
+                        <span className={`text-xs font-semibold ${(post.comments?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`}>
                           {post.comments?.length || 0}
                         </span>
                       </div>
@@ -527,29 +548,43 @@ export default function CommunityHomePage() {
                           className={`transition-colors ${post.isPinned ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
                           title={post.isPinned ? "Unpin question" : "Pin question to profile"}
                         >
-                          <Pin className={`size-5 ${post.isPinned ? "fill-current" : ""}`} />
+                          <Pin className={`size-4 ${post.isPinned ? "fill-current" : ""}`} />
                         </button>
-                        <span className="text-[10px] text-muted-foreground">pin</span>
+                        <span className="text-[9px] text-muted-foreground">pin</span>
+                      </div>
+                      
+                      <Separator className="w-full" />
+                      
+                      {/* Save */}
+                      <div className="flex flex-col items-center">
+                        <button
+                          onClick={() => handleSave(post._id)}
+                          className={`transition-colors ${post.saved?.includes(user?.id || "") ? "text-yellow-500" : "text-muted-foreground hover:text-yellow-500"}`}
+                          title={post.saved?.includes(user?.id || "") ? "Unsave question" : "Save question"}
+                        >
+                          <Bookmark className={`size-4 ${post.saved?.includes(user?.id || "") ? "fill-current" : ""}`} />
+                        </button>
+                        <span className="text-[9px] text-muted-foreground">save</span>
                       </div>
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 min-w-0 space-y-3">
+                    <div className="flex-1 min-w-0 space-y-2">
                       {/* Pinned Badge */}
                       {post.isPinned && (
-                        <Badge className="gap-1 w-fit bg-primary text-primary-foreground hover:bg-primary/90">
+                        <Badge variant="outline" className="gap-1 w-fit text-primary border-primary/50">
                           <Pin className="size-3" />
                           Pinned
                         </Badge>
                       )}
                       
-                      <h3 className="text-lg font-medium leading-snug hover:text-primary cursor-pointer line-clamp-2">
+                      <h3 className="text-sm font-medium leading-snug hover:text-primary cursor-pointer line-clamp-2">
                         {escapeHtml(post.content)}
                       </h3>
 
                       {/* Tags */}
                       {post.tags && post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-1">
                           {post.tags.map((tag, index) => {
                             const tagColors = [
                               "bg-blue-100 text-blue-700 hover:bg-blue-200",
@@ -564,7 +599,7 @@ export default function CommunityHomePage() {
                               <button
                                 key={tag}
                                 onClick={() => setFilterTag(filterTag === tag ? null : tag)}
-                                className={`px-2 py-0.5 text-xs rounded-full transition-colors ${colorClass} ${filterTag === tag ? "ring-2 ring-primary" : ""}`}
+                                className={`px-1.5 py-0.5 text-[10px] rounded-full transition-colors ${colorClass} ${filterTag === tag ? "ring-1 ring-primary" : ""}`}
                               >
                                 {tag}
                               </button>
@@ -574,58 +609,62 @@ export default function CommunityHomePage() {
                       )}
 
                       {/* Footer */}
-                      <div className="flex items-center justify-between pt-3 border-t">
+                      <div className="flex items-center justify-between pt-2 border-t">
                         {/* Left: Meta info */}
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
                           <button onClick={() => toggleComments(post._id)} className="hover:text-primary">
                             {post.comments?.length || 0} answers
                           </button>
-                          <span className="flex items-center gap-1">
-                            <Clock className="size-3" />
+                          <span className="flex items-center gap-0.5">
+                            <Clock className="size-2.5" />
                             {getHoursUntilExpiry(post.expiresAt)}h left
                           </span>
                         </div>
 
                         {/* Right: Author */}
-                        <Link href={`/community/profile/${post.authorId}`} className="flex items-center gap-2 hover:bg-muted/50 px-2 py-1 rounded-lg transition-colors">
-                          <span className="text-xs text-muted-foreground">
+                        <Link href={`/community/profile/${post.authorId}`} className="flex items-center gap-1.5 hover:bg-muted/50 px-1.5 py-0.5 rounded transition-colors">
+                          <span className="text-[10px] text-muted-foreground">
                             {formatDistanceToNow(new Date(post.createdAt))}
                           </span>
-                          <Avatar className="size-6">
+                          <Avatar className="size-5">
                             {post.authorAvatar ? (
                               <AvatarImage src={post.authorAvatar} alt={post.authorName} />
                             ) : null}
-                            <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">
+                            <AvatarFallback className="text-[8px] bg-muted text-muted-foreground">
                               {post.authorName?.charAt(0).toUpperCase() || "?"}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-sm font-medium text-foreground hover:text-primary">
+                          <span className="text-xs font-medium text-foreground hover:text-primary">
                             {escapeHtml(post.authorName || "Anonymous")}
                           </span>
                         </Link>
                       </div>
 
                       {/* Actions - Compact */}
-                      <div className="flex items-center gap-1 pt-2">
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={() => handleLike(post._id)}>
-                          <Heart className={`size-3 ${isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+                      <div className="flex items-center gap-0.5 pt-1">
+                        <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5" onClick={() => handleLike(post._id)}>
+                          <Heart className={`size-2.5 ${isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
                           <span className={isLiked ? "text-red-500" : "text-muted-foreground"}>{isLiked ? "Liked" : "Like"}</span>
                         </Button>
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={() => handleShare(post.content)}>
-                          <Share2 className="size-3 text-muted-foreground" />
+                        <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5" onClick={() => handleShare(post.content)}>
+                          <Share2 className="size-2.5 text-muted-foreground" />
                           <span className="text-muted-foreground">Share</span>
                         </Button>
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={() => handleFlag(post._id)}>
-                          <Flag className="size-3 text-muted-foreground" />
+                        <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5" onClick={() => handleFlag(post._id)}>
+                          <Flag className="size-2.5 text-muted-foreground" />
                           <span className="text-muted-foreground">Flag</span>
                         </Button>
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={() => handlePin(post._id)}>
-                          <Pin className={`size-3 ${post.isPinned ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+                        <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5" onClick={() => handlePin(post._id)}>
+                          <Pin className={`size-2.5 ${post.isPinned ? "fill-primary text-primary" : "text-muted-foreground"}`} />
                           <span className={post.isPinned ? "text-primary" : "text-muted-foreground"}>{post.isPinned ? "Pinned" : "Pin"}</span>
                         </Button>
+                        <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5" onClick={() => handleSave(post._id)}>
+                          <Bookmark className={`size-2.5 ${isSaved ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground"}`} />
+                          <span className={isSaved ? "text-yellow-500" : "text-muted-foreground"}>{isSaved ? "Saved" : "Save"}</span>
+                        </Button>
                         {(isOwner || user?.role === "admin") && (
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1 text-destructive" onClick={() => handleDeletePost(post._id)}>
-                            <Trash2 className="size-3" />
+                          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5 text-destructive" onClick={() => handleDeletePost(post._id)}>
+                            <Trash2 className="size-2.5" />
                             <span>Delete</span>
                           </Button>
                         )}
@@ -633,54 +672,54 @@ export default function CommunityHomePage() {
 
                       {/* Answers Section */}
                       {expandedComments.has(post._id) && (
-                        <div className="pt-4 border-t space-y-4">
-                          <h4 className="font-semibold text-sm">{post.comments?.length || 0} Answers</h4>
+                        <div className="pt-3 border-t space-y-3">
+                          <h4 className="font-semibold text-xs">{post.comments?.length || 0} Answers</h4>
                           
                           {post.comments && post.comments.length > 0 && (
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                               {post.comments.map((comment) => (
-                                <div key={comment._id} className="flex gap-3 p-3 bg-muted/50 rounded-lg">
-                                  <Avatar className="size-8">
+                                <div key={comment._id} className="flex gap-2 p-2 bg-muted/50 rounded-lg">
+                                  <Avatar className="size-6">
                                     {comment.authorAvatar ? (
                                       <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
                                     ) : null}
-                                    <AvatarFallback className="text-xs bg-secondary">
+                                    <AvatarFallback className="text-[10px] bg-secondary">
                                       {comment.authorName?.charAt(0).toUpperCase() || "?"}
                                     </AvatarFallback>
                                   </Avatar>
-                                  <div className="flex-1 space-y-1">
+                                  <div className="flex-1 space-y-0.5">
                                     <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-2">
-                                        <Link href={`/community/profile/${comment.authorId}`} className="text-sm font-medium text-primary hover:underline">
+                                      <div className="flex items-center gap-1.5">
+                                        <Link href={`/community/profile/${comment.authorId}`} className="text-xs font-medium text-primary hover:underline">
                                           {escapeHtml(comment.authorName)}
                                         </Link>
-                                        <span className="text-xs text-muted-foreground">
+                                        <span className="text-[10px] text-muted-foreground">
                                           {formatDistanceToNow(new Date(comment.createdAt))}
                                         </span>
                                       </div>
                                       {(comment.authorId === user?.id || user?.role === "admin") && (
-                                        <Button variant="ghost" size="sm" className="h-6 text-xs text-destructive hover:text-destructive" onClick={() => handleDeleteComment(post._id, comment._id)}>
-                                          <Trash2 className="size-3" />
+                                        <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-destructive hover:text-destructive" onClick={() => handleDeleteComment(post._id, comment._id)}>
+                                          <Trash2 className="size-2.5" />
                                         </Button>
                                       )}
                                     </div>
-                                    <p className="text-sm">{escapeHtml(comment.content)}</p>
+                                    <p className="text-xs">{escapeHtml(comment.content)}</p>
                                   </div>
                                 </div>
                               ))}
                             </div>
                           )}
 
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 pt-2">
                             <Input
                               placeholder="Write your answer..."
                               value={newComment[post._id] || ""}
                               onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
                               onKeyDown={(e) => e.key === "Enter" && handleAddComment(post._id)}
-                              className="flex-1"
+                              className="flex-1 h-8 text-xs"
                             />
-                            <Button size="sm" onClick={() => handleAddComment(post._id)}>
-                              <Send className="size-4" />
+                            <Button size="sm" className="h-8" onClick={() => handleAddComment(post._id)}>
+                              <Send className="size-3" />
                             </Button>
                           </div>
                         </div>
