@@ -16,7 +16,7 @@ interface Message {
 
 export function SupportChat() {
   const pathname = usePathname();
-  if (pathname?.startsWith("/certificate")) return null;
+  if (pathname?.startsWith("/certificate") || pathname?.startsWith("/community")) return null;
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
