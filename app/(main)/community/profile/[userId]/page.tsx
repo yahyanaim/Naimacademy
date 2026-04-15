@@ -192,32 +192,32 @@ export default function UserProfilePage() {
       {/* Profile Header - Twitter Style */}
       <div className="max-w-2xl mx-auto">
         {/* GitHub-style Activity Banner */}
-        <div className="h-40 bg-card border-b p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Activity</h3>
-            <span className="text-xs text-muted-foreground">{totalContributions} contributions this year</span>
+        <div className="bg-[#ebedf0] dark:bg-[#161b22] p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">Question Activity</h3>
+            <span className="text-xs text-gray-500">{totalContributions} questions this year</span>
           </div>
-          <div className="flex gap-[3px] overflow-hidden rounded">
+          <div className="flex gap-[3px] overflow-hidden">
             {generateGrid().map((week, weekIndex) => (
               <div key={weekIndex} className="flex flex-col gap-[3px]">
                 {week.map((day, dayIndex) => (
                   <div
                     key={`${weekIndex}-${dayIndex}`}
-                    className={`size-3 rounded-sm ${getIntensityColor(day.count)} ${day.isToday ? 'ring-1 ring-primary' : ''}`}
+                    className={`w-3 h-3 rounded-sm ${day.count > 0 ? 'bg-green-500' : 'bg-[#d0d4da] dark:bg-[#21262d]'} ${day.isToday ? 'ring-1 ring-blue-500 ring-offset-1 dark:ring-offset-[#161b22]' : ''}`}
                     title={`${day.date}: ${day.count} question${day.count !== 1 ? 's' : ''}`}
                   />
                 ))}
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-end gap-2 mt-2 text-xs text-muted-foreground">
+          <div className="flex items-center justify-end gap-1.5 mt-3 text-xs text-gray-500">
             <span>Less</span>
-            <div className="flex gap-1">
-              <div className="size-3 rounded-sm bg-muted/50" />
-              <div className="size-3 rounded-sm bg-green-300" />
-              <div className="size-3 rounded-sm bg-green-400" />
-              <div className="size-3 rounded-sm bg-green-500" />
-              <div className="size-3 rounded-sm bg-green-600" />
+            <div className="flex gap-[2px]">
+              <div className="w-3 h-3 rounded-sm bg-[#ebedf0] dark:bg-[#161b22] border border-[#d0d4da] dark:border-[#21262d]" />
+              <div className="w-3 h-3 rounded-sm bg-[#9be9a8]" />
+              <div className="w-3 h-3 rounded-sm bg-[#40c463]" />
+              <div className="w-3 h-3 rounded-sm bg-[#30a14e]" />
+              <div className="w-3 h-3 rounded-sm bg-[#216e39]" />
             </div>
             <span>More</span>
           </div>
