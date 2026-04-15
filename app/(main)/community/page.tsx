@@ -392,7 +392,7 @@ function CommunityHomePageContent() {
     handleSave={handleSave}
     handleDeletePost={handleDeletePost}
     handleAddComment={handleAddComment}
-    handlePinPost={handlePinPost}
+    handlePin={handlePin}
   />;
 }
 
@@ -401,7 +401,7 @@ function CommunityContent({
   newPost, setNewPost, newTags, setNewTags, tagInput, setTagInput,
   expandedComments, setExpandedComments, newComment, setNewComment,
   posting, setPosting, handleAddTag, handleRemoveTag, handleCreatePost,
-  toggleComments, handleLike, handleSave, handleDeletePost, handleAddComment, handlePinPost
+  toggleComments, handleLike, handleSave, handleDeletePost, handleAddComment, handlePin
 }: any) {
   if (loading) {
     return (
