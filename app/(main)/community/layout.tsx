@@ -41,7 +41,7 @@ interface ChatMessage {
 }
 
 const navItems = [
-  { label: "Home", href: "/community", icon: Home },
+  { label: "Questions", href: "/community", icon: MessageCircle },
   { label: "Saved", href: "/community/saved", icon: Bookmark },
   { label: "Profile", href: "/profile", icon: Users },
 ];

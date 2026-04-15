@@ -357,15 +357,16 @@ export default function CommunityHomePage() {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Questions</h1>
-          <Button onClick={() => setShowNewPostForm(true)} className="bg-black hover:bg-gray-800 text-white rounded-full px-4">
-            Ask Question
-          </Button>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">Questions</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">{filteredPosts.length} questions</p>
         </div>
+        <Button onClick={() => setShowNewPostForm(true)} className="bg-black hover:bg-gray-800 text-white rounded-full px-4">
+          Ask Question
+        </Button>
       </div>
 
       {/* New Post Form Modal */}
@@ -421,11 +422,11 @@ export default function CommunityHomePage() {
       )}
 
       {/* Filters */}
-      <div className="flex gap-1 p-1 bg-muted/50 mx-4 my-4 rounded-lg max-w-md">
+      <div className="flex gap-1 p-1 bg-muted/50 rounded-lg w-fit">
         <Button 
           variant={sortBy === "newest" ? "default" : "ghost"} 
           size="sm" 
-          className={`flex-1 ${sortBy === "newest" ? "bg-primary" : ""}`}
+          className={sortBy === "newest" ? "bg-black text-white" : ""}
           onClick={() => setSortBy("newest")}
         >
           Newest
@@ -433,7 +434,7 @@ export default function CommunityHomePage() {
         <Button 
           variant={sortBy === "votes" ? "default" : "ghost"} 
           size="sm" 
-          className={`flex-1 ${sortBy === "votes" ? "bg-primary" : ""}`}
+          className={sortBy === "votes" ? "bg-black text-white" : ""}
           onClick={() => setSortBy("votes")}
         >
           Most Voted
@@ -441,7 +442,7 @@ export default function CommunityHomePage() {
         <Button 
           variant={sortBy === "unanswered" ? "default" : "ghost"} 
           size="sm" 
-          className={`flex-1 ${sortBy === "unanswered" ? "bg-primary" : ""}`}
+          className={sortBy === "unanswered" ? "bg-black text-white" : ""}
           onClick={() => setSortBy("unanswered")}
         >
           Unanswered
