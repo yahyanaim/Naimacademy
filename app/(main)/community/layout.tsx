@@ -11,7 +11,8 @@ import {
   Settings, 
   LogOut, 
   GraduationCap,
-  Loader2
+  Loader2,
+  Bookmark
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ interface User {
 const navItems = [
   { label: "Home", href: "/community", icon: Home },
   { label: "Chat", href: "/community/chat", icon: MessageCircle },
+  { label: "Saved", href: "/community/saved", icon: Bookmark },
 ];
 
 export default function CommunityLayout({ children }: { children: React.ReactNode }) {

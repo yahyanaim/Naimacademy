@@ -25,6 +25,36 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ messages: messages.reverse() });
     }
 
+    if (type === "saved") {
+      const token = request.cookies.get(SESSION.COOKIE_NAME)?.value;
+      if (!token) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      const payload = await verifyToken(token);
+      if (!payload) {
+        return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+      }
+
+      const savedPosts = await CommunityPost.find({ 
+        saved: payload.userId,
+        isExpired: false 
+      })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean();
+
+      const posts = savedPosts.map(post => ({
+        ...post,
+        tags: post.tags || [],
+        likes: post.likes || [],
+        saved: post.saved || [],
+        comments: post.comments || [],
+      }));
+
+      return NextResponse.json({ posts });
+    }
+
     const skip = (page - 1) * limit;
     const [pinnedPosts, regularPosts, total] = await Promise.all([
       CommunityPost.find({ isPinned: true, isExpired: false }).sort({ createdAt: -1 }).limit(10).lean(),
