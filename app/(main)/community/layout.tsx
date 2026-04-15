@@ -263,8 +263,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
 
       {/* Main Content */}
       <main className={cn(
-        "flex-1 min-h-full transition-all duration-300 ml-0 md:ml-64",
-        chatOpen ? "mr-80" : ""
+        "flex-1 min-h-full transition-all duration-300 ml-0 md:ml-64 pb-48"
       )}>
         {children}
       </main>
@@ -272,7 +271,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       {/* Chat Side Panel - Facebook Style */}
       <div
         className={cn(
-          "fixed right-0 top-14 h-[calc(100vh-14rem)] w-80 bg-card border-l flex flex-col transition-transform duration-300 z-40 rounded-l-lg shadow-xl",
+          "fixed right-0 bottom-0 h-[400px] w-80 bg-card border border-t-2 border-l flex flex-col transition-transform duration-300 z-40 rounded-tl-lg shadow-xl",
           chatOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
