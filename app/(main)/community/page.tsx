@@ -373,12 +373,12 @@ export default function CommunityHomePage() {
               <label className="text-sm font-medium">Tags</label>
               <div className="flex flex-wrap gap-2">
                 {newTags.map(tag => (
-                  <Badge key={tag} variant="secondary" className="gap-1">
+                  <span key={tag} className="px-2.5 py-1 text-xs rounded-full bg-primary text-primary-foreground flex items-center gap-1">
                     {tag}
-                    <button onClick={() => handleRemoveTag(tag)} className="ml-1 hover:text-destructive">
+                    <button onClick={() => handleRemoveTag(tag)} className="hover:opacity-70">
                       <X className="size-3" />
                     </button>
-                  </Badge>
+                  </span>
                 ))}
               </div>
               <Input
@@ -393,11 +393,20 @@ export default function CommunityHomePage() {
                 }}
               />
               <div className="flex flex-wrap gap-1">
-                {SUGGESTED_TAGS.filter(t => !newTags.includes(t)).slice(0, 6).map(tag => (
-                  <Badge key={tag} variant="outline" className="cursor-pointer hover:bg-secondary" onClick={() => handleAddTag(tag)}>
-                    {tag}
-                  </Badge>
-                ))}
+                {SUGGESTED_TAGS.filter(t => !newTags.includes(t)).slice(0, 6).map((tag, index) => {
+                  const tagColors = [
+                    "bg-blue-100 text-blue-700 hover:bg-blue-200",
+                    "bg-green-100 text-green-700 hover:bg-green-200", 
+                    "bg-purple-100 text-purple-700 hover:bg-purple-200",
+                    "bg-orange-100 text-orange-700 hover:bg-orange-200",
+                  ];
+                  const colorClass = tagColors[index % tagColors.length];
+                  return (
+                    <button key={tag} onClick={() => handleAddTag(tag)} className={`px-2 py-0.5 text-xs rounded-full ${colorClass}`}>
+                      {tag}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -442,16 +451,26 @@ export default function CommunityHomePage() {
       {/* Tags Cloud */}
       {allTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {allTags.map(tag => (
-            <Badge
-              key={tag}
-              variant={filterTag === tag ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => setFilterTag(filterTag === tag ? null : tag)}
-            >
-              {tag}
-            </Badge>
-          ))}
+          {allTags.map((tag, index) => {
+            const tagColors = [
+              "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200",
+              "bg-green-100 text-green-700 hover:bg-green-200 border-green-200", 
+              "bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-200",
+              "bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-200",
+              "bg-pink-100 text-pink-700 hover:bg-pink-200 border-pink-200",
+              "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border-indigo-200",
+            ];
+            const colorClass = tagColors[index % tagColors.length];
+            return (
+              <button
+                key={tag}
+                onClick={() => setFilterTag(filterTag === tag ? null : tag)}
+                className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${colorClass} ${filterTag === tag ? "ring-2 ring-primary" : ""}`}
+              >
+                {tag}
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -471,7 +490,7 @@ export default function CommunityHomePage() {
             const isOwner = user && post.authorId === user.id;
             
             return (
-              <Card key={post._id} className={`hover:shadow-md transition-shadow ${post.isPinned ? "border-primary/50 bg-primary/5" : ""}`}>
+              <Card key={post._id} className={`hover:shadow-md transition-shadow ${post.isPinned ? "border-2 border-primary bg-primary/5" : ""}`}>
                 <CardContent className="p-5">
                   <div className="flex gap-4">
                     {/* Stats Column */}
@@ -518,9 +537,9 @@ export default function CommunityHomePage() {
                     <div className="flex-1 min-w-0 space-y-3">
                       {/* Pinned Badge */}
                       {post.isPinned && (
-                        <Badge variant="default" className="gap-1 w-fit">
+                        <Badge className="gap-1 w-fit bg-primary text-primary-foreground hover:bg-primary/90">
                           <Pin className="size-3" />
-                          Pinned on profile
+                          Pinned
                         </Badge>
                       )}
                       
@@ -531,16 +550,26 @@ export default function CommunityHomePage() {
                       {/* Tags */}
                       {post.tags && post.tags.length > 0 && (
                         <div className="flex flex-wrap gap-2">
-                          {post.tags.map(tag => (
-                            <Badge
-                              key={tag}
-                              variant={filterTag === tag ? "default" : "secondary"}
-                              className="cursor-pointer text-xs"
-                              onClick={() => setFilterTag(filterTag === tag ? null : tag)}
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
+                          {post.tags.map((tag, index) => {
+                            const tagColors = [
+                              "bg-blue-100 text-blue-700 hover:bg-blue-200",
+                              "bg-green-100 text-green-700 hover:bg-green-200", 
+                              "bg-purple-100 text-purple-700 hover:bg-purple-200",
+                              "bg-orange-100 text-orange-700 hover:bg-orange-200",
+                              "bg-pink-100 text-pink-700 hover:bg-pink-200",
+                              "bg-indigo-100 text-indigo-700 hover:bg-indigo-200",
+                            ];
+                            const colorClass = tagColors[index % tagColors.length];
+                            return (
+                              <button
+                                key={tag}
+                                onClick={() => setFilterTag(filterTag === tag ? null : tag)}
+                                className={`px-2 py-0.5 text-xs rounded-full transition-colors ${colorClass} ${filterTag === tag ? "ring-2 ring-primary" : ""}`}
+                              >
+                                {tag}
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
 
