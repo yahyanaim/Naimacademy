@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { MessageCircle, Pin, Heart, Send, Clock, User, Lock, Crown, Loader2, X } from "lucide-react";
+import { Pin, Heart, Clock, MessageCircle, Loader2, Send, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 interface Post {
   _id: string;
@@ -31,16 +32,6 @@ interface Comment {
   createdAt: string;
 }
 
-interface ChatMessage {
-  _id: string;
-  authorId: string;
-  authorName: string;
-  authorEmail: string;
-  authorAvatar?: string;
-  content: string;
-  createdAt: string;
-}
-
 interface User {
   id: string;
   name: string;
@@ -48,8 +39,6 @@ interface User {
   avatar?: string;
   role: string;
 }
-
-type TabType = "home" | "posts" | "chat";
 
 function escapeHtml(text: string): string {
   return text
@@ -89,19 +78,16 @@ function getTimeRemaining(expiresAt: string): string {
   return `${minutes}m left`;
 }
 
-export default function CommunityPage() {
+export default function CommunityHomePage() {
   const [user, setUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>("home");
   const [posts, setPosts] = useState<Post[]>([]);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
   const [newPost, setNewPost] = useState("");
-  const [newMessage, setNewMessage] = useState("");
   const [showNewPostForm, setShowNewPostForm] = useState(false);
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [newComment, setNewComment] = useState<{ [postId: string]: string }>({});
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchUser = useCallback(async () => {
     try {
@@ -109,11 +95,9 @@ export default function CommunityPage() {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
-      } else {
-        window.location.href = "/login";
       }
-    } catch {
-      window.location.href = "/login";
+    } catch (err) {
+      console.error("Error fetching user:", err);
     }
   }, []);
 
@@ -131,18 +115,6 @@ export default function CommunityPage() {
     }
   }, []);
 
-  const fetchChat = useCallback(async () => {
-    try {
-      const res = await fetch("/api/community?type=chat&limit=100");
-      if (res.ok) {
-        const data = await res.json();
-        setChatMessages(data.messages || []);
-      }
-    } catch (err) {
-      console.error("Error fetching chat:", err);
-    }
-  }, []);
-
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
@@ -150,22 +122,8 @@ export default function CommunityPage() {
   useEffect(() => {
     if (user) {
       fetchPosts();
-      fetchChat();
     }
-  }, [user, fetchPosts, fetchChat]);
-
-  useEffect(() => {
-    if (activeTab === "chat") {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [chatMessages, activeTab]);
-
-  useEffect(() => {
-    if (activeTab === "chat") {
-      const interval = setInterval(fetchChat, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [activeTab, fetchChat]);
+  }, [user, fetchPosts]);
 
   const handleCreatePost = async () => {
     if (!newPost.trim() || newPost.trim().length < 10) {
@@ -198,36 +156,6 @@ export default function CommunityPage() {
       }
     } catch {
       toast.error("Failed to post");
-    } finally {
-      setPosting(false);
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
-
-    setPosting(true);
-    try {
-      const res = await fetch("/api/community", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "chat",
-          content: newMessage,
-          authorName: user?.name,
-          authorEmail: user?.email,
-          authorAvatar: user?.avatar,
-        }),
-      });
-
-      if (res.ok) {
-        setNewMessage("");
-        fetchChat();
-      } else {
-        toast.error("Failed to send message");
-      }
-    } catch {
-      toast.error("Failed to send message");
     } finally {
       setPosting(false);
     }
@@ -311,69 +239,87 @@ export default function CommunityPage() {
     setExpandedComments(newExpanded);
   };
 
+  const filteredPosts = posts.filter(post => 
+    post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    post.authorName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const pinnedPosts = filteredPosts.filter(p => p.isPinned);
+  const regularPosts = filteredPosts.filter(p => !p.isPinned);
+
   const renderPost = (post: Post, isPinned = false) => (
     <div
       key={post._id}
-      className={`bg-card border rounded-xl p-4 ${isPinned ? "border-primary/50 bg-primary/5" : ""}`}
+      className={`bg-card border rounded-2xl p-5 transition-all duration-200 hover:shadow-md ${
+        isPinned ? "border-primary/30 bg-primary/5" : ""
+      }`}
     >
       {isPinned && (
-        <div className="flex items-center gap-1 text-primary text-xs font-medium mb-2">
+        <div className="flex items-center gap-1.5 text-primary text-xs font-semibold mb-3 bg-primary/10 px-2.5 py-1 rounded-full w-fit">
           <Pin className="size-3" />
           Pinned
         </div>
       )}
-      <div className="flex items-start gap-3">
-        <div className="size-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 overflow-hidden">
+      
+      <div className="flex items-start gap-4">
+        <div className="size-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm">
           {post.authorAvatar ? (
-            <Image src={post.authorAvatar} alt="" width={40} height={40} className="object-cover" />
+            <Image src={post.authorAvatar} alt="" width={48} height={48} className="object-cover" />
           ) : (
-            <span className="text-sm font-bold text-white">{post.authorName.charAt(0).toUpperCase()}</span>
+            <span className="text-lg font-bold text-white">{post.authorName.charAt(0).toUpperCase()}</span>
           )}
         </div>
+        
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-sm">{escapeHtml(post.authorName)}</span>
-            <span className="text-xs text-muted-foreground">{formatTimeAgo(post.createdAt)}</span>
-            <span className="flex items-center gap-1 text-xs text-amber-600">
+            <span className="font-semibold text-base">{escapeHtml(post.authorName)}</span>
+            <span className="text-sm text-muted-foreground">{formatTimeAgo(post.createdAt)}</span>
+            <span className="flex items-center gap-1 text-sm text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
               <Clock className="size-3" />
               {getTimeRemaining(post.expiresAt)}
             </span>
           </div>
-          <p className="mt-2 text-sm whitespace-pre-wrap">{escapeHtml(post.content)}</p>
           
-          <div className="flex items-center gap-4 mt-3">
+          <p className="mt-3 text-base leading-relaxed whitespace-pre-wrap">{escapeHtml(post.content)}</p>
+          
+          <div className="flex items-center gap-6 mt-4 pt-3 border-t">
             <button
               onClick={() => handleLike(post._id)}
-              className={`flex items-center gap-1 text-xs transition-colors ${
-                post.likes.includes(user?.id || "") ? "text-red-500" : "text-muted-foreground hover:text-red-500"
+              className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                post.likes.includes(user?.id || "") 
+                  ? "text-red-500" 
+                  : "text-muted-foreground hover:text-red-500"
               }`}
             >
-              <Heart className={`size-4 ${post.likes.includes(user?.id || "") ? "fill-current" : ""}`} />
-              {post.likes.length}
+              <Heart className={`size-5 ${post.likes.includes(user?.id || "") ? "fill-current" : ""}`} />
+              {post.likes.length} {post.likes.length === 1 ? "like" : "likes"}
             </button>
+            
             <button
               onClick={() => toggleComments(post._id)}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+              className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
-              <MessageCircle className="size-4" />
-              {post.comments.length}
+              <MessageCircle className="size-5" />
+              {post.comments.length} {post.comments.length === 1 ? "comment" : "comments"}
             </button>
+            
             {user?.role === "admin" && (
               <button
                 onClick={() => handlePin(post._id)}
-                className={`flex items-center gap-1 text-xs transition-colors ${
+                className={`flex items-center gap-2 text-sm font-medium transition-colors ${
                   post.isPinned ? "text-primary" : "text-muted-foreground hover:text-primary"
                 }`}
               >
-                <Pin className="size-4" />
+                <Pin className="size-5" />
+                {post.isPinned ? "Unpin" : "Pin"}
               </button>
             )}
           </div>
 
           {expandedComments.has(post._id) && (
-            <div className="mt-3 space-y-3 pl-2 border-l-2 border-muted">
+            <div className="mt-4 space-y-4 pl-4 border-l-2 border-primary/20">
               {post.comments.map((comment) => (
-                <div key={comment._id} className="flex gap-2">
+                <div key={comment._id} className="flex gap-3">
                   <div className="size-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {comment.authorAvatar ? (
                       <Image src={comment.authorAvatar} alt="" width={32} height={32} className="object-cover" />
@@ -381,25 +327,27 @@ export default function CommunityPage() {
                       <span className="text-xs font-bold">{comment.authorName.charAt(0).toUpperCase()}</span>
                     )}
                   </div>
-                  <div>
+                  <div className="flex-1 bg-muted/50 rounded-xl p-3">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-xs">{escapeHtml(comment.authorName)}</span>
+                      <span className="font-medium text-sm">{escapeHtml(comment.authorName)}</span>
                       <span className="text-xs text-muted-foreground">{formatTimeAgo(comment.createdAt)}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{escapeHtml(comment.content)}</p>
+                    <p className="text-sm mt-1">{escapeHtml(comment.content)}</p>
                   </div>
                 </div>
               ))}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Add a comment..."
+              
+              <div className="flex gap-3 items-center">
+                <Input
+                  placeholder="Write a comment..."
                   value={newComment[post._id] || ""}
                   onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
                   onKeyDown={(e) => e.key === "Enter" && handleAddComment(post._id)}
-                  className="flex-1 text-sm px-3 py-2 border rounded-lg bg-background"
+                  className="flex-1"
                 />
-                <Button size="sm" onClick={() => handleAddComment(post._id)}>Send</Button>
+                <Button size="sm" onClick={() => handleAddComment(post._id)}>
+                  <Send className="size-4" />
+                </Button>
               </div>
             </div>
           )}
@@ -408,228 +356,102 @@ export default function CommunityPage() {
     </div>
   );
 
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="size-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-card border-b sticky top-14 z-40">
-        <div className="flex items-center">
-          <button
-            onClick={() => setActiveTab("home")}
-            className={`flex-1 py-4 text-sm font-medium transition-colors ${
-              activeTab === "home" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <span className="flex items-center justify-center gap-2">
-              <MessageCircle className="size-4" />
-              Accueil
-            </span>
-          </button>
-          <button
-            onClick={() => setActiveTab("posts")}
-            className={`flex-1 py-4 text-sm font-medium transition-colors ${
-              activeTab === "posts" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <span className="flex items-center justify-center gap-2">
-              <Pin className="size-4" />
-              All Posts
-            </span>
-          </button>
-          <button
-            onClick={() => setActiveTab("chat")}
-            className={`flex-1 py-4 text-sm font-medium transition-colors ${
-              activeTab === "chat" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <span className="flex items-center justify-center gap-2">
-              <MessageCircle className="size-4" />
-              Chat
-            </span>
-          </button>
+    <div className="max-w-3xl mx-auto p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Community Home</h1>
+        <p className="text-muted-foreground mt-1">Ask questions and share with the community</p>
+      </div>
+
+      {/* Create Post */}
+      <div className="bg-card border rounded-2xl p-5 mb-6">
+        <div className="flex items-start gap-4">
+          <div className="size-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {user?.avatar ? (
+              <Image src={user.avatar} alt="" width={48} height={48} className="object-cover" />
+            ) : (
+              <span className="text-lg font-bold text-white">{user?.name?.charAt(0).toUpperCase()}</span>
+            )}
+          </div>
+          
+          <div className="flex-1">
+            {showNewPostForm ? (
+              <div className="space-y-4">
+                <Textarea
+                  placeholder="Ask a question to the community... (will expire in 24h)"
+                  value={newPost}
+                  onChange={(e) => setNewPost(e.target.value)}
+                  rows={4}
+                  className="resize-none text-base"
+                />
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                    <Clock className="size-4" />
+                    Expires in 24 hours
+                  </span>
+                  <div className="flex gap-3">
+                    <Button variant="outline" onClick={() => setShowNewPostForm(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleCreatePost} disabled={posting}>
+                      {posting ? "Posting..." : "Post Question"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowNewPostForm(true)}
+                className="w-full text-left px-4 py-3.5 rounded-xl border border-dashed hover:bg-muted/50 transition-colors text-muted-foreground"
+              >
+                Ask a question to the community...
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="p-4">
-        {activeTab === "home" && (
-          <div className="space-y-4">
-            <div className="bg-card border rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <div className="size-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  {user.avatar ? (
-                    <Image src={user.avatar} alt="" width={40} height={40} className="object-cover" />
-                  ) : (
-                    <span className="text-sm font-bold text-white">{user.name.charAt(0).toUpperCase()}</span>
-                  )}
-                </div>
-                <div className="flex-1">
-                  {showNewPostForm ? (
-                    <div className="space-y-3">
-                      <Textarea
-                        placeholder="Ask a question... (will expire in 24h)"
-                        value={newPost}
-                        onChange={(e) => setNewPost(e.target.value)}
-                        rows={4}
-                        className="resize-none"
-                      />
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="size-3" />
-                          Expires in 24 hours
-                        </span>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => setShowNewPostForm(false)}>
-                            Cancel
-                          </Button>
-                          <Button size="sm" onClick={handleCreatePost} disabled={posting}>
-                            {posting ? "Posting..." : "Post Question"}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowNewPostForm(true)}
-                      className="w-full text-left px-4 py-3 rounded-lg border hover:bg-muted/50 transition-colors text-muted-foreground"
-                    >
-                      Ask a question to the community...
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-card border rounded-xl p-4 animate-pulse">
-                    <div className="flex gap-3">
-                      <div className="size-10 rounded-full bg-muted" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-muted rounded w-1/4" />
-                        <div className="h-4 bg-muted rounded w-full" />
-                        <div className="h-4 bg-muted rounded w-3/4" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : posts.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <MessageCircle className="size-12 mx-auto mb-3 opacity-30" />
-                <p>No questions yet. Be the first to ask!</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {posts.filter(p => p.isPinned).map((post) => renderPost(post, true))}
-                {posts.filter(p => !p.isPinned).slice(0, 5).map((post) => renderPost(post))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "posts" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold">All Posts</h2>
-              <Button size="sm" onClick={() => { setActiveTab("home"); setShowNewPostForm(true); }}>
-                New Question
-              </Button>
-            </div>
-            
-            {loading ? (
-              <div className="space-y-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="bg-card border rounded-xl p-4 animate-pulse">
-                    <div className="flex gap-3">
-                      <div className="size-10 rounded-full bg-muted" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-muted rounded w-1/4" />
-                        <div className="h-4 bg-muted rounded w-full" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : posts.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Pin className="size-12 mx-auto mb-3 opacity-30" />
-                <p>No posts yet</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {posts.map((post) => renderPost(post))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "chat" && (
-          <div className="flex flex-col h-[calc(100vh-200px)]">
-            <div className="flex-1 overflow-y-auto space-y-3 p-2">
-              {chatMessages.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <MessageCircle className="size-12 mx-auto mb-3 opacity-30" />
-                  <p>No messages yet. Start the conversation!</p>
-                </div>
-              ) : (
-                chatMessages.map((message) => (
-                  <div
-                    key={message._id}
-                    className={`flex gap-2 ${message.authorId === user?.id ? "flex-row-reverse" : ""}`}
-                  >
-                    <div className={`size-8 rounded-full bg-gradient-to-br flex items-center justify-center flex-shrink-0 overflow-hidden ${
-                      message.authorId === user?.id ? "from-green-500 to-green-600" : "from-primary to-primary/60"
-                    }`}>
-                      {message.authorAvatar ? (
-                        <Image src={message.authorAvatar} alt="" width={32} height={32} className="object-cover" />
-                      ) : (
-                        <span className="text-xs font-bold text-white">{message.authorName.charAt(0).toUpperCase()}</span>
-                      )}
-                    </div>
-                    <div className={`max-w-[70%] ${message.authorId === user?.id ? "text-right" : ""}`}>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        {message.authorId !== user?.id && <span className="font-medium">{escapeHtml(message.authorName)}</span>}
-                        <span>{formatTimeAgo(message.createdAt)}</span>
-                      </div>
-                      <div className={`inline-block px-3 py-2 rounded-2xl text-sm ${
-                        message.authorId === user?.id 
-                          ? "bg-primary text-white rounded-br-md" 
-                          : "bg-muted rounded-bl-md"
-                      }`}>
-                        {escapeHtml(message.content)}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-              <div ref={chatEndRef} />
-            </div>
-
-            <div className="border-t bg-card p-3 rounded-b-xl">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                  className="flex-1 px-4 py-2 border rounded-full bg-background"
-                />
-                <Button size="icon" onClick={handleSendMessage} disabled={posting || !newMessage.trim()}>
-                  <Send className="size-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+      {/* Search */}
+      <div className="mb-6">
+        <Input
+          placeholder="Search posts..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-md"
+        />
       </div>
+
+      {/* Posts */}
+      {loading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-card border rounded-2xl p-5 animate-pulse">
+              <div className="flex gap-4">
+                <div className="size-12 rounded-full bg-muted" />
+                <div className="flex-1 space-y-3">
+                  <div className="h-4 bg-muted rounded w-1/4" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="h-4 bg-muted rounded w-3/4" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filteredPosts.length === 0 ? (
+        <div className="text-center py-16">
+          <div className="size-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
+            <MessageCircle className="size-8 text-muted-foreground" />
+          </div>
+          <h3 className="font-semibold text-lg">No posts yet</h3>
+          <p className="text-muted-foreground mt-1">Be the first to ask a question!</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {pinnedPosts.map((post) => renderPost(post, true))}
+          {regularPosts.map((post) => renderPost(post))}
+        </div>
+      )}
     </div>
   );
 }
