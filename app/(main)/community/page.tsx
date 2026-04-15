@@ -365,7 +365,7 @@ function CommunityHomePageContent() {
   // Separate content into its own component to use useSearchParams
   return <CommunityContent 
     user={user} 
-    posts={posts} 
+    posts={sortedPosts} 
     setPosts={setPosts}
     searchQuery={searchQuery}
     sortBy={sortBy}
@@ -410,6 +410,7 @@ function CommunityContent({
   posting: boolean; setPosting: any; loading: boolean; handleAddTag: any; handleRemoveTag: any; handleCreatePost: any;
   toggleComments: any; handleLike: any; handleSave: any; handleDeletePost: any; handleAddComment: any; handlePin: any;
 }) {
+  const allTags = Array.from(new Set(posts.flatMap((p: any) => p.tags || []))).slice(0, 15);
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
