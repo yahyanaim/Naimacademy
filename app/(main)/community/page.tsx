@@ -14,8 +14,7 @@ import {
   X, 
   Share2,
   Flag,
-  Trash2,
-  Bookmark
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -378,10 +377,10 @@ export default function CommunityHomePage() {
                 {newTags.map(tag => (
                   <span 
                     key={tag} 
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary text-sm rounded-md"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary text-primary-foreground text-sm rounded-md"
                   >
                     {tag}
-                    <button onClick={() => handleRemoveTag(tag)} className="hover:text-primary/70">
+                    <button onClick={() => handleRemoveTag(tag)} className="hover:opacity-70">
                       <X className="size-3" />
                     </button>
                   </span>
@@ -445,7 +444,7 @@ export default function CommunityHomePage() {
         </div>
 
         {filterTag && (
-          <button onClick={() => setFilterTag(null)} className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-sm">
+          <button onClick={() => setFilterTag(null)} className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm">
             Tag: {filterTag} <X className="size-3" />
           </button>
         )}
@@ -458,7 +457,7 @@ export default function CommunityHomePage() {
             <button
               key={tag}
               onClick={() => setFilterTag(filterTag === tag ? null : tag)}
-              className={`px-2.5 py-1 text-xs rounded-md transition-colors ${filterTag === tag ? "bg-primary text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+              className={`px-2.5 py-1 text-xs rounded-md transition-colors ${filterTag === tag ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
             >
               {tag}
             </button>
@@ -466,7 +465,7 @@ export default function CommunityHomePage() {
         </div>
       )}
 
-      {/* Questions List */}
+      {/* Questions List - StackOverflow Style */}
       {sortedPosts.length === 0 ? (
         <div className="bg-card border rounded-lg p-12 text-center">
           <MessageCircle className="size-12 mx-auto mb-3 text-muted-foreground opacity-30" />
@@ -474,51 +473,42 @@ export default function CommunityHomePage() {
           <p className="text-muted-foreground mt-1">Be the first to ask a question!</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="divide-y divide-border">
           {sortedPosts.map((post) => {
             const isLiked = user && post.likes?.includes(user.id);
             const isOwner = user && post.authorId === user.id;
-            const hoursLeft = getHoursUntilExpiry(post.expiresAt);
             
             return (
-              <div key={post._id} className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow">
-                {/* Pinned Badge */}
-                {post.isPinned && (
-                  <div className="flex items-center gap-1 text-xs font-semibold text-primary mb-2">
-                    <Pin className="size-3" />
-                    Pinned
-                  </div>
-                )}
-                
+              <div key={post._id} className="py-4 hover:bg-muted/30 -mx-4 px-4 transition-colors">
                 <div className="flex gap-4">
-                  {/* Stats - Left Side */}
-                  <div className="flex flex-col items-center gap-3 min-w-[60px] text-center">
-                    <div className={`flex flex-col items-center ${isLiked ? "text-red-500" : "text-muted-foreground"}`}>
-                      <Heart 
-                        className={`size-5 cursor-pointer transition-colors ${isLiked ? "fill-red-500" : "hover:text-red-500"}`}
-                        onClick={() => handleLike(post._id)}
-                      />
-                      <span className="text-sm font-semibold">{post.likes?.length || 0}</span>
+                  {/* Stats - StackOverflow Style */}
+                  <div className="flex flex-col items-end gap-2 min-w-[80px] text-sm">
+                    <div className="text-center">
+                      <div className={`font-bold ${(post.likes?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`}>
+                        {(post.likes?.length || 0)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">votes</div>
                     </div>
                     
-                    <div className={`flex flex-col items-center ${(post.comments?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`}>
-                      <MessageCircle className="size-5" />
-                      <span className="text-sm font-semibold">{post.comments?.length || 0}</span>
+                    <div className={`text-center px-2 py-1 rounded ${(post.comments?.length || 0) > 0 ? "bg-green-100 text-green-700 border border-green-300" : "text-muted-foreground"}`}>
+                      <div className="font-bold">{post.comments?.length || 0}</div>
+                      <div className="text-xs">answers</div>
                     </div>
 
-                    <div className="flex flex-col items-center text-muted-foreground">
-                      <Clock className="size-4" />
-                      <span className="text-xs">{hoursLeft}h</span>
+                    <div className="text-center text-xs text-muted-foreground">
+                      <div>{getHoursUntilExpiry(post.expiresAt)}h</div>
+                      <div>left</div>
                     </div>
                   </div>
 
-                  {/* Content - Middle */}
+                  {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-medium text-foreground hover:text-primary cursor-pointer line-clamp-2 mb-2">
+                    {/* Title/Content */}
+                    <h3 className="text-base font-medium text-primary hover:text-primary/80 cursor-pointer mb-2">
                       {escapeHtml(post.content)}
                     </h3>
                     
-                    {/* Tags */}
+                    {/* Tags as Badges */}
                     {post.tags && post.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-3">
                         {post.tags.map(tag => (
@@ -526,7 +516,9 @@ export default function CommunityHomePage() {
                             key={tag}
                             onClick={() => setFilterTag(filterTag === tag ? null : tag)}
                             className={`px-2 py-0.5 text-xs rounded-md transition-colors ${
-                              filterTag === tag ? "bg-primary text-white" : "bg-primary/10 text-primary hover:bg-primary/20"
+                              filterTag === tag 
+                                ? "bg-primary text-primary-foreground" 
+                                : "bg-primary/10 text-primary hover:bg-primary/20"
                             }`}
                           >
                             {tag}
@@ -535,7 +527,7 @@ export default function CommunityHomePage() {
                       </div>
                     )}
 
-                    {/* Footer */}
+                    {/* Footer - Author & Actions */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
                         <button onClick={() => handleShare(post.content)} className="hover:text-primary flex items-center gap-1">
@@ -545,23 +537,34 @@ export default function CommunityHomePage() {
                           <Flag className="size-3" /> Flag
                         </button>
                         <button onClick={() => toggleComments(post._id)} className="hover:text-primary">
-                          {expandedComments.has(post._id) ? "Hide answers" : "Add answer"}
+                          {expandedComments.has(post._id) ? "Hide answers" : `${post.comments?.length || 0} answers`}
+                        </button>
+                        {(isOwner || user?.role === "admin") && (
+                          <button onClick={() => handleDeletePost(post._id)} className="hover:text-red-500 flex items-center gap-1">
+                            <Trash2 className="size-3" /> Delete
+                          </button>
+                        )}
+                        {user?.role === "admin" && (
+                          <button onClick={() => handlePin(post._id)} className={`flex items-center gap-1 ${post.isPinned ? "text-primary" : "hover:text-primary"}`}>
+                            <Pin className={`size-3 ${post.isPinned ? "fill-current" : ""}`} /> {post.isPinned ? "Unpin" : "Pin"}
+                          </button>
+                        )}
+                        <button onClick={() => handleLike(post._id)} className={`flex items-center gap-1 ${isLiked ? "text-red-500" : "hover:text-red-500"}`}>
+                          <Heart className={`size-3 ${isLiked ? "fill-current" : ""}`} /> {isLiked ? "Liked" : "Like"}
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        {/* Author */}
-                        <Link href={`/community/profile/${post.authorId}`} className="flex items-center gap-2 text-xs hover:bg-muted/50 p-1 rounded transition-colors">
-                          <div className="size-6 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden">
-                            {post.authorAvatar ? (
-                              <Image src={post.authorAvatar} alt="" width={24} height={24} className="object-cover" />
-                            ) : (
-                              <span className="text-[10px] font-bold text-white">{post.authorName?.charAt(0).toUpperCase()}</span>
-                            )}
-                          </div>
-                          <span className="text-primary">{escapeHtml(post.authorName || "Anonymous")}</span>
+                      {/* Author Info - StackOverflow Style */}
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-muted-foreground">
+                          asked {formatDistanceToNow(new Date(post.createdAt))}
+                        </span>
+                        <Link 
+                          href={`/community/profile/${post.authorId}`}
+                          className="text-primary hover:underline font-medium"
+                        >
+                          {escapeHtml(post.authorName || "Anonymous")}
                         </Link>
-                        <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(post.createdAt))}</span>
                       </div>
                     </div>
 
@@ -611,20 +614,6 @@ export default function CommunityHomePage() {
                           </Button>
                         </div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Actions - Right Side */}
-                  <div className="flex flex-col gap-1">
-                    {(isOwner || user?.role === "admin") && (
-                      <button onClick={() => handleDeletePost(post._id)} className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded transition-colors" title="Delete">
-                        <Trash2 className="size-4" />
-                      </button>
-                    )}
-                    {user?.role === "admin" && (
-                      <button onClick={() => handlePin(post._id)} className={`p-2 rounded transition-colors ${post.isPinned ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-primary hover:bg-muted"}`} title={post.isPinned ? "Unpin" : "Pin"}>
-                        <Pin className={`size-4 ${post.isPinned ? "fill-current" : ""}`} />
-                      </button>
                     )}
                   </div>
                 </div>
