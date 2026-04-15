@@ -28,9 +28,26 @@ export async function GET(request: Request) {
 
     const firstAdmin = await Admin.findOne().lean();
     const fallbackAvatar = firstAdmin?.avatar || "";
+    
+    const authorIds = [...new Set(posts.map(p => p.authorId).filter(Boolean))];
+    const authors = await Admin.find({ _id: { $in: authorIds } }).lean();
+    const authorMap = new Map(authors.map(a => [a._id.toString(), a.avatar || ""]));
+    
+    const allAdmins = await Admin.find().lean();
+    const nameAvatarMap = new Map(allAdmins.map(a => [a.name.toLowerCase(), a.avatar || ""]));
 
     const postsWithAvatars = posts.map((post) => {
-      return { ...post, authorAvatar: fallbackAvatar };
+      let authorAvatar = "";
+      if (post.authorId) {
+        authorAvatar = authorMap.get(post.authorId) || "";
+      }
+      if (!authorAvatar && post.author) {
+        authorAvatar = nameAvatarMap.get(post.author.toLowerCase()) || "";
+      }
+      if (!authorAvatar) {
+        authorAvatar = fallbackAvatar;
+      }
+      return { ...post, authorAvatar };
     });
 
     return NextResponse.json({

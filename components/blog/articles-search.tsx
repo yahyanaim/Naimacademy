@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { FileText, Clock, Eye, Search, X } from "lucide-react";
 
 interface Article {
@@ -10,6 +11,7 @@ interface Article {
   slug: string;
   excerpt: string;
   author: string;
+  authorAvatar?: string;
   publishedAt: string;
   readingTime: number;
   views: number;
@@ -120,11 +122,17 @@ export default function ArticlesSearch({ placeholder = "Search articles..." }: A
                   <div className="flex gap-6">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="size-8 rounded-full bg-muted flex items-center justify-center">
-                          <span className="text-xs font-medium text-muted-foreground">
-                            {article.author?.charAt(0) || "N"}
-                          </span>
-                        </div>
+                        {article.authorAvatar ? (
+                          <div className="size-8 rounded-full overflow-hidden flex-shrink-0">
+                            <Image src={article.authorAvatar} alt={article.author} width={32} height={32} className="object-cover" />
+                          </div>
+                        ) : (
+                          <div className="size-8 rounded-full bg-muted flex items-center justify-center">
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {article.author?.charAt(0) || "N"}
+                            </span>
+                          </div>
+                        )}
                         <span className="text-sm font-medium">{article.author}</span>
                         <span className="text-muted-foreground">·</span>
                         <time className="text-sm text-muted-foreground">
@@ -185,11 +193,17 @@ export default function ArticlesSearch({ placeholder = "Search articles..." }: A
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   <div className="order-2 md:order-1">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="size-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-                        <span className="text-sm font-bold text-white">
-                          {featuredPost.author?.charAt(0) || "N"}
-                        </span>
-                      </div>
+                      {featuredPost.authorAvatar ? (
+                        <div className="size-10 rounded-full overflow-hidden flex-shrink-0">
+                          <Image src={featuredPost.authorAvatar} alt={featuredPost.author} width={40} height={40} className="object-cover" />
+                        </div>
+                      ) : (
+                        <div className="size-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+                          <span className="text-sm font-bold text-white">
+                            {featuredPost.author?.charAt(0) || "N"}
+                          </span>
+                        </div>
+                      )}
                       <div>
                         <p className="font-medium text-sm">{featuredPost.author}</p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -254,11 +268,17 @@ export default function ArticlesSearch({ placeholder = "Search articles..." }: A
                     <div className="flex gap-6">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="size-8 rounded-full bg-muted flex items-center justify-center">
-                            <span className="text-xs font-medium text-muted-foreground">
-                              {post.author?.charAt(0) || "N"}
-                            </span>
-                          </div>
+                          {post.authorAvatar ? (
+                            <div className="size-8 rounded-full overflow-hidden flex-shrink-0">
+                              <Image src={post.authorAvatar} alt={post.author} width={32} height={32} className="object-cover" />
+                            </div>
+                          ) : (
+                            <div className="size-8 rounded-full bg-muted flex items-center justify-center">
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {post.author?.charAt(0) || "N"}
+                              </span>
+                            </div>
+                          )}
                           <span className="text-sm font-medium">{post.author}</span>
                           <span className="text-muted-foreground">·</span>
                           <time className="text-sm text-muted-foreground">
