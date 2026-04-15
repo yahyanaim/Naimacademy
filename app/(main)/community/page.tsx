@@ -403,7 +403,13 @@ function CommunityContent({
   expandedComments, setExpandedComments, newComment, setNewComment,
   posting, setPosting, loading, handleAddTag, handleRemoveTag, handleCreatePost,
   toggleComments, handleLike, handleSave, handleDeletePost, handleAddComment, handlePin
-}: any) {
+}: {
+  user: any; posts: any[]; setPosts: any; searchQuery: string; sortBy: string; setSortBy: any; filterTag: any; setFilterTag: any;
+  newPost: string; setNewPost: any; newTags: string[]; setNewTags: any; tagInput: string; setTagInput: any;
+  expandedComments: any; setExpandedComments: any; newComment: any; setNewComment: any;
+  posting: boolean; setPosting: any; loading: boolean; handleAddTag: any; handleRemoveTag: any; handleCreatePost: any;
+  toggleComments: any; handleLike: any; handleSave: any; handleDeletePost: any; handleAddComment: any; handlePin: any;
+}) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
