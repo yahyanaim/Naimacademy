@@ -173,6 +173,11 @@ function CommunityHomePageContent() {
       return;
     }
 
+    if (newTags.length === 0) {
+      toast.error("Please add at least one tag");
+      return;
+    }
+
     setPosting(true);
     try {
       const res = await fetch("/api/community", {
@@ -429,15 +434,12 @@ function CommunityContent({
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Questions</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">{filteredPostsCount} questions</p>
-        </div>
-          <Button onClick={() => setShowNewPostForm(true)} className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4">
-          Ask Question
-        </Button>
+      {/* Inline Question Input */}
+      <div 
+        onClick={() => setShowNewPostForm(true)}
+        className="bg-gray-100 dark:bg-gray-800/50 rounded-full px-5 py-3 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors border border-gray-200 dark:border-gray-700"
+      >
+        <span className="text-gray-500 dark:text-gray-400 text-sm">Ask a question or start a discussion...</span>
       </div>
 
       {/* New Post Form Modal */}
@@ -483,7 +485,7 @@ function CommunityContent({
               
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="outline" onClick={() => setShowNewPostForm(false)}>Cancel</Button>
-                <Button onClick={handleCreatePost} disabled={posting || newPost.trim().length < 10} className="bg-blue-500 hover:bg-blue-600">
+                <Button onClick={handleCreatePost} disabled={posting || newPost.trim().length < 10 || newTags.length === 0} className="bg-gray-900 hover:bg-gray-800 text-white">
                   Post
                 </Button>
               </div>
@@ -497,7 +499,7 @@ function CommunityContent({
         <Button 
           variant={sortBy === "newest" ? "default" : "ghost"} 
           size="sm" 
-          className={sortBy === "newest" ? "bg-blue-500 text-white" : ""}
+          className={sortBy === "newest" ? "bg-gray-900 text-white" : ""}
           onClick={() => setSortBy("newest")}
         >
           Newest
@@ -505,7 +507,7 @@ function CommunityContent({
         <Button 
           variant={sortBy === "votes" ? "default" : "ghost"} 
           size="sm" 
-          className={sortBy === "votes" ? "bg-blue-500 text-white" : ""}
+          className={sortBy === "votes" ? "bg-gray-900 text-white" : ""}
           onClick={() => setSortBy("votes")}
         >
           Most Voted
@@ -513,7 +515,7 @@ function CommunityContent({
         <Button 
           variant={sortBy === "unanswered" ? "default" : "ghost"} 
           size="sm" 
-          className={sortBy === "unanswered" ? "bg-blue-500 text-white" : ""}
+          className={sortBy === "unanswered" ? "bg-gray-900 text-white" : ""}
           onClick={() => setSortBy("unanswered")}
         >
           Unanswered

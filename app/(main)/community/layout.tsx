@@ -285,7 +285,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                   className={cn(
                     "flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
                     isActive
-                      ? "bg-blue-500/10 text-blue-500 font-bold"
+                      ? "bg-gray-900 text-white font-bold"
                       : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
                   )}
                 >
@@ -301,7 +301,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
               className={cn(
                 "w-full flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
                 chatOpen
-                  ? "bg-blue-500/10 text-blue-500 font-bold"
+                  ? "bg-gray-900 text-white font-bold"
                   : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
               )}
             >
