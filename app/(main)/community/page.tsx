@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Pin, Heart, Clock, MessageCircle, Loader2, Send, Plus, X } from "lucide-react";
+import Link from "next/link";
+import { Pin, Heart, Clock, MessageCircle, Loader2, Send, Plus, X, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -49,8 +50,7 @@ function escapeHtml(text: string): string {
     .replace(/'/g, "&#039;");
 }
 
-function formatTimeAgo(dateString: string): string {
-  const date = new Date(dateString);
+function formatDistanceToNow(date: Date): string {
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const seconds = Math.floor(diff / 1000);
@@ -58,24 +58,16 @@ function formatTimeAgo(dateString: string): string {
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
 
-  if (days > 0) return `${days}d ago`;
-  if (hours > 0) return `${hours}h ago`;
-  if (minutes > 0) return `${minutes}m ago`;
-  return "Just now";
+  if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
+  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+  return "just now";
 }
 
-function getTimeRemaining(expiresAt: string): string {
+function getHoursUntilExpiry(expiresAt: string): number {
   const expires = new Date(expiresAt);
   const now = new Date();
-  const diff = expires.getTime() - now.getTime();
-  
-  if (diff <= 0) return "Expired";
-  
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  
-  if (hours > 0) return `${hours}h ${minutes}m left`;
-  return `${minutes}m left`;
+  return Math.max(0, Math.ceil((expires.getTime() - now.getTime()) / (1000 * 60 * 60)));
 }
 
 export default function CommunityHomePage() {
@@ -88,6 +80,7 @@ export default function CommunityHomePage() {
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [newComment, setNewComment] = useState<{ [postId: string]: string }>({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"newest" | "votes" | "unanswered">("newest");
 
   const fetchUser = useCallback(async () => {
     try {
@@ -244,102 +237,106 @@ export default function CommunityHomePage() {
     post.authorName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const pinnedPosts = filteredPosts.filter(p => p.isPinned);
-  const regularPosts = filteredPosts.filter(p => !p.isPinned);
+  const sortedPosts = [...filteredPosts].sort((a, b) => {
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    
+    if (sortBy === "votes") {
+      return b.likes.length - a.likes.length;
+    } else if (sortBy === "unanswered") {
+      return a.comments.length - b.comments.length;
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
-  const renderPost = (post: Post, isPinned = false) => (
-    <div
-      key={post._id}
-      className={`bg-card border rounded-2xl p-5 transition-all duration-200 hover:shadow-md ${
-        isPinned ? "border-primary/30 bg-primary/5" : ""
-      }`}
-    >
-      {isPinned && (
-        <div className="flex items-center gap-1.5 text-primary text-xs font-semibold mb-3 bg-primary/10 px-2.5 py-1 rounded-full w-fit">
-          <Pin className="size-3" />
-          Pinned
-        </div>
-      )}
-      
-      <div className="flex items-start gap-4">
-        <div className="size-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm">
-          {post.authorAvatar ? (
-            <Image src={post.authorAvatar} alt="" width={48} height={48} className="object-cover" />
-          ) : (
-            <span className="text-lg font-bold text-white">{post.authorName.charAt(0).toUpperCase()}</span>
+  const pinnedPosts = sortedPosts.filter(p => p.isPinned);
+  const regularPosts = sortedPosts.filter(p => !p.isPinned);
+
+  const renderPost = (post: Post, showAuthor = true) => (
+    <div key={post._id} className="bg-card border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+      <div className="flex">
+        {/* Vote Column - StackOverflow Style */}
+        <div className="w-16 bg-muted/30 flex flex-col items-center py-4 gap-1 border-r">
+          <button 
+            onClick={() => handleLike(post._id)}
+            className="flex flex-col items-center p-1 hover:bg-muted rounded transition-colors"
+          >
+            <ThumbsUp className={`size-5 ${post.likes.includes(user?.id || "") ? "text-primary fill-primary" : "text-muted-foreground"}`} />
+            <span className="text-sm font-bold text-foreground">{post.likes.length}</span>
+          </button>
+          
+          <button
+            onClick={() => toggleComments(post._id)}
+            className="flex flex-col items-center p-1 hover:bg-muted rounded transition-colors mt-2"
+          >
+            <MessageCircle className={`size-5 ${post.comments.length > 0 ? "text-primary" : "text-muted-foreground"}`} />
+            <span className="text-sm font-bold text-foreground">{post.comments.length}</span>
+          </button>
+
+          {user?.role === "admin" && (
+            <button
+              onClick={() => handlePin(post._id)}
+              className="flex flex-col items-center p-1 hover:bg-muted rounded transition-colors mt-2"
+            >
+              <Pin className={`size-5 ${post.isPinned ? "text-primary fill-primary" : "text-muted-foreground"}`} />
+            </button>
           )}
         </div>
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-base">{escapeHtml(post.authorName)}</span>
-            <span className="text-sm text-muted-foreground">{formatTimeAgo(post.createdAt)}</span>
-            <span className="flex items-center gap-1 text-sm text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+
+        {/* Content */}
+        <div className="flex-1 p-4">
+          {post.isPinned && (
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded mb-2">
+              <Pin className="size-3" />
+              Pinned
+            </span>
+          )}
+          
+          <p className="text-base leading-relaxed whitespace-pre-wrap">{escapeHtml(post.content)}</p>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mt-3">
+            <span className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-1 rounded">
               <Clock className="size-3" />
-              {getTimeRemaining(post.expiresAt)}
+              asked {formatDistanceToNow(new Date(post.createdAt))}
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">
+              Expires in {getHoursUntilExpiry(post.expiresAt)}h
             </span>
           </div>
-          
-          <p className="mt-3 text-base leading-relaxed whitespace-pre-wrap">{escapeHtml(post.content)}</p>
-          
-          <div className="flex items-center gap-6 mt-4 pt-3 border-t">
-            <button
-              onClick={() => handleLike(post._id)}
-              className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                post.likes.includes(user?.id || "") 
-                  ? "text-red-500" 
-                  : "text-muted-foreground hover:text-red-500"
-              }`}
-            >
-              <Heart className={`size-5 ${post.likes.includes(user?.id || "") ? "fill-current" : ""}`} />
-              {post.likes.length} {post.likes.length === 1 ? "like" : "likes"}
-            </button>
-            
-            <button
-              onClick={() => toggleComments(post._id)}
-              className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              <MessageCircle className="size-5" />
-              {post.comments.length} {post.comments.length === 1 ? "comment" : "comments"}
-            </button>
-            
-            {user?.role === "admin" && (
-              <button
-                onClick={() => handlePin(post._id)}
-                className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                  post.isPinned ? "text-primary" : "text-muted-foreground hover:text-primary"
-                }`}
-              >
-                <Pin className="size-5" />
-                {post.isPinned ? "Unpin" : "Pin"}
-              </button>
-            )}
-          </div>
 
+          {/* Comments Section */}
           {expandedComments.has(post._id) && (
-            <div className="mt-4 space-y-4 pl-4 border-l-2 border-primary/20">
+            <div className="mt-4 pt-4 border-t space-y-3">
               {post.comments.map((comment) => (
-                <div key={comment._id} className="flex gap-3">
-                  <div className="size-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div key={comment._id} className="flex gap-3 bg-muted/50 p-3 rounded-lg">
+                  <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {comment.authorAvatar ? (
                       <Image src={comment.authorAvatar} alt="" width={32} height={32} className="object-cover" />
                     ) : (
-                      <span className="text-xs font-bold">{comment.authorName.charAt(0).toUpperCase()}</span>
+                      <span className="text-xs font-bold text-white">{comment.authorName.charAt(0).toUpperCase()}</span>
                     )}
                   </div>
-                  <div className="flex-1 bg-muted/50 rounded-xl p-3">
+                  <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">{escapeHtml(comment.authorName)}</span>
-                      <span className="text-xs text-muted-foreground">{formatTimeAgo(comment.createdAt)}</span>
+                      <Link 
+                        href={`/community/profile/${comment.authorId}`}
+                        className="font-medium text-sm hover:text-primary"
+                      >
+                        {escapeHtml(comment.authorName)}
+                      </Link>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(comment.createdAt))}
+                      </span>
                     </div>
                     <p className="text-sm mt-1">{escapeHtml(comment.content)}</p>
                   </div>
                 </div>
               ))}
               
-              <div className="flex gap-3 items-center">
+              <div className="flex gap-2 items-center">
                 <Input
-                  placeholder="Write a comment..."
+                  placeholder="Add an answer..."
                   value={newComment[post._id] || ""}
                   onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
                   onKeyDown={(e) => e.key === "Enter" && handleAddComment(post._id)}
@@ -352,104 +349,141 @@ export default function CommunityHomePage() {
             </div>
           )}
         </div>
+
+        {/* Author Card - StackOverflow Style */}
+        {showAuthor && (
+          <div className="w-40 bg-muted/30 p-3 border-l">
+            <div className="text-xs text-muted-foreground mb-2">
+              asked {formatDistanceToNow(new Date(post.createdAt))}
+            </div>
+            <Link 
+              href={`/community/profile/${post.authorId}`}
+              className="flex items-center gap-2 hover:bg-muted p-1.5 rounded-lg transition-colors"
+            >
+              <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden flex-shrink-0">
+                {post.authorAvatar ? (
+                  <Image src={post.authorAvatar} alt="" width={32} height={32} className="object-cover" />
+                ) : (
+                  <span className="text-xs font-bold text-white">{post.authorName.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate hover:text-primary">{escapeHtml(post.authorName)}</p>
+                <p className="text-xs text-muted-foreground">{post.likes.length} votes</p>
+              </div>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto p-6">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Community Home</h1>
-        <p className="text-muted-foreground mt-1">Ask questions and share with the community</p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">All Questions</h1>
+          <p className="text-muted-foreground mt-1">{filteredPosts.length} questions</p>
+        </div>
+        <Button onClick={() => setShowNewPostForm(true)}>
+          <Plus className="size-4 mr-2" />
+          Ask Question
+        </Button>
       </div>
 
-      {/* Create Post */}
-      <div className="bg-card border rounded-2xl p-5 mb-6">
-        <div className="flex items-start gap-4">
-          <div className="size-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {user?.avatar ? (
-              <Image src={user.avatar} alt="" width={48} height={48} className="object-cover" />
-            ) : (
-              <span className="text-lg font-bold text-white">{user?.name?.charAt(0).toUpperCase()}</span>
-            )}
-          </div>
-          
-          <div className="flex-1">
-            {showNewPostForm ? (
-              <div className="space-y-4">
-                <Textarea
-                  placeholder="Ask a question to the community... (will expire in 24h)"
-                  value={newPost}
-                  onChange={(e) => setNewPost(e.target.value)}
-                  rows={4}
-                  className="resize-none text-base"
-                />
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <Clock className="size-4" />
-                    Expires in 24 hours
-                  </span>
-                  <div className="flex gap-3">
-                    <Button variant="outline" onClick={() => setShowNewPostForm(false)}>
-                      Cancel
-                    </Button>
-                    <Button onClick={handleCreatePost} disabled={posting}>
-                      {posting ? "Posting..." : "Post Question"}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowNewPostForm(true)}
-                className="w-full text-left px-4 py-3.5 rounded-xl border border-dashed hover:bg-muted/50 transition-colors text-muted-foreground"
-              >
-                Ask a question to the community...
-              </button>
-            )}
+      {/* New Post Form */}
+      {showNewPostForm && (
+        <div className="bg-card border rounded-xl p-5 mb-6">
+          <h3 className="font-semibold mb-4">Ask a Question</h3>
+          <Textarea
+            placeholder="What's your question? Be specific and include details..."
+            value={newPost}
+            onChange={(e) => setNewPost(e.target.value)}
+            rows={6}
+            className="resize-none text-base mb-4"
+          />
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+              <Clock className="size-4" />
+              This question will expire in 24 hours
+            </span>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setShowNewPostForm(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreatePost} disabled={posting || newPost.trim().length < 10}>
+                {posting ? "Posting..." : "Post Question"}
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Search */}
-      <div className="mb-6">
+      {/* Filters */}
+      <div className="flex items-center gap-4 mb-6">
         <Input
-          placeholder="Search posts..."
+          placeholder="Search questions..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-md"
+          className="max-w-sm"
         />
+        <div className="flex gap-1 bg-muted/50 p-1 rounded-lg">
+          <button
+            onClick={() => setSortBy("newest")}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              sortBy === "newest" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Newest
+          </button>
+          <button
+            onClick={() => setSortBy("votes")}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              sortBy === "votes" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Most Voted
+          </button>
+          <button
+            onClick={() => setSortBy("unanswered")}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              sortBy === "unanswered" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Unanswered
+          </button>
+        </div>
       </div>
 
       {/* Posts */}
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-card border rounded-2xl p-5 animate-pulse">
-              <div className="flex gap-4">
-                <div className="size-12 rounded-full bg-muted" />
-                <div className="flex-1 space-y-3">
-                  <div className="h-4 bg-muted rounded w-1/4" />
-                  <div className="h-4 bg-muted rounded w-full" />
+            <div key={i} className="bg-card border rounded-lg animate-pulse">
+              <div className="flex">
+                <div className="w-16 bg-muted/30 p-4" />
+                <div className="flex-1 p-4 space-y-3">
                   <div className="h-4 bg-muted rounded w-3/4" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="h-4 bg-muted rounded w-1/2" />
                 </div>
               </div>
             </div>
           ))}
         </div>
-      ) : filteredPosts.length === 0 ? (
-        <div className="text-center py-16">
+      ) : sortedPosts.length === 0 ? (
+        <div className="bg-card border rounded-lg p-12 text-center">
           <div className="size-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
             <MessageCircle className="size-8 text-muted-foreground" />
           </div>
-          <h3 className="font-semibold text-lg">No posts yet</h3>
+          <h3 className="font-semibold text-lg">No questions yet</h3>
           <p className="text-muted-foreground mt-1">Be the first to ask a question!</p>
         </div>
       ) : (
         <div className="space-y-4">
           {pinnedPosts.map((post) => renderPost(post, true))}
-          {regularPosts.map((post) => renderPost(post))}
+          {regularPosts.map((post) => renderPost(post, true))}
         </div>
       )}
     </div>
