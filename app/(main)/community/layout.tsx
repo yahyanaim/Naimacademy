@@ -273,62 +273,61 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       {chatOpen && (
         <div
           className={cn(
-            "fixed right-4 bottom-20 w-80 bg-card border border-t-2 border-l flex flex-col transition-all duration-300 z-40 rounded-tl-lg shadow-xl",
-            chatCollapsed ? "h-12" : "h-[400px]"
+            "fixed right-4 bottom-24 w-80 bg-white dark:bg-[#15202b] border border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-40 rounded-2xl shadow-2xl",
+            chatCollapsed ? "h-14" : "h-[450px]"
           )}
         >
           {/* Chat Header */}
-          <div className="flex items-center justify-between p-3 border-b bg-card flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+          <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-gray-50 to-white dark:from-[#192734] dark:to-[#15202b] rounded-t-2xl flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="size-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
                 <Users className="size-4 text-white" />
               </div>
               <div>
-                <h2 className="font-semibold text-sm">N8N Community</h2>
+                <h2 className="font-bold text-sm text-gray-900 dark:text-white">N8N Community</h2>
                 {!chatCollapsed && (
-                  <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                    <span className="size-1.5 rounded-full bg-green-500" />
-                    Active now
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="size-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400">Active now</span>
+                  </div>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               <Button
                 variant="ghost"
                 size="sm"
-                className="size-8 p-0"
+                className="size-8 p-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                 onClick={() => setChatCollapsed(!chatCollapsed)}
                 title={chatCollapsed ? "Expand" : "Collapse"}
               >
                 {chatCollapsed ? (
-                  <div className="size-3 border-2 border-muted-foreground rounded-sm" />
+                  <div className="size-4 rounded border-2 border-gray-400" />
                 ) : (
-                  <Minus className="size-4" />
+                  <Minus className="size-5" />
                 )}
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="size-8 p-0"
+                className="size-8 p-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                 onClick={() => { setChatOpen(false); setChatCollapsed(false); }}
               >
-                <X className="size-4" />
+                <X className="size-5" />
               </Button>
             </div>
           </div>
 
           {/* Messages */}
           {!chatCollapsed && (
-            <div className="flex-1 overflow-y-auto p-3 space-y-3">
-              {false ? (
-                <div className="flex items-center justify-center h-full">
-                  <Loader2 className="size-5 animate-spin text-muted-foreground" />
-                </div>
-              ) : messages.length === 0 ? (
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-[#15202b]">
+              {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <MessageCircle className="size-8 text-muted-foreground mb-2" />
-                  <p className="text-xs text-muted-foreground">No messages yet</p>
+                  <div className="size-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-3">
+                    <MessageCircle className="size-6 text-blue-500" />
+                  </div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">No messages yet</p>
+                  <p className="text-xs text-gray-400 mt-1">Start the conversation!</p>
                 </div>
               ) : (
                 messages.map((message) => {
@@ -339,38 +338,42 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                       className={cn("flex gap-2", isOwn ? "flex-row-reverse" : "")}
                     >
                       {!isOwn && (
-                        <div className="size-6 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <div className="size-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm">
                           {message.authorAvatar ? (
-                            <Image src={message.authorAvatar} alt="" width={24} height={24} className="object-cover" />
+                            <Image src={message.authorAvatar} alt="" width={32} height={32} className="object-cover" />
                           ) : (
-                            <span className="text-[8px] font-bold text-white">
+                            <span className="text-[10px] font-bold text-white">
                               {message.authorName.charAt(0).toUpperCase()}
                             </span>
                           )}
                         </div>
                       )}
-                      <div className={cn("max-w-[75%]", isOwn ? "items-end" : "")}>
+                      <div className={cn("max-w-[80%]", isOwn ? "items-end" : "")}>
                         {!isOwn && (
-                          <span className="text-[10px] font-medium text-primary">
-                            {escapeHtml(message.authorName)}
-                          </span>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-semibold text-gray-900 dark:text-white">
+                              {escapeHtml(message.authorName)}
+                            </span>
+                            <span className="text-[10px] text-gray-400">
+                              {formatTimeAgo(message.createdAt)}
+                            </span>
+                          </div>
                         )}
                         <div
                           className={cn(
-                            "px-2.5 py-1.5 rounded-lg text-xs mt-0.5",
+                            "px-3 py-2 rounded-2xl text-sm shadow-sm",
                             isOwn
-                              ? "bg-primary text-white rounded-br-sm"
-                              : "bg-muted rounded-bl-sm"
+                              ? "bg-blue-500 text-white rounded-br-sm"
+                              : "bg-white dark:bg-[#192734] text-gray-900 dark:text-white rounded-bl-sm border border-gray-100 dark:border-gray-700"
                           )}
                         >
                           <p className="leading-relaxed">{escapeHtml(message.content)}</p>
                         </div>
-                        <span className={cn(
-                          "text-[9px] text-muted-foreground mt-0.5 block",
-                          isOwn ? "text-right" : ""
-                        )}>
-                          {formatTimeAgo(message.createdAt)}
-                        </span>
+                        {isOwn && (
+                          <span className="text-[9px] text-gray-400 mt-1 block text-right">
+                            {formatTimeAgo(message.createdAt)}
+                          </span>
+                        )}
                       </div>
                     </div>
                   );
@@ -381,23 +384,23 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
           )}
 
           {/* Input */}
-          <div className="p-3 border-t bg-card flex-shrink-0">
-            <div className="flex gap-2">
+          <div className="p-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-[#192734] rounded-b-2xl flex-shrink-0">
+            <div className="flex items-center gap-2">
               <input
                 type="text"
-                placeholder="Type a message..."
+                placeholder="Message..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                className="flex-1 px-3 py-2 text-xs border rounded-full bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="flex-1 px-4 py-2.5 text-sm rounded-full bg-gray-100 dark:bg-[#253341] border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white placeholder-gray-400"
               />
               <Button
                 size="sm"
-                className="size-8 p-0 rounded-full"
+                className="size-9 p-0 rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-md transition-all"
                 onClick={handleSendMessage}
                 disabled={sending || !newMessage.trim()}
               >
-                <Send className="size-3" />
+                <Send className="size-4" />
               </Button>
             </div>
           </div>
