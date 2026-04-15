@@ -22,8 +22,16 @@ async function getPost(slug: string) {
     ).lean();
     
     if (post) {
-      const firstAdmin = await Admin.findOne().lean();
-      (post as any).authorAvatar = firstAdmin?.avatar || "";
+      let authorAvatar = "";
+      if (post.authorId) {
+        const authorAdmin = await Admin.findById(post.authorId).lean();
+        authorAvatar = authorAdmin?.avatar || "";
+      }
+      if (!authorAvatar) {
+        const firstAdmin = await Admin.findOne().lean();
+        authorAvatar = firstAdmin?.avatar || "";
+      }
+      (post as any).authorAvatar = authorAvatar;
     }
     
     return post;
@@ -43,7 +51,14 @@ async function getAllPosts() {
     const firstAdmin = await Admin.findOne().lean();
     const fallbackAvatar = firstAdmin?.avatar || "";
     
-    return posts.map(post => ({ ...post, authorAvatar: fallbackAvatar }));
+    const authorIds = [...new Set(posts.map(p => p.authorId).filter(Boolean))];
+    const authors = await Admin.find({ _id: { $in: authorIds } }).lean();
+    const authorMap = new Map(authors.map(a => [a._id.toString(), a.avatar || ""]));
+    
+    return posts.map(post => {
+      const authorAvatar = post.authorId ? (authorMap.get(post.authorId) || fallbackAvatar) : fallbackAvatar;
+      return { ...post, authorAvatar };
+    });
   } catch {
     return [];
   }
