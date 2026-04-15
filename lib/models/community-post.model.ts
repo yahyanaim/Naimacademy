@@ -6,6 +6,7 @@ export interface ICommunityPost extends Document {
   authorEmail: string;
   authorAvatar?: string;
   content: string;
+  tags: string[];
   isPinned: boolean;
   pinnedBy?: Types.ObjectId;
   expiresAt: Date;
@@ -30,11 +31,12 @@ const CommunityPostSchema = new Schema<ICommunityPost>(
     authorEmail: { type: String, required: true },
     authorAvatar: { type: String, default: "" },
     content: { type: String, required: true },
-    isPinned: { type: Boolean, default: false },
+    tags: [{ type: String, default: [] }],
+    isPinned: { type: Boolean, default: false, index: true },
     pinnedBy: { type: Schema.Types.ObjectId, ref: "User" },
     expiresAt: { type: Date, required: true, index: true },
     isExpired: { type: Boolean, default: false },
-    likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    likes: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     comments: [
       {
         authorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -52,6 +54,7 @@ const CommunityPostSchema = new Schema<ICommunityPost>(
 CommunityPostSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 CommunityPostSchema.index({ createdAt: -1 });
 CommunityPostSchema.index({ isPinned: -1, createdAt: -1 });
+CommunityPostSchema.index({ tags: 1 });
 
 export const CommunityPost =
   mongoose.models.CommunityPost || mongoose.model<ICommunityPost>("CommunityPost", CommunityPostSchema);

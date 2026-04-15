@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     if (type === "post") {
-      const { content } = body;
+      const { content, tags } = body;
 
       if (!content || content.trim().length < 10) {
         return NextResponse.json({ error: "Post must be at least 10 characters" }, { status: 400 });
@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
         authorAvatar: body.authorAvatar || "",
         content: content.trim(),
         expiresAt,
+        tags: tags || [],
       });
 
       return NextResponse.json({ post }, { status: 201 });
@@ -128,7 +129,11 @@ export async function POST(request: NextRequest) {
 
       await post.save();
 
-      return NextResponse.json({ likes: post.likes.length, liked: likeIndex === -1 });
+      return NextResponse.json({ 
+        likes: post.likes.length, 
+        liked: likeIndex === -1,
+        userId: payload.userId 
+      });
     }
 
     if (type === "pin") {
@@ -143,7 +148,10 @@ export async function POST(request: NextRequest) {
       post.pinnedBy = post.isPinned ? payload.userId : undefined;
       await post.save();
 
-      return NextResponse.json({ isPinned: post.isPinned });
+      return NextResponse.json({ 
+        isPinned: post.isPinned,
+        postId: post._id.toString()
+      });
     }
 
     if (type === "comment") {
@@ -170,7 +178,10 @@ export async function POST(request: NextRequest) {
 
       await post.save();
 
-      return NextResponse.json({ comment: post.comments[post.comments.length - 1] }, { status: 201 });
+      return NextResponse.json({ 
+        comment: post.comments[post.comments.length - 1],
+        totalComments: post.comments.length 
+      }, { status: 201 });
     }
 
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });

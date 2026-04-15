@@ -5,19 +5,15 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { 
   Loader2, 
-  MapPin, 
   Calendar, 
   MessageCircle, 
   Pin,
   Heart,
-  Award,
   ChevronLeft,
-  ThumbsUp,
   Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
 
 interface Post {
   _id: string;
@@ -26,6 +22,7 @@ interface Post {
   authorEmail: string;
   authorAvatar?: string;
   content: string;
+  tags: string[];
   isPinned: boolean;
   likes: string[];
   comments: Comment[];
@@ -134,87 +131,95 @@ export default function UserProfilePage() {
   }
 
   const filteredPosts = activeTab === "posts" 
-    ? posts.filter(p => !p.isPinned)
+    ? posts
     : activeTab === "pinned"
     ? posts.filter(p => p.isPinned)
     : posts.filter(p => p.likes.length > 0);
 
-  const renderPost = (post: Post, showAuthor = false) => (
+  const renderPost = (post: Post) => (
     <div key={post._id} className="bg-card border rounded-lg overflow-hidden">
       <div className="flex">
-        {/* Vote Column - StackOverflow Style */}
-        <div className="w-16 bg-muted/30 flex flex-col items-center py-4 gap-2 border-r">
-          <button className="flex flex-col items-center p-1 hover:bg-muted rounded transition-colors">
-            <ThumbsUp className="size-6 text-muted-foreground hover:text-primary" />
-            <span className="text-sm font-bold text-foreground">{post.likes.length}</span>
-          </button>
-          <div className="text-xs text-muted-foreground font-medium">likes</div>
+        {/* Stats Column - StackOverflow Style */}
+        <div className="w-16 bg-muted/30 flex flex-col items-center py-4 gap-3 border-r">
+          <div className="text-center">
+            <div className={`flex flex-col items-center p-1 rounded ${
+              post.likes.length > 0 ? "text-red-500" : "text-muted-foreground"
+            }`}>
+              <Heart className={`size-5 ${post.likes.length > 0 ? "fill-current" : ""}`} />
+              <span className="text-xs font-bold">{post.likes.length}</span>
+            </div>
+          </div>
+
+          <div className={`text-center p-1 rounded ${post.comments.length > 0 ? "bg-green-100 text-green-700" : ""}`}>
+            <div className={`flex flex-col items-center ${post.comments.length > 0 ? "" : "text-muted-foreground"}`}>
+              <MessageCircle className="size-4" />
+              <span className="text-xs font-bold">{post.comments.length}</span>
+            </div>
+          </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 p-4">
           {post.isPinned && (
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded mb-3">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded mb-2">
               <Pin className="size-3" />
               Pinned
             </span>
           )}
           
-          <p className="text-base leading-relaxed whitespace-pre-wrap">
-            {escapeHtml(post.content)}
-          </p>
+          <p className="text-base leading-relaxed whitespace-pre-wrap">{escapeHtml(post.content)}</p>
 
-          <div className="flex items-center gap-4 mt-4 pt-3 border-t text-sm text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <MessageCircle className="size-4" />
-              {post.comments.length} {post.comments.length === 1 ? "answer" : "answers"}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="size-4" />
-              asked {formatDistanceToNow(new Date(post.createdAt))}
-            </span>
-          </div>
-
-          {/* Comments */}
-          {post.comments.length > 0 && (
-            <div className="mt-4 space-y-3 pl-4 border-l-2 border-primary/30">
-              {post.comments.map((comment) => (
-                <div key={comment._id} className="text-sm">
-                  <p className="text-foreground">{escapeHtml(comment.content)}</p>
-                  <span className="text-xs text-muted-foreground">
-                    — {comment.authorName} {formatDistanceToNow(new Date(comment.createdAt))}
-                  </span>
-                </div>
+          {/* Tags */}
+          {post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {post.tags.map(tag => (
+                <span 
+                  key={tag} 
+                  className="px-2.5 py-1 text-xs bg-primary/10 text-primary rounded-md"
+                >
+                  {tag}
+                </span>
               ))}
             </div>
           )}
+
+          <div className="flex items-center gap-4 mt-4 pt-3 border-t text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <MessageCircle className="size-3" />
+              {post.comments.length} answers
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock className="size-3" />
+              asked {formatDistanceToNow(new Date(post.createdAt))}
+            </span>
+          </div>
         </div>
 
-        {/* Author Card */}
-        {showAuthor && (
-          <div className="w-48 bg-muted/30 p-4 border-l">
-            <div className="text-xs text-muted-foreground mb-2">asked {formatDistanceToNow(new Date(post.createdAt))}</div>
-            <div className="flex items-center gap-2">
-              <div className="size-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden">
-                {post.authorAvatar ? (
-                  <Image src={post.authorAvatar} alt="" width={40} height={40} className="object-cover" />
-                ) : (
-                  <span className="text-sm font-bold text-white">{post.authorName.charAt(0).toUpperCase()}</span>
-                )}
-              </div>
-              <div>
-                <p className="text-sm font-medium">{escapeHtml(post.authorName)}</p>
-                <p className="text-xs text-muted-foreground">{profileUser.role}</p>
-              </div>
+        {/* Author Card - Only show on own profile for consistency */}
+        <div className="w-44 bg-muted/20 p-3 border-l">
+          <div className="text-[11px] text-muted-foreground mb-2">
+            asked {formatDistanceToNow(new Date(post.createdAt))}
+          </div>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+            <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {post.authorAvatar ? (
+                <Image src={post.authorAvatar} alt="" width={32} height={32} className="object-cover" />
+              ) : (
+                <span className="text-xs font-bold text-white">{post.authorName.charAt(0).toUpperCase()}</span>
+              )}
+            </div>
+            <div>
+              <p className="text-xs font-medium">{escapeHtml(post.authorName)}</p>
+              <p className="text-[10px] text-muted-foreground">{post.likes.length} votes</p>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6">
       {/* Back Button */}
       <Link 
         href="/community" 
@@ -225,10 +230,10 @@ export default function UserProfilePage() {
       </Link>
 
       {/* Profile Header */}
-      <div className="bg-card border rounded-2xl p-6 mb-6">
+      <div className="bg-card border rounded-lg p-6 mb-6">
         <div className="flex items-start gap-6">
           {/* Avatar */}
-          <div className="size-24 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden shadow-lg flex-shrink-0">
+          <div className="size-24 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden shadow-lg flex-shrink-0">
             {profileUser.avatar ? (
               <Image src={profileUser.avatar} alt="" width={96} height={96} className="object-cover" />
             ) : (
@@ -249,24 +254,21 @@ export default function UserProfilePage() {
             </div>
           </div>
 
-          {/* Stats Card */}
-          <div className="bg-muted/50 rounded-xl p-4 min-w-[200px]">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary">{stats?.totalPosts || 0}</p>
-                <p className="text-xs text-muted-foreground">Posts</p>
+          {/* Stats Card - StackOverflow Style */}
+          <div className="bg-muted/50 rounded-lg p-4 min-w-[180px]">
+            <div className="text-xs text-muted-foreground mb-3 font-medium">STATS</div>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">{stats?.totalPosts || 0}</span>
+                <span className="text-sm font-medium">questions</span>
               </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary">{stats?.totalLikes || 0}</p>
-                <p className="text-xs text-muted-foreground">Likes</p>
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">{stats?.totalLikes || 0}</span>
+                <span className="text-sm font-medium">votes received</span>
               </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary">{stats?.pinnedPosts || 0}</p>
-                <p className="text-xs text-muted-foreground">Pinned</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary">{stats?.totalComments || 0}</p>
-                <p className="text-xs text-muted-foreground">Answers</p>
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">{stats?.totalComments || 0}</span>
+                <span className="text-sm font-medium">answers</span>
               </div>
             </div>
           </div>
@@ -281,10 +283,7 @@ export default function UserProfilePage() {
             activeTab === "posts" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          <span className="flex items-center gap-2">
-            <MessageCircle className="size-4" />
-            Questions ({posts.filter(p => !p.isPinned).length})
-          </span>
+          Questions ({posts.length})
         </button>
         <button
           onClick={() => setActiveTab("pinned")}
@@ -322,7 +321,7 @@ export default function UserProfilePage() {
             </p>
           </div>
         ) : (
-          filteredPosts.map((post) => renderPost(post, activeTab === "posts"))
+          filteredPosts.map((post) => renderPost(post))
         )}
       </div>
     </div>
