@@ -172,7 +172,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)] bg-muted/30">
       {/* Left Sidebar */}
-      <aside className="w-64 bg-card border-r flex flex-col fixed left-0 top-14 bottom-0 z-30">
+      <aside className="w-64 bg-card border-r flex flex-col fixed left-0 top-14 bottom-0 z-30 hidden md:flex">
         {/* Logo/Brand */}
         <div className="p-4 border-b">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg">
@@ -262,7 +262,10 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main Content */}
-      <main className={cn("flex-1 transition-all duration-300", chatOpen ? "mr-80 max-w-[calc(100vw-21rem)]" : "")}>
+      <main className={cn(
+        "flex-1 min-h-full transition-all duration-300",
+        chatOpen ? "mr-80" : ""
+      )}>
         {children}
       </main>
 
