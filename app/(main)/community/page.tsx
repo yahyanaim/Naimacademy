@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { 
   Pin, 
@@ -13,14 +14,13 @@ import {
   X, 
   Share2,
   Flag,
-  Trash2,
-  MoreHorizontal
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -471,18 +471,12 @@ export default function CommunityHomePage() {
             const isOwner = user && post.authorId === user.id;
             
             return (
-              <Card key={post._id} className="hover:shadow-md transition-shadow">
+              <Card key={post._id} className={`hover:shadow-md transition-shadow ${post.isPinned ? "border-primary/50 bg-primary/5" : ""}`}>
                 <CardContent className="p-5">
-                  {post.isPinned && (
-                    <div className="flex items-center gap-1 text-xs font-medium text-primary mb-3">
-                      <Pin className="size-3" />
-                      Pinned
-                    </div>
-                  )}
-                  
                   <div className="flex gap-4">
-                    {/* Stats */}
-                    <div className="flex flex-col items-center gap-3 min-w-[60px]">
+                    {/* Stats Column */}
+                    <div className="flex flex-col items-center gap-3 min-w-[50px]">
+                      {/* Like */}
                       <div className="flex flex-col items-center">
                         <button
                           onClick={() => handleLike(post._id)}
@@ -495,16 +489,41 @@ export default function CommunityHomePage() {
                       
                       <Separator className="w-full" />
                       
+                      {/* Comments */}
                       <div className="flex flex-col items-center">
-                        <MessageCircle className={`size-5 ${(post.comments?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`} />
+                        <button onClick={() => toggleComments(post._id)} className="text-muted-foreground hover:text-primary">
+                          <MessageCircle className={`size-5 ${(post.comments?.length || 0) > 0 ? "text-green-600" : ""}`} />
+                        </button>
                         <span className={`text-sm font-semibold ${(post.comments?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`}>
                           {post.comments?.length || 0}
                         </span>
+                      </div>
+                      
+                      <Separator className="w-full" />
+                      
+                      {/* Pin */}
+                      <div className="flex flex-col items-center">
+                        <button
+                          onClick={() => handlePin(post._id)}
+                          className={`transition-colors ${post.isPinned ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
+                          title={post.isPinned ? "Unpin question" : "Pin question to profile"}
+                        >
+                          <Pin className={`size-5 ${post.isPinned ? "fill-current" : ""}`} />
+                        </button>
+                        <span className="text-[10px] text-muted-foreground">pin</span>
                       </div>
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0 space-y-3">
+                      {/* Pinned Badge */}
+                      {post.isPinned && (
+                        <Badge variant="default" className="gap-1 w-fit">
+                          <Pin className="size-3" />
+                          Pinned on profile
+                        </Badge>
+                      )}
+                      
                       <h3 className="text-lg font-medium leading-snug hover:text-primary cursor-pointer line-clamp-2">
                         {escapeHtml(post.content)}
                       </h3>
@@ -525,7 +544,7 @@ export default function CommunityHomePage() {
                         </div>
                       )}
 
-                      {/* Footer */}
+                      {/* Footer with Author */}
                       <div className="flex items-center justify-between pt-2">
                         <div className="flex items-center gap-4">
                           <button onClick={() => toggleComments(post._id)} className="text-sm text-muted-foreground hover:text-primary">
@@ -537,20 +556,26 @@ export default function CommunityHomePage() {
                           </span>
                         </div>
 
+                        {/* Author with Avatar */}
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-2">
-                            <Avatar className="size-6">
+                            <Avatar className="size-8">
+                              {post.authorAvatar ? (
+                                <AvatarImage src={post.authorAvatar} alt={post.authorName} />
+                              ) : null}
                               <AvatarFallback className="text-xs bg-primary text-primary-foreground">
                                 {post.authorName?.charAt(0).toUpperCase() || "?"}
                               </AvatarFallback>
                             </Avatar>
-                            <Link href={`/community/profile/${post.authorId}`} className="text-sm text-primary hover:underline">
-                              {escapeHtml(post.authorName || "Anonymous")}
-                            </Link>
+                            <div className="flex flex-col">
+                              <Link href={`/community/profile/${post.authorId}`} className="text-sm font-medium text-primary hover:underline leading-tight">
+                                {escapeHtml(post.authorName || "Anonymous")}
+                              </Link>
+                              <span className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(post.createdAt))}
+                              </span>
+                            </div>
                           </div>
-                          <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(post.createdAt))}
-                          </span>
                         </div>
                       </div>
 
@@ -568,12 +593,10 @@ export default function CommunityHomePage() {
                           <Flag className="size-3 mr-1" />
                           Flag
                         </Button>
-                        {user?.role === "admin" && (
-                          <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handlePin(post._id)}>
-                            <Pin className={`size-3 mr-1 ${post.isPinned ? "fill-current" : ""}`} />
-                            {post.isPinned ? "Unpin" : "Pin"}
-                          </Button>
-                        )}
+                        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handlePin(post._id)}>
+                          <Pin className={`size-3 mr-1 ${post.isPinned ? "fill-current" : ""}`} />
+                          {post.isPinned ? "Unpin" : "Pin"}
+                        </Button>
                         {(isOwner || user?.role === "admin") && (
                           <Button variant="ghost" size="sm" className="h-8 text-xs text-destructive hover:text-destructive" onClick={() => handleDeletePost(post._id)}>
                             <Trash2 className="size-3 mr-1" />
@@ -591,9 +614,14 @@ export default function CommunityHomePage() {
                             <div className="space-y-3">
                               {post.comments.map((comment) => (
                                 <div key={comment._id} className="flex gap-3 p-3 bg-muted/50 rounded-lg">
-                                  <div className="flex flex-col items-center gap-1">
-                                    <Heart className="size-4 text-muted-foreground cursor-pointer hover:text-red-500" />
-                                  </div>
+                                  <Avatar className="size-8">
+                                    {comment.authorAvatar ? (
+                                      <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
+                                    ) : null}
+                                    <AvatarFallback className="text-xs bg-secondary">
+                                      {comment.authorName?.charAt(0).toUpperCase() || "?"}
+                                    </AvatarFallback>
+                                  </Avatar>
                                   <div className="flex-1 space-y-1">
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-2">
