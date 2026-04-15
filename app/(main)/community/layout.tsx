@@ -217,14 +217,14 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
             </button>
           </div>
 
-          {/* Search Bar */}
+          {/* Search Bar - Twitter Style */}
           <div className="px-3 mt-4">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search questions..."
-                className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                placeholder="Search"
+                className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-[#1d9bf0]/10 border border-transparent focus:border-blue-400 dark:focus:border-blue-500 rounded-full text-sm focus:outline-none transition-all"
               />
             </div>
           </div>

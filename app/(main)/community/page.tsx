@@ -357,119 +357,97 @@ export default function CommunityHomePage() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full">
       {/* Header - Twitter Style */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Questions</h1>
-          <Button onClick={() => setShowNewPostForm(true)} className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4">
-            Ask Question
-          </Button>
-        </div>
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-3">
+        <h1 className="text-xl font-bold">Questions</h1>
       </div>
 
-      {/* New Post Form */}
-      {showNewPostForm && (
-        <Card className="border-2 border-primary/20">
-          <CardContent className="pt-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Ask a public question</h2>
-              <Button variant="ghost" size="sm" onClick={() => setShowNewPostForm(false)}>
-                <X className="size-4" />
-              </Button>
-            </div>
-            
-            <Textarea
-              placeholder="Describe your question in detail..."
+      {/* Twitter-style Post Composer */}
+      <div className="border-b p-4">
+        <div className="flex gap-3">
+          <div className="size-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center overflow-hidden flex-shrink-0">
+            {user?.avatar ? (
+              <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-sm font-bold text-white">{user?.name?.charAt(0).toUpperCase()}</span>
+            )}
+          </div>
+          <div className="flex-1">
+            <textarea
+              placeholder="Ask a question..."
               value={newPost}
               onChange={(e) => setNewPost(e.target.value)}
-              rows={5}
-              className="resize-none"
+              className="w-full min-h-[80px] resize-none border-0 focus:outline-none text-lg placeholder:text-gray-400 bg-transparent"
             />
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Tags</label>
-              <div className="flex flex-wrap gap-2">
+            
+            {/* Tags */}
+            {newTags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
                 {newTags.map(tag => (
-                  <span key={tag} className="px-2.5 py-1 text-xs rounded-full bg-primary text-primary-foreground flex items-center gap-1">
-                    {tag}
-                    <button onClick={() => handleRemoveTag(tag)} className="hover:opacity-70">
+                  <span key={tag} className="px-2.5 py-1 text-xs rounded-full bg-blue-100 text-blue-600 flex items-center gap-1">
+                    #{tag}
+                    <button onClick={() => handleRemoveTag(tag)} className="hover:text-blue-800">
                       <X className="size-3" />
                     </button>
                   </span>
                 ))}
               </div>
-              <Input
-                placeholder="Add tags..."
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddTag(tagInput);
-                  }
-                }}
-              />
-              <div className="flex flex-wrap gap-1">
-                {SUGGESTED_TAGS.filter(t => !newTags.includes(t)).slice(0, 6).map((tag, index) => {
-                  const tagColors = [
-                    "bg-blue-100 text-blue-700 hover:bg-blue-200",
-                    "bg-green-100 text-green-700 hover:bg-green-200", 
-                    "bg-purple-100 text-purple-700 hover:bg-purple-200",
-                    "bg-orange-100 text-orange-700 hover:bg-orange-200",
-                  ];
-                  const colorClass = tagColors[index % tagColors.length];
-                  return (
-                    <button key={tag} onClick={() => handleAddTag(tag)} className={`px-2 py-0.5 text-xs rounded-full ${colorClass}`}>
-                      {tag}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-4 border-t">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="size-4" />
-                Expires in 24 hours
-              </div>
+            )}
+            
+            <div className="flex items-center justify-between pt-3 border-t">
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setShowNewPostForm(false)}>Cancel</Button>
-                <Button onClick={handleCreatePost} disabled={posting || newPost.trim().length < 10}>
-                  {posting ? "Posting..." : "Post Question"}
-                </Button>
+                {SUGGESTED_TAGS.filter(t => !newTags.includes(t)).slice(0, 4).map((tag, index) => (
+                  <button
+                    key={tag}
+                    onClick={() => handleAddTag(tag)}
+                    className="px-2 py-1 text-xs rounded-full text-blue-500 hover:bg-blue-50 transition-colors"
+                  >
+                    +{tag}
+                  </button>
+                ))}
               </div>
+              <Button 
+                onClick={handleCreatePost} 
+                disabled={posting || newPost.trim().length < 10}
+                className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4"
+              >
+                {posting ? "Posting..." : "Post"}
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </div>
+      </div>
 
-      {/* Filters */}
-      <div className="flex gap-1 p-1 bg-muted/50 mx-4">
-        <Button 
-          variant={sortBy === "newest" ? "default" : "ghost"} 
-          size="sm" 
-          className={`flex-1 rounded-full ${sortBy === "newest" ? "bg-primary" : ""}`}
+      {/* Filters - Twitter Style */}
+      <div className="flex border-b">
+        <button
           onClick={() => setSortBy("newest")}
+          className={`flex-1 py-4 text-sm font-medium text-center transition-colors relative ${
+            sortBy === "newest" ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
+          }`}
         >
           Newest
-        </Button>
-        <Button 
-          variant={sortBy === "votes" ? "default" : "ghost"} 
-          size="sm" 
-          className={`flex-1 rounded-full ${sortBy === "votes" ? "bg-primary" : ""}`}
+          {sortBy === "newest" && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-blue-500 rounded-full" />}
+        </button>
+        <button
           onClick={() => setSortBy("votes")}
+          className={`flex-1 py-4 text-sm font-medium text-center transition-colors relative ${
+            sortBy === "votes" ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
+          }`}
         >
           Most Voted
-        </Button>
-        <Button 
-          variant={sortBy === "unanswered" ? "default" : "ghost"} 
-          size="sm" 
-          className={`flex-1 rounded-full ${sortBy === "unanswered" ? "bg-primary" : ""}`}
+          {sortBy === "votes" && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-blue-500 rounded-full" />}
+        </button>
+        <button
           onClick={() => setSortBy("unanswered")}
+          className={`flex-1 py-4 text-sm font-medium text-center transition-colors relative ${
+            sortBy === "unanswered" ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
+          }`}
         >
           Unanswered
-        </Button>
+          {sortBy === "unanswered" && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-blue-500 rounded-full" />}
+        </button>
       </div>
 
       {/* Questions List */}
