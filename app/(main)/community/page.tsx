@@ -16,7 +16,8 @@ import {
   Bookmark,
   Share2,
   Flag,
-  Check
+  Check,
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -111,9 +112,12 @@ export default function CommunityHomePage() {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
+        return data.user;
       }
+      return null;
     } catch (err) {
       console.error("Error fetching user:", err);
+      return null;
     }
   }, []);
 
@@ -132,14 +136,16 @@ export default function CommunityHomePage() {
   }, []);
 
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
-
-  useEffect(() => {
-    if (user) {
-      fetchPosts();
-    }
-  }, [user, fetchPosts]);
+    const init = async () => {
+      const currentUser = await fetchUser();
+      if (currentUser) {
+        fetchPosts();
+      } else {
+        setLoading(false);
+      }
+    };
+    init();
+  }, []);
 
   const handleAddTag = (tag: string) => {
     const normalizedTag = tag.toLowerCase().trim();
@@ -263,6 +269,28 @@ export default function CommunityHomePage() {
       }
     } catch {
       toast.error("Failed to add comment");
+    }
+  };
+
+  const handleDeleteComment = async (postId: string, commentId: string) => {
+    if (!confirm("Are you sure you want to delete this comment?")) return;
+
+    try {
+      const res = await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "deleteComment", postId, commentId }),
+      });
+
+      if (res.ok) {
+        toast.success("Comment deleted");
+        fetchPosts();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to delete comment");
+      }
+    } catch {
+      toast.error("Failed to delete comment");
     }
   };
 
@@ -409,16 +437,27 @@ export default function CommunityHomePage() {
                           <Heart className="size-4 text-muted-foreground hover:text-red-500 cursor-pointer" />
                         </div>
                         <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <Link 
-                              href={`/community/profile/${comment.authorId}`}
-                              className="font-medium text-sm text-primary hover:underline"
-                            >
-                              {escapeHtml(comment.authorName)}
-                            </Link>
-                            <span className="text-xs text-muted-foreground">
-                              answered {formatDistanceToNow(new Date(comment.createdAt))}
-                            </span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Link 
+                                href={`/community/profile/${comment.authorId}`}
+                                className="font-medium text-sm text-primary hover:underline"
+                              >
+                                {escapeHtml(comment.authorName)}
+                              </Link>
+                              <span className="text-xs text-muted-foreground">
+                                answered {formatDistanceToNow(new Date(comment.createdAt))}
+                              </span>
+                            </div>
+                            {(comment.authorId === user?.id || user?.role === "admin") && (
+                              <button
+                                onClick={() => handleDeleteComment(post._id, comment._id)}
+                                className="text-muted-foreground hover:text-red-500 p-1 rounded transition-colors"
+                                title="Delete comment"
+                              >
+                                <Trash2 className="size-3.5" />
+                              </button>
+                            )}
                           </div>
                           <p className="text-sm mt-1">{escapeHtml(comment.content)}</p>
                         </div>

@@ -184,6 +184,35 @@ export async function POST(request: NextRequest) {
       }, { status: 201 });
     }
 
+    if (type === "deleteComment") {
+      const { postId, commentId } = body;
+
+      const post = await CommunityPost.findById(postId);
+
+      if (!post) {
+        return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      }
+
+      const commentIndex = post.comments.findIndex(
+        (c: { _id?: string }) => c._id?.toString() === commentId
+      );
+
+      if (commentIndex === -1) {
+        return NextResponse.json({ error: "Comment not found" }, { status: 404 });
+      }
+
+      const comment = post.comments[commentIndex];
+      
+      if (comment.authorId.toString() !== payload.userId && payload.role !== "admin") {
+        return NextResponse.json({ error: "Not authorized to delete this comment" }, { status: 403 });
+      }
+
+      post.comments.splice(commentIndex, 1);
+      await post.save();
+
+      return NextResponse.json({ success: true, totalComments: post.comments.length });
+    }
+
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   } catch (error) {
     console.error("Error posting to community:", error);
