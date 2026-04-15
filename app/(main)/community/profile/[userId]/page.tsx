@@ -170,9 +170,9 @@ export default function UserProfilePage() {
           <p className="text-base leading-relaxed whitespace-pre-wrap">{escapeHtml(post.content)}</p>
 
           {/* Tags */}
-          {post.tags.length > 0 && (
+          {(post.tags || []).length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
-              {post.tags.map(tag => (
+              {(post.tags || []).map(tag => (
                 <span 
                   key={tag} 
                   className="px-2.5 py-1 text-xs bg-primary/10 text-primary rounded-md"

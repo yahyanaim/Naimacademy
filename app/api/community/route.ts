@@ -36,7 +36,12 @@ export async function GET(request: NextRequest) {
       CommunityPost.countDocuments({ isExpired: false }),
     ]);
 
-    const posts = [...pinnedPosts, ...regularPosts];
+    const posts = [...pinnedPosts, ...regularPosts].map(post => ({
+      ...post,
+      tags: post.tags || [],
+      likes: post.likes || [],
+      comments: post.comments || [],
+    }));
 
     return NextResponse.json({
       posts,

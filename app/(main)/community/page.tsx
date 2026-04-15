@@ -387,7 +387,7 @@ export default function CommunityHomePage() {
 
             {/* Tags */}
             <div className="flex flex-wrap gap-2 mt-3">
-              {post.tags.map(tag => (
+              {(post.tags || []).map(tag => (
                 <button
                   key={tag}
                   onClick={() => setFilterTag(filterTag === tag ? null : tag)}
