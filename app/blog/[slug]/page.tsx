@@ -27,6 +27,10 @@ async function getPost(slug: string) {
         const authorAdmin = await Admin.findById(post.authorId).lean();
         authorAvatar = authorAdmin?.avatar || "";
       }
+      if (!authorAvatar && post.author) {
+        const adminByName = await Admin.findOne({ name: post.author }).lean();
+        authorAvatar = adminByName?.avatar || "";
+      }
       if (!authorAvatar) {
         const firstAdmin = await Admin.findOne().lean();
         authorAvatar = firstAdmin?.avatar || "";
@@ -55,8 +59,20 @@ async function getAllPosts() {
     const authors = await Admin.find({ _id: { $in: authorIds } }).lean();
     const authorMap = new Map(authors.map(a => [a._id.toString(), a.avatar || ""]));
     
+    const allAdmins = await Admin.find().lean();
+    const nameAvatarMap = new Map(allAdmins.map(a => [a.name.toLowerCase(), a.avatar || ""]));
+    
     return posts.map(post => {
-      const authorAvatar = post.authorId ? (authorMap.get(post.authorId) || fallbackAvatar) : fallbackAvatar;
+      let authorAvatar = "";
+      if (post.authorId) {
+        authorAvatar = authorMap.get(post.authorId) || "";
+      }
+      if (!authorAvatar && post.author) {
+        authorAvatar = nameAvatarMap.get(post.author.toLowerCase()) || "";
+      }
+      if (!authorAvatar) {
+        authorAvatar = fallbackAvatar;
+      }
       return { ...post, authorAvatar };
     });
   } catch {
