@@ -366,6 +366,7 @@ function CommunityHomePageContent() {
   return <CommunityContent 
     user={user} 
     posts={sortedPosts} 
+    filteredPostsCount={filteredPosts.length}
     setPosts={setPosts}
     searchQuery={searchQuery}
     sortBy={sortBy}
@@ -385,6 +386,8 @@ function CommunityHomePageContent() {
     posting={posting}
     setPosting={setPosting}
     loading={loading}
+    showNewPostForm={showNewPostForm}
+    setShowNewPostForm={setShowNewPostForm}
     handleAddTag={handleAddTag}
     handleRemoveTag={handleRemoveTag}
     handleCreatePost={handleCreatePost}
@@ -394,23 +397,28 @@ function CommunityHomePageContent() {
     handleDeletePost={handleDeletePost}
     handleAddComment={handleAddComment}
     handlePin={handlePin}
+    handleFlag={handleFlag}
+    handleShare={handleShare}
+    handleDeleteComment={handleDeleteComment}
   />;
 }
 
 function CommunityContent({
-  user, posts, setPosts, searchQuery, sortBy, setSortBy, filterTag, setFilterTag,
+  user, posts, filteredPostsCount, setPosts, searchQuery, sortBy, setSortBy, filterTag, setFilterTag,
   newPost, setNewPost, newTags, setNewTags, tagInput, setTagInput,
   expandedComments, setExpandedComments, newComment, setNewComment,
-  posting, setPosting, loading, handleAddTag, handleRemoveTag, handleCreatePost,
-  toggleComments, handleLike, handleSave, handleDeletePost, handleAddComment, handlePin
+  posting, setPosting, loading, showNewPostForm, setShowNewPostForm,
+  handleAddTag, handleRemoveTag, handleCreatePost,
+  toggleComments, handleLike, handleSave, handleDeletePost, handleAddComment, handlePin, handleFlag, handleShare, handleDeleteComment
 }: {
-  user: any; posts: any[]; setPosts: any; searchQuery: string; sortBy: string; setSortBy: any; filterTag: any; setFilterTag: any;
-  newPost: string; setNewPost: any; newTags: string[]; setNewTags: any; tagInput: string; setTagInput: any;
-  expandedComments: any; setExpandedComments: any; newComment: any; setNewComment: any;
-  posting: boolean; setPosting: any; loading: boolean; handleAddTag: any; handleRemoveTag: any; handleCreatePost: any;
-  toggleComments: any; handleLike: any; handleSave: any; handleDeletePost: any; handleAddComment: any; handlePin: any;
+  user: User | null; posts: Post[]; filteredPostsCount: number; setPosts: React.Dispatch<React.SetStateAction<Post[]>>; searchQuery: string; sortBy: string; setSortBy: React.Dispatch<React.SetStateAction<"votes" | "newest" | "unanswered">>; filterTag: string | null; setFilterTag: React.Dispatch<React.SetStateAction<string | null>>;
+  newPost: string; setNewPost: React.Dispatch<React.SetStateAction<string>>; newTags: string[]; setNewTags: React.Dispatch<React.SetStateAction<string[]>>; tagInput: string; setTagInput: React.Dispatch<React.SetStateAction<string>>;
+  expandedComments: Set<string>; setExpandedComments: React.Dispatch<React.SetStateAction<Set<string>>>; newComment: { [postId: string]: string }; setNewComment: React.Dispatch<React.SetStateAction<{ [postId: string]: string }>>;
+  posting: boolean; setPosting: React.Dispatch<React.SetStateAction<boolean>>; loading: boolean; showNewPostForm: boolean; setShowNewPostForm: React.Dispatch<React.SetStateAction<boolean>>;
+  handleAddTag: (tag: string) => void; handleRemoveTag: (tag: string) => void; handleCreatePost: () => Promise<void>;
+  toggleComments: (postId: string) => void; handleLike: (postId: string) => Promise<void>; handleSave: (postId: string) => Promise<void>; handleDeletePost: (postId: string) => Promise<void>; handleAddComment: (postId: string) => Promise<void>; handlePin: (postId: string) => Promise<void>; handleFlag: (postId: string) => Promise<void>; handleShare: (postContent: string) => Promise<void>; handleDeleteComment: (postId: string, commentId: string) => Promise<void>;
 }) {
-  const allTags = Array.from(new Set(posts.flatMap((p: any) => p.tags || []))).slice(0, 15);
+  const allTags = Array.from(new Set(posts.flatMap((p: Post) => p.tags || []))).slice(0, 15);
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -425,7 +433,7 @@ function CommunityContent({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Questions</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">{filteredPosts.length} questions</p>
+          <p className="text-muted-foreground text-sm sm:text-base">{filteredPostsCount} questions</p>
         </div>
           <Button onClick={() => setShowNewPostForm(true)} className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4">
           Ask Question
@@ -603,7 +611,7 @@ function CommunityContent({
                       {/* Tags */}
                       {post.tags && post.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1">
-                          {post.tags.map((tag, index) => {
+                          {post.tags.map((tag: string, index: number) => {
                             const tagColors = [
                               "bg-blue-100 text-blue-700 hover:bg-blue-200",
                               "bg-green-100 text-green-700 hover:bg-green-200", 
@@ -695,7 +703,7 @@ function CommunityContent({
                           
                           {post.comments && post.comments.length > 0 && (
                             <div className="space-y-2">
-                              {post.comments.map((comment) => (
+                              {post.comments.map((comment: Comment) => (
                                 <div key={comment._id} className="flex gap-2 p-2 bg-muted/50 rounded-lg">
                                   <Avatar className="size-6">
                                     {comment.authorAvatar ? (
