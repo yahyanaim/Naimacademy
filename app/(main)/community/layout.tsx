@@ -223,23 +223,21 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
           })}
 
           {/* Chat Toggle Button */}
-          {pathname !== "/community" && (
-            <button
-              onClick={() => setChatOpen(!chatOpen)}
-              className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                chatOpen
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              <MessageCircle className="size-5" />
-              Chat
-              {!chatOpen && (
-                <span className="ml-auto size-2 rounded-full bg-green-500" />
-              )}
-            </button>
-          )}
+          <button
+            onClick={() => setChatOpen(!chatOpen)}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+              chatOpen
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+          >
+            <MessageCircle className="size-5" />
+            Chat
+            {!chatOpen && (
+              <span className="ml-auto size-2 rounded-full bg-green-500" />
+            )}
+          </button>
         </nav>
 
         {/* Bottom Actions */}
@@ -272,7 +270,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       </main>
 
       {/* Chat Side Panel - Facebook Style */}
-      {chatOpen && pathname !== "/community" && (
+      {chatOpen && (
         <div
           className={cn(
             "fixed right-4 bottom-20 w-80 bg-card border border-t-2 border-l flex flex-col transition-all duration-300 z-40 rounded-tl-lg shadow-xl",
