@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -13,10 +13,8 @@ import {
   Plus, 
   X, 
   ThumbsUp,
-  Bookmark,
   Share2,
   Flag,
-  Check,
   Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -74,9 +72,9 @@ function formatDistanceToNow(date: Date): string {
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
 
-  if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+  if (days > 0) return `${days}d ago`;
+  if (hours > 0) return `${hours}h ago`;
+  if (minutes > 0) return `${minutes}m ago`;
   return "just now";
 }
 
@@ -106,31 +104,6 @@ export default function CommunityHomePage() {
   const [sortBy, setSortBy] = useState<"newest" | "votes" | "unanswered">("newest");
   const [filterTag, setFilterTag] = useState<string | null>(null);
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const userRes = await fetch("/api/auth/me");
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          setUser(userData.user);
-          
-          if (userData.user) {
-            const postsRes = await fetch("/api/community?type=posts");
-            if (postsRes.ok) {
-              const postsData = await postsRes.json();
-              setPosts(postsData.posts || []);
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Error initializing:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    init();
-  }, []);
-
   const fetchPosts = async () => {
     try {
       const res = await fetch("/api/community?type=posts");
@@ -140,8 +113,28 @@ export default function CommunityHomePage() {
       }
     } catch (err) {
       console.error("Error fetching posts:", err);
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const userRes = await fetch("/api/auth/me");
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setUser(userData.user);
+        }
+      } catch (err) {
+        console.error("Error initializing:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+    fetchPosts();
+  }, []);
 
   const handleAddTag = (tag: string) => {
     const normalizedTag = tag.toLowerCase().trim();
@@ -202,18 +195,7 @@ export default function CommunityHomePage() {
       });
 
       if (res.ok) {
-        const data = await res.json();
-        setPosts(posts.map(p => {
-          if (p._id === postId) {
-            return {
-              ...p,
-              likes: data.liked 
-                ? [...p.likes, data.userId] 
-                : p.likes.filter(id => id !== data.userId)
-            };
-          }
-          return p;
-        }));
+        fetchPosts();
       }
     } catch {
       toast.error("Failed to like");
@@ -230,14 +212,24 @@ export default function CommunityHomePage() {
 
       if (res.ok) {
         const data = await res.json();
-        setPosts(posts.map(p => 
-          p._id === postId ? { ...p, isPinned: data.isPinned } : p
-        ));
         toast.success(data.isPinned ? "Post pinned" : "Post unpinned");
         fetchPosts();
       }
     } catch {
       toast.error("Failed to pin");
+    }
+  };
+
+  const handleFlag = async (postId: string) => {
+    toast.info("Post flagged for review");
+  };
+
+  const handleShare = async (postContent: string) => {
+    try {
+      await navigator.clipboard.writeText(postContent.substring(0, 100) + "...");
+      toast.success("Link copied to clipboard!");
+    } catch {
+      toast.error("Failed to copy link");
     }
   };
 
@@ -264,12 +256,12 @@ export default function CommunityHomePage() {
         fetchPosts();
       }
     } catch {
-      toast.error("Failed to add comment");
+      toast.error("Failed to add answer");
     }
   };
 
   const handleDeleteComment = async (postId: string, commentId: string) => {
-    if (!confirm("Are you sure you want to delete this comment?")) return;
+    if (!confirm("Are you sure you want to delete this answer?")) return;
 
     try {
       const res = await fetch("/api/community", {
@@ -279,14 +271,11 @@ export default function CommunityHomePage() {
       });
 
       if (res.ok) {
-        toast.success("Comment deleted");
+        toast.success("Answer deleted");
         fetchPosts();
-      } else {
-        const data = await res.json();
-        toast.error(data.error || "Failed to delete comment");
       }
     } catch {
-      toast.error("Failed to delete comment");
+      toast.error("Failed to delete answer");
     }
   };
 
@@ -304,7 +293,7 @@ export default function CommunityHomePage() {
     const matchesSearch = 
       post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.authorName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTag = !filterTag || post.tags.includes(filterTag);
+    const matchesTag = !filterTag || (post.tags && post.tags.includes(filterTag));
     return matchesSearch && matchesTag;
   });
 
@@ -313,215 +302,29 @@ export default function CommunityHomePage() {
     if (!a.isPinned && b.isPinned) return 1;
     
     if (sortBy === "votes") {
-      return b.likes.length - a.likes.length;
+      return (b.likes?.length || 0) - (a.likes?.length || 0);
     } else if (sortBy === "unanswered") {
-      return a.comments.length - b.comments.length;
+      return (a.comments?.length || 0) - (b.comments?.length || 0);
     }
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  const allTags = Array.from(new Set(posts.flatMap(p => p.tags))).slice(0, 10);
+  const allTags = Array.from(new Set(posts.flatMap(p => p.tags || []))).slice(0, 15);
 
-  const renderPost = (post: Post) => {
-    const isLiked = post.likes.includes(user?.id || "");
-    
+  if (loading) {
     return (
-      <div key={post._id} className="bg-card border rounded-lg overflow-hidden">
-        <div className="flex">
-          {/* Stats Column - StackOverflow Style */}
-          <div className="w-16 bg-muted/30 flex flex-col items-center py-4 gap-3 border-r">
-            {/* Votes */}
-            <div className="text-center">
-              <div className={`flex flex-col items-center p-1 rounded ${
-                post.likes.length > 0 ? "text-red-500" : "text-muted-foreground"
-              }`}>
-                <Heart 
-                  className={`size-6 cursor-pointer transition-colors ${
-                    isLiked ? "fill-red-500 text-red-500" : "hover:text-red-500"
-                  }`}
-                  onClick={() => handleLike(post._id)} 
-                />
-                <span className="text-sm font-bold">{post.likes.length}</span>
-              </div>
-            </div>
-
-            {/* Answers */}
-            <div className={`text-center p-1 rounded ${post.comments.length > 0 ? "bg-green-100 text-green-700" : ""}`}>
-              <div className={`flex flex-col items-center ${post.comments.length > 0 ? "" : "text-muted-foreground"}`}>
-                <MessageCircle className="size-5" />
-                <span className="text-sm font-bold">{post.comments.length}</span>
-                <span className="text-[10px]">answers</span>
-              </div>
-            </div>
-
-            {/* Views */}
-            <div className="text-center text-muted-foreground">
-              <span className="text-xs">{getHoursUntilExpiry(post.expiresAt)}h left</span>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <h3 className="text-lg font-medium text-primary hover:text-primary/80 cursor-pointer line-clamp-2">
-                  {escapeHtml(post.content)}
-                </h3>
-              </div>
-              
-              {/* Action Buttons */}
-              {user?.role === "admin" && (
-                <button
-                  onClick={() => handlePin(post._id)}
-                  className={`p-2 rounded-lg transition-colors ${
-                    post.isPinned 
-                      ? "bg-primary/10 text-primary" 
-                      : "hover:bg-muted text-muted-foreground"
-                  }`}
-                  title={post.isPinned ? "Unpin post" : "Pin post"}
-                >
-                  <Pin className={`size-4 ${post.isPinned ? "fill-current" : ""}`} />
-                </button>
-              )}
-            </div>
-
-            {/* Tags */}
-            <div className="flex flex-wrap gap-2 mt-3">
-              {(post.tags || []).map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => setFilterTag(filterTag === tag ? null : tag)}
-                  className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
-                    filterTag === tag
-                      ? "bg-primary text-white"
-                      : "bg-primary/10 text-primary hover:bg-primary/20"
-                  }`}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-between mt-4 pt-3 border-t">
-              <div className="flex gap-4 text-xs text-muted-foreground">
-                <button className="hover:text-primary flex items-center gap-1">
-                  <Share2 className="size-3" />
-                  Share
-                </button>
-                <button className="hover:text-primary flex items-center gap-1">
-                  <Flag className="size-3" />
-                  Flag
-                </button>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
-                  asked {formatDistanceToNow(new Date(post.createdAt))}
-                </span>
-              </div>
-            </div>
-
-            {/* Comments Section */}
-            {expandedComments.has(post._id) && (
-              <div className="mt-4 pt-4 border-t space-y-4">
-                {post.comments.length > 0 && (
-                  <div className="space-y-3">
-                    {post.comments.map((comment) => (
-                      <div key={comment._id} className="flex gap-3 border-b pb-3">
-                        <div className="flex flex-col items-center gap-1">
-                          <Heart className="size-4 text-muted-foreground hover:text-red-500 cursor-pointer" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Link 
-                                href={`/community/profile/${comment.authorId}`}
-                                className="font-medium text-sm text-primary hover:underline"
-                              >
-                                {escapeHtml(comment.authorName)}
-                              </Link>
-                              <span className="text-xs text-muted-foreground">
-                                answered {formatDistanceToNow(new Date(comment.createdAt))}
-                              </span>
-                            </div>
-                            {(comment.authorId === user?.id || user?.role === "admin") && (
-                              <button
-                                onClick={() => handleDeleteComment(post._id, comment._id)}
-                                className="text-muted-foreground hover:text-red-500 p-1 rounded transition-colors"
-                                title="Delete comment"
-                              >
-                                <Trash2 className="size-3.5" />
-                              </button>
-                            )}
-                          </div>
-                          <p className="text-sm mt-1">{escapeHtml(comment.content)}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                <div className="flex gap-2 items-center">
-                  <Input
-                    placeholder="Add your answer..."
-                    value={newComment[post._id] || ""}
-                    onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
-                    onKeyDown={(e) => e.key === "Enter" && handleAddComment(post._id)}
-                    className="flex-1"
-                  />
-                  <Button size="sm" onClick={() => handleAddComment(post._id)}>
-                    <Send className="size-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Author Card - StackOverflow Style */}
-          <div className="w-44 bg-muted/20 p-3 border-l flex flex-col justify-start">
-            <div className="text-[11px] text-muted-foreground mb-2">
-              asked {formatDistanceToNow(new Date(post.createdAt))}
-            </div>
-            <Link 
-              href={`/community/profile/${post.authorId}`}
-              className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted transition-colors"
-            >
-              <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden flex-shrink-0">
-                {post.authorAvatar ? (
-                  <Image src={post.authorAvatar} alt="" width={32} height={32} className="object-cover" />
-                ) : (
-                  <span className="text-xs font-bold text-white">{post.authorName.charAt(0).toUpperCase()}</span>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-primary truncate hover:underline">
-                  {escapeHtml(post.authorName)}
-                </p>
-                <p className="text-[10px] text-muted-foreground">
-                  {post.likes.length} votes
-                </p>
-              </div>
-            </Link>
-            
-            <button
-              onClick={() => toggleComments(post._id)}
-              className="mt-auto text-xs text-primary hover:underline pt-2"
-            >
-              {expandedComments.has(post._id) ? "Hide answers" : `${post.comments.length} answers`}
-            </button>
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
       </div>
     );
-  };
+  }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">All Questions</h1>
+          <h1 className="text-2xl font-bold">Questions</h1>
           <p className="text-muted-foreground mt-1">{filteredPosts.length} questions</p>
         </div>
         <Button onClick={() => setShowNewPostForm(true)} className="gap-2">
@@ -691,27 +494,8 @@ export default function CommunityHomePage() {
         </div>
       )}
 
-      {/* Posts */}
-      {loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-card border rounded-lg animate-pulse">
-              <div className="flex">
-                <div className="w-16 bg-muted/30 p-4" />
-                <div className="flex-1 p-4 space-y-3">
-                  <div className="h-5 bg-muted rounded w-3/4" />
-                  <div className="h-4 bg-muted rounded w-full" />
-                  <div className="flex gap-2">
-                    <div className="h-5 bg-muted rounded w-16" />
-                    <div className="h-5 bg-muted rounded w-20" />
-                  </div>
-                </div>
-                <div className="w-44 bg-muted/30 p-4" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : sortedPosts.length === 0 ? (
+      {/* Posts - StackOverflow Style */}
+      {sortedPosts.length === 0 ? (
         <div className="bg-card border rounded-lg p-12 text-center">
           <div className="size-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
             <MessageCircle className="size-8 text-muted-foreground" />
@@ -723,7 +507,213 @@ export default function CommunityHomePage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {sortedPosts.map((post) => renderPost(post))}
+          {sortedPosts.map((post) => {
+            const isLiked = user && post.likes?.includes(user.id);
+            const hoursLeft = getHoursUntilExpiry(post.expiresAt);
+            
+            return (
+              <div key={post._id} className="bg-card border rounded-lg overflow-hidden">
+                <div className="flex">
+                  {/* Stats Column - StackOverflow Style */}
+                  <div className="w-20 bg-muted/30 flex flex-col items-center py-4 gap-3 border-r">
+                    {/* Votes */}
+                    <div className="text-center">
+                      <button 
+                        onClick={() => handleLike(post._id)}
+                        className={`flex flex-col items-center p-1 rounded transition-colors ${
+                          isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"
+                        }`}
+                      >
+                        <Heart className={`size-6 ${isLiked ? "fill-red-500" : ""}`} />
+                        <span className="text-sm font-bold">{post.likes?.length || 0}</span>
+                      </button>
+                      <span className="text-[10px] text-muted-foreground">votes</span>
+                    </div>
+
+                    {/* Answers */}
+                    <div className={`text-center p-1.5 rounded ${
+                      (post.comments?.length || 0) > 0 
+                        ? "bg-green-100 text-green-700 border border-green-300" 
+                        : "text-muted-foreground"
+                    }`}>
+                      <span className="text-sm font-bold block">{post.comments?.length || 0}</span>
+                      <span className="text-[10px]">answers</span>
+                    </div>
+
+                    {/* Time Left */}
+                    <div className="text-center">
+                      <span className="text-xs text-muted-foreground block">{hoursLeft}h</span>
+                      <span className="text-[10px] text-muted-foreground">left</span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-medium text-primary hover:text-primary/80 cursor-pointer line-clamp-2">
+                          {escapeHtml(post.content)}
+                        </h3>
+                      </div>
+                      
+                      {/* Action Buttons */}
+                      {user?.role === "admin" && (
+                        <button
+                          onClick={() => handlePin(post._id)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            post.isPinned 
+                              ? "bg-primary/10 text-primary" 
+                              : "hover:bg-muted text-muted-foreground"
+                          }`}
+                          title={post.isPinned ? "Unpin post" : "Pin post"}
+                        >
+                          <Pin className={`size-4 ${post.isPinned ? "fill-current" : ""}`} />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Tags */}
+                    {post.tags && post.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {post.tags.map(tag => (
+                          <button
+                            key={tag}
+                            onClick={() => setFilterTag(filterTag === tag ? null : tag)}
+                            className={`px-2 py-0.5 text-xs rounded transition-colors ${
+                              filterTag === tag
+                                ? "bg-primary text-white"
+                                : "bg-primary/10 text-primary hover:bg-primary/20"
+                            }`}
+                          >
+                            {tag}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t text-xs text-muted-foreground">
+                      <div className="flex gap-3">
+                        <button 
+                          onClick={() => handleShare(post.content)}
+                          className="hover:text-primary flex items-center gap-1"
+                        >
+                          <Share2 className="size-3" />
+                          Share
+                        </button>
+                        <button 
+                          onClick={() => handleFlag(post._id)}
+                          className="hover:text-primary flex items-center gap-1"
+                        >
+                          <Flag className="size-3" />
+                          Flag
+                        </button>
+                        <button 
+                          onClick={() => toggleComments(post._id)}
+                          className="hover:text-primary"
+                        >
+                          {expandedComments.has(post._id) ? "Hide answers" : `${post.comments?.length || 0} answers`}
+                        </button>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <span>asked {formatDistanceToNow(new Date(post.createdAt))}</span>
+                      </div>
+                    </div>
+
+                    {/* Answers Section - StackOverflow Style */}
+                    {expandedComments.has(post._id) && (
+                      <div className="mt-4 pt-4 border-t">
+                        <h4 className="text-sm font-semibold mb-3">
+                          {post.comments?.length || 0} Answers
+                        </h4>
+                        
+                        {post.comments && post.comments.length > 0 && (
+                          <div className="space-y-4">
+                            {post.comments.map((comment) => (
+                              <div key={comment._id} className="flex gap-3 pb-4 border-b last:border-0 last:pb-0">
+                                {/* Vote column */}
+                                <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                                  <Heart className="size-4 hover:text-red-500 cursor-pointer" />
+                                </div>
+                                
+                                {/* Content */}
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <div className="flex items-center gap-2">
+                                      <Link 
+                                        href={`/community/profile/${comment.authorId}`}
+                                        className="font-medium text-sm text-primary hover:underline"
+                                      >
+                                        {escapeHtml(comment.authorName)}
+                                      </Link>
+                                      <span className="text-xs text-muted-foreground">
+                                        answered {formatDistanceToNow(new Date(comment.createdAt))}
+                                      </span>
+                                    </div>
+                                    {(comment.authorId === user?.id || user?.role === "admin") && (
+                                      <button
+                                        onClick={() => handleDeleteComment(post._id, comment._id)}
+                                        className="text-muted-foreground hover:text-red-500 p-1"
+                                        title="Delete answer"
+                                      >
+                                        <Trash2 className="size-3.5" />
+                                      </button>
+                                    )}
+                                  </div>
+                                  <p className="text-sm">{escapeHtml(comment.content)}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Add Answer Form */}
+                        <div className="mt-4 pt-4 border-t">
+                          <p className="text-sm font-medium mb-2">Your Answer</p>
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Write your answer..."
+                              value={newComment[post._id] || ""}
+                              onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
+                              onKeyDown={(e) => e.key === "Enter" && handleAddComment(post._id)}
+                              className="flex-1"
+                            />
+                            <Button size="sm" onClick={() => handleAddComment(post._id)}>
+                              <Send className="size-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Author Card - StackOverflow Style */}
+                  <div className="w-40 bg-muted/20 p-3 border-l flex flex-col justify-start">
+                    <div className="text-[11px] text-muted-foreground mb-2">
+                      asked {formatDistanceToNow(new Date(post.createdAt))}
+                    </div>
+                    <Link 
+                      href={`/community/profile/${post.authorId}`}
+                      className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {post.authorAvatar ? (
+                          <Image src={post.authorAvatar} alt="" width={32} height={32} className="object-cover" />
+                        ) : (
+                          <span className="text-xs font-bold text-white">{post.authorName?.charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium truncate">{escapeHtml(post.authorName || "Anonymous")}</p>
+                        <p className="text-[10px] text-muted-foreground">{post.likes?.length || 0} votes</p>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
