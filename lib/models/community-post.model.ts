@@ -53,7 +53,6 @@ const CommunityPostSchema = new Schema<ICommunityPost>(
   { timestamps: true }
 );
 
-CommunityPostSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 CommunityPostSchema.index({ createdAt: -1 });
 CommunityPostSchema.index({ isPinned: -1, createdAt: -1 });
 CommunityPostSchema.index({ tags: 1 });
