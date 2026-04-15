@@ -284,7 +284,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                 <Users className="size-4 text-white" />
               </div>
               <div>
-                <h2 className="font-semibold text-sm">N8N Community Chat Group</h2>
+                <h2 className="font-semibold text-sm">N8N Community</h2>
                 {!chatCollapsed && (
                   <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                     <span className="size-1.5 rounded-full bg-green-500" />
