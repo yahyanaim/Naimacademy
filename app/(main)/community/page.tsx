@@ -364,7 +364,7 @@ export default function CommunityHomePage() {
           <h1 className="text-2xl sm:text-3xl font-bold">Questions</h1>
           <p className="text-muted-foreground text-sm sm:text-base">{filteredPosts.length} questions</p>
         </div>
-        <Button onClick={() => setShowNewPostForm(true)} className="bg-black hover:bg-gray-800 text-white rounded-full px-4">
+          <Button onClick={() => setShowNewPostForm(true)} className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4">
           Ask Question
         </Button>
       </div>
@@ -412,7 +412,7 @@ export default function CommunityHomePage() {
               
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="outline" onClick={() => setShowNewPostForm(false)}>Cancel</Button>
-                <Button onClick={handleCreatePost} disabled={posting || newPost.trim().length < 10} className="bg-black hover:bg-gray-800">
+                <Button onClick={handleCreatePost} disabled={posting || newPost.trim().length < 10} className="bg-blue-500 hover:bg-blue-600">
                   Post
                 </Button>
               </div>
@@ -426,7 +426,7 @@ export default function CommunityHomePage() {
         <Button 
           variant={sortBy === "newest" ? "default" : "ghost"} 
           size="sm" 
-          className={sortBy === "newest" ? "bg-black text-white" : ""}
+          className={sortBy === "newest" ? "bg-blue-500 text-white" : ""}
           onClick={() => setSortBy("newest")}
         >
           Newest
@@ -434,7 +434,7 @@ export default function CommunityHomePage() {
         <Button 
           variant={sortBy === "votes" ? "default" : "ghost"} 
           size="sm" 
-          className={sortBy === "votes" ? "bg-black text-white" : ""}
+          className={sortBy === "votes" ? "bg-blue-500 text-white" : ""}
           onClick={() => setSortBy("votes")}
         >
           Most Voted
@@ -442,7 +442,7 @@ export default function CommunityHomePage() {
         <Button 
           variant={sortBy === "unanswered" ? "default" : "ghost"} 
           size="sm" 
-          className={sortBy === "unanswered" ? "bg-black text-white" : ""}
+          className={sortBy === "unanswered" ? "bg-blue-500 text-white" : ""}
           onClick={() => setSortBy("unanswered")}
         >
           Unanswered

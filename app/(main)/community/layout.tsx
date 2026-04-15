@@ -177,23 +177,23 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
     <div className="flex min-h-[calc(100vh-3.5rem)]">
       {/* Left Sidebar - Twitter Style */}
       <aside className="w-72 fixed left-0 top-14 bottom-0 z-30 hidden md:flex flex-col bg-background border-r">
-        {/* Search Bar - Twitter Style */}
+        {/* Search Bar */}
         <div className="p-4">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search N8N Community"
-              className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-sm focus:outline-none transition-all border border-transparent focus:border-gray-400"
+              placeholder="Search questions..."
+              className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-sm focus:outline-none transition-all border border-transparent focus:border-blue-400"
             />
           </div>
         </div>
 
-        {/* User Profile Card - Twitter Style */}
+        {/* User Profile Card */}
         <div className="px-4">
-          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4">
+          <Link href={`/community/profile/${user?.id}`} className="block bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <div className="flex items-center gap-3 mb-3">
-              <div className="size-12 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center overflow-hidden flex-shrink-0">
+              <div className="size-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center overflow-hidden flex-shrink-0">
                 {user.avatar ? (
                   <Image src={user.avatar} alt="" width={48} height={48} className="object-cover" />
                 ) : (
@@ -205,7 +205,10 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                 <p className="text-sm text-gray-500 truncate">@{user.name?.toLowerCase().replace(/\s+/g, "")}</p>
               </div>
               <div className="relative group">
-                <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <button 
+                  onClick={(e) => e.preventDefault()}
+                  className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
                   <MoreHorizontal className="size-5 text-gray-500" />
                 </button>
                 {/* Dropdown Menu */}
@@ -227,18 +230,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                 </div>
               </div>
             </div>
-            {/* Stats */}
-            <div className="flex gap-4 text-sm">
-              <Link href="/community/saved" className="hover:underline">
-                <span className="font-bold">0</span>
-                <span className="text-gray-500 ml-1">Saved</span>
-              </Link>
-              <span>
-                <span className="font-bold">0</span>
-                <span className="text-gray-500 ml-1">Questions</span>
-              </span>
-            </div>
-          </div>
+          </Link>
         </div>
 
         {/* Navigation */}
@@ -253,7 +245,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                   className={cn(
                     "flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
                     isActive
-                      ? "bg-black/10 text-black font-bold"
+                      ? "bg-blue-500/10 text-blue-500 font-bold"
                       : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
                   )}
                 >
@@ -269,7 +261,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
               className={cn(
                 "w-full flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
                 chatOpen
-                  ? "bg-black/10 text-black font-bold"
+                  ? "bg-blue-500/10 text-blue-500 font-bold"
                   : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
               )}
             >
@@ -299,9 +291,9 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
           )}
         >
           {/* Chat Header */}
-          <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-gray-50 to-white dark:from-[#192734] dark:to-[#15202b] rounded-t-2xl flex-shrink-0">
+          <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/20 dark:to-[#15202b] rounded-t-2xl flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="size-9 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center shadow-md">
+              <div className="size-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
                 <Users className="size-4 text-white" />
               </div>
               <div>
@@ -417,7 +409,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
               />
               <Button
                 size="sm"
-                className="size-9 p-0 rounded-full bg-black hover:bg-gray-800 text-white shadow-md transition-all"
+                className="size-9 p-0 rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-md transition-all"
                 onClick={handleSendMessage}
                 disabled={sending || !newMessage.trim()}
               >
