@@ -94,40 +94,25 @@ export default function SavedQuestionsPage() {
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [newComment, setNewComment] = useState<{ [postId: string]: string }>({});
 
-  const fetchPosts = async () => {
-    try {
-      const res = await fetch("/api/community?type=saved");
-      if (res.ok) {
-        const data = await res.json();
-        setPosts(data.posts || []);
-      }
-    } catch (err) {
-      console.error("Error fetching saved posts:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     const init = async () => {
-      try {
-        const userRes = await fetch("/api/auth/me");
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          setUser(userData.user);
-        }
-      } catch (err) {
-        console.error("Error initializing:", err);
+      const [userRes, postsRes] = await Promise.all([
+        fetch("/api/auth/me"),
+        fetch("/api/community?type=saved")
+      ]);
+      
+      if (userRes.ok) {
+        const userData = await userRes.json();
+        setUser(userData.user);
       }
+      if (postsRes.ok) {
+        const postsData = await postsRes.json();
+        setPosts(postsData.posts || []);
+      }
+      setLoading(false);
     };
     init();
   }, []);
-
-  useEffect(() => {
-    if (user) {
-      fetchPosts();
-    }
-  }, [user]);
 
   const handleLike = async (postId: string) => {
     try {

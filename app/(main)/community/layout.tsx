@@ -72,10 +72,10 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const [chatLoading, setChatLoading] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const hasFetchedChat = useRef(false);
 
   const fetchUser = useCallback(async () => {
     try {
@@ -83,25 +83,30 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
+      } else {
+        router.push("/login");
       }
-    } catch (err) {
-      console.error("Error fetching user:", err);
+    } catch {
+      router.push("/login");
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   const fetchMessages = useCallback(async () => {
+    if (!chatOpen || hasFetchedChat.current) return;
+    hasFetchedChat.current = true;
+    
     try {
       const res = await fetch("/api/community?type=chat&limit=50");
       if (res.ok) {
         const data = await res.json();
         setMessages(data.messages || []);
       }
-    } catch (err) {
+    } catch {
       console.error("Error fetching messages:", err);
-    } finally {
-      setChatLoading(false);
     }
-  }, []);
+  }, [chatOpen]);
 
   useEffect(() => {
     fetchUser();
@@ -109,7 +114,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     if (chatOpen) {
-      setChatLoading(true);
+      hasFetchedChat.current = false;
       fetchMessages();
     }
   }, [chatOpen, fetchMessages]);
@@ -120,15 +125,8 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
     }
   }, [chatOpen, messages]);
 
-  useEffect(() => {
-    if (!chatOpen || !user) return;
-    
-    const interval = setInterval(fetchMessages, 5000);
-    return () => clearInterval(interval);
-  }, [chatOpen, user, fetchMessages]);
-
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !user) return;
 
     setSending(true);
     try {
@@ -138,15 +136,19 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
         body: JSON.stringify({
           type: "chat",
           content: newMessage,
-          authorName: user?.name,
-          authorEmail: user?.email,
-          authorAvatar: user?.avatar,
+          authorName: user.name,
+          authorEmail: user.email,
+          authorAvatar: user.avatar,
         }),
       });
 
       if (res.ok) {
         setNewMessage("");
-        fetchMessages();
+        const msgRes = await fetch("/api/community?type=chat&limit=50");
+        if (msgRes.ok) {
+          const data = await msgRes.json();
+          setMessages(data.messages || []);
+        }
       }
     } catch {
       console.error("Failed to send message");
@@ -164,13 +166,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   }
 
   if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <p className="text-muted-foreground">Redirecting to login...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

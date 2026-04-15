@@ -109,36 +109,24 @@ export default function CommunityHomePage() {
   const [sortBy, setSortBy] = useState<"newest" | "votes" | "unanswered">("newest");
   const [filterTag, setFilterTag] = useState<string | null>(null);
 
-  const fetchPosts = async () => {
-    try {
-      const res = await fetch("/api/community?type=posts");
-      if (res.ok) {
-        const data = await res.json();
-        setPosts(data.posts || []);
-      }
-    } catch (err) {
-      console.error("Error fetching posts:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     const init = async () => {
-      try {
-        const userRes = await fetch("/api/auth/me");
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          setUser(userData.user);
-        }
-      } catch (err) {
-        console.error("Error initializing:", err);
-      } finally {
-        setLoading(false);
+      const [userRes, postsRes] = await Promise.all([
+        fetch("/api/auth/me"),
+        fetch("/api/community?type=posts")
+      ]);
+      
+      if (userRes.ok) {
+        const userData = await userRes.json();
+        setUser(userData.user);
       }
+      if (postsRes.ok) {
+        const postsData = await postsRes.json();
+        setPosts(postsData.posts || []);
+      }
+      setLoading(false);
     };
     init();
-    fetchPosts();
   }, []);
 
   const handleAddTag = (tag: string) => {
