@@ -205,7 +205,7 @@ export default function SavedQuestionsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/community">
@@ -214,11 +214,11 @@ export default function SavedQuestionsPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Bookmark className="size-6 text-yellow-500" />
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Bookmark className="size-5 sm:size-6 text-yellow-500" />
             Saved Questions
           </h1>
-          <p className="text-muted-foreground">{posts.length} saved questions</p>
+          <p className="text-muted-foreground text-sm">{posts.length} saved questions</p>
         </div>
       </div>
 
