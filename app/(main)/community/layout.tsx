@@ -43,6 +43,7 @@ interface ChatMessage {
 const navItems = [
   { label: "Home", href: "/community", icon: Home },
   { label: "Saved", href: "/community/saved", icon: Bookmark },
+  { label: "Profile", href: "/profile", icon: Users },
 ];
 
 function escapeHtml(text: string): string {
@@ -231,21 +232,40 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
 
         {/* User Profile Section */}
         <div className="p-3">
-          <div className="flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer">
-            <div className="size-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center overflow-hidden flex-shrink-0">
-              {user.avatar ? (
-                <Image src={user.avatar} alt="" width={40} height={40} className="object-cover" />
-              ) : (
-                <span className="text-base font-bold text-white">{user.name?.charAt(0).toUpperCase()}</span>
-              )}
+          <div className="group relative">
+            <div className="flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+              <div className="size-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center overflow-hidden flex-shrink-0">
+                {user.avatar ? (
+                  <Image src={user.avatar} alt="" width={40} height={40} className="object-cover" />
+                ) : (
+                  <span className="text-base font-bold text-white">{user.name?.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0 hidden xl:block">
+                <p className="font-bold text-sm truncate">{user.name}</p>
+                <p className="text-xs text-gray-500 truncate">@{user.name?.toLowerCase().replace(/\s+/g, "")}</p>
+              </div>
+              <div className="hidden xl:block">
+                <button className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                  <MoreHorizontal className="size-5 text-gray-500" />
+                </button>
+              </div>
             </div>
-            <div className="flex-1 min-w-0 hidden xl:block">
-              <p className="font-bold text-sm truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">@{user.name?.toLowerCase().replace(/\s+/g, "")}</p>
-            </div>
-            <div className="hidden xl:block">
-              <button className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                <MoreHorizontal className="size-5 text-gray-500" />
+            {/* Dropdown Menu */}
+            <div className="absolute bottom-full left-0 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all mb-2 z-50">
+              <Link href="/profile" className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                <Settings className="size-4" />
+                Settings
+              </Link>
+              <button 
+                onClick={async () => {
+                  await fetch("/api/auth/logout", { method: "POST" });
+                  router.push("/");
+                }}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-red-500"
+              >
+                <LogOut className="size-4" />
+                Logout
               </button>
             </div>
           </div>

@@ -178,14 +178,9 @@ export default function UserProfilePage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-4">
-          <Link href="/community" className="p-2 rounded-full hover:bg-muted transition-colors">
-            <ArrowLeft className="size-5" />
-          </Link>
-          <div>
-            <h1 className="font-bold text-lg leading-none">{profileUser.name}</h1>
-            <p className="text-sm text-muted-foreground">{posts.length} questions</p>
-          </div>
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <h1 className="font-bold text-lg leading-none">{profileUser.name}</h1>
+          <p className="text-sm text-muted-foreground">{posts.length} questions</p>
         </div>
       </div>
 
