@@ -273,7 +273,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       {chatOpen && (
         <div
           className={cn(
-            "fixed right-4 bottom-24 w-80 bg-white dark:bg-[#15202b] border border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-40 rounded-2xl shadow-2xl",
+            "fixed left-1/2 -translate-x-1/2 bottom-6 w-80 bg-white dark:bg-[#15202b] border border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-40 rounded-2xl shadow-2xl",
             chatCollapsed ? "h-14" : "h-[450px]"
           )}
         >
