@@ -358,32 +358,35 @@ export default function CommunityHomePage() {
 
   return (
     <div className="w-full">
-      {/* Header - Twitter Style */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-3">
-        <h1 className="text-xl font-bold">Questions</h1>
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold">Questions</h1>
+          <Button onClick={() => setShowNewPostForm(true)} className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4">
+            Ask Question
+          </Button>
+        </div>
       </div>
 
-      {/* Twitter-style Post Composer */}
-      <div className="border-b p-4">
-        <div className="flex gap-3">
-          <div className="size-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center overflow-hidden flex-shrink-0">
-            {user?.avatar ? (
-              <img src={user.avatar} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-sm font-bold text-white">{user?.name?.charAt(0).toUpperCase()}</span>
-            )}
-          </div>
-          <div className="flex-1">
-            <textarea
-              placeholder="Ask a question..."
-              value={newPost}
-              onChange={(e) => setNewPost(e.target.value)}
-              className="w-full min-h-[80px] resize-none border-0 focus:outline-none text-lg placeholder:text-gray-400 bg-transparent"
-            />
-            
-            {/* Tags */}
-            {newTags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-3">
+      {/* New Post Form Modal */}
+      {showNewPostForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-background rounded-xl w-full max-w-lg mx-4 shadow-xl">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-bold">Ask a question</h2>
+              <Button variant="ghost" size="sm" onClick={() => setShowNewPostForm(false)}>
+                <X className="size-5" />
+              </Button>
+            </div>
+            <div className="p-4 space-y-4">
+              <textarea
+                placeholder="What's your question?"
+                value={newPost}
+                onChange={(e) => setNewPost(e.target.value)}
+                className="w-full min-h-[120px] resize-none border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              
+              <div className="flex flex-wrap gap-2">
                 {newTags.map(tag => (
                   <span key={tag} className="px-2.5 py-1 text-xs rounded-full bg-blue-100 text-blue-600 flex items-center gap-1">
                     #{tag}
@@ -393,61 +396,56 @@ export default function CommunityHomePage() {
                   </span>
                 ))}
               </div>
-            )}
-            
-            <div className="flex items-center justify-between pt-3 border-t">
-              <div className="flex gap-2">
-                {SUGGESTED_TAGS.filter(t => !newTags.includes(t)).slice(0, 4).map((tag, index) => (
+              
+              <div className="flex flex-wrap gap-2">
+                {SUGGESTED_TAGS.filter(t => !newTags.includes(t)).slice(0, 6).map((tag) => (
                   <button
                     key={tag}
                     onClick={() => handleAddTag(tag)}
-                    className="px-2 py-1 text-xs rounded-full text-blue-500 hover:bg-blue-50 transition-colors"
+                    className="px-2 py-1 text-xs rounded-full border hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     +{tag}
                   </button>
                 ))}
               </div>
-              <Button 
-                onClick={handleCreatePost} 
-                disabled={posting || newPost.trim().length < 10}
-                className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4"
-              >
-                {posting ? "Posting..." : "Post"}
-              </Button>
+              
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => setShowNewPostForm(false)}>Cancel</Button>
+                <Button onClick={handleCreatePost} disabled={posting || newPost.trim().length < 10} className="bg-blue-500 hover:bg-blue-600">
+                  Post
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Filters - Twitter Style */}
-      <div className="flex border-b">
-        <button
+      {/* Filters */}
+      <div className="flex gap-1 p-1 bg-muted/50 mx-4 my-4 rounded-lg max-w-md">
+        <Button 
+          variant={sortBy === "newest" ? "default" : "ghost"} 
+          size="sm" 
+          className={`flex-1 ${sortBy === "newest" ? "bg-primary" : ""}`}
           onClick={() => setSortBy("newest")}
-          className={`flex-1 py-4 text-sm font-medium text-center transition-colors relative ${
-            sortBy === "newest" ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
-          }`}
         >
           Newest
-          {sortBy === "newest" && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-blue-500 rounded-full" />}
-        </button>
-        <button
+        </Button>
+        <Button 
+          variant={sortBy === "votes" ? "default" : "ghost"} 
+          size="sm" 
+          className={`flex-1 ${sortBy === "votes" ? "bg-primary" : ""}`}
           onClick={() => setSortBy("votes")}
-          className={`flex-1 py-4 text-sm font-medium text-center transition-colors relative ${
-            sortBy === "votes" ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
-          }`}
         >
           Most Voted
-          {sortBy === "votes" && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-blue-500 rounded-full" />}
-        </button>
-        <button
+        </Button>
+        <Button 
+          variant={sortBy === "unanswered" ? "default" : "ghost"} 
+          size="sm" 
+          className={`flex-1 ${sortBy === "unanswered" ? "bg-primary" : ""}`}
           onClick={() => setSortBy("unanswered")}
-          className={`flex-1 py-4 text-sm font-medium text-center transition-colors relative ${
-            sortBy === "unanswered" ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
-          }`}
         >
           Unanswered
-          {sortBy === "unanswered" && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-blue-500 rounded-full" />}
-        </button>
+        </Button>
       </div>
 
       {/* Questions List */}
