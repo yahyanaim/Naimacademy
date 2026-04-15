@@ -272,7 +272,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       {/* Chat Side Panel - Facebook Style */}
       <div
         className={cn(
-          "fixed right-0 top-14 bottom-0 w-80 bg-card border-l flex flex-col transition-transform duration-300 z-40",
+          "fixed right-0 top-14 h-[calc(100vh-14rem)] w-80 bg-card border-l flex flex-col transition-transform duration-300 z-40 rounded-l-lg shadow-xl",
           chatOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
