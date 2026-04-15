@@ -184,7 +184,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
             <input
               type="text"
               placeholder="Search N8N Community"
-              className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-[#1d9bf0]/10 hover:bg-gray-200 dark:hover:bg-[#1d9bf0]/20 rounded-full text-sm focus:outline-none focus:bg-white dark:focus:bg-[#1d9bf0]/20 transition-all border border-transparent focus:border-blue-400"
+              className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-sm focus:outline-none transition-all border border-transparent focus:border-gray-400"
             />
           </div>
         </div>
@@ -193,7 +193,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
         <div className="px-4">
           <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className="size-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center overflow-hidden flex-shrink-0">
+              <div className="size-12 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center overflow-hidden flex-shrink-0">
                 {user.avatar ? (
                   <Image src={user.avatar} alt="" width={48} height={48} className="object-cover" />
                 ) : (
@@ -253,7 +253,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                   className={cn(
                     "flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
                     isActive
-                      ? "bg-blue-500/10 text-blue-500 font-bold"
+                      ? "bg-black/10 text-black font-bold"
                       : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
                   )}
                 >
@@ -269,7 +269,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
               className={cn(
                 "w-full flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
                 chatOpen
-                  ? "bg-blue-500/10 text-blue-500 font-bold"
+                  ? "bg-black/10 text-black font-bold"
                   : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
               )}
             >
@@ -301,7 +301,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
           {/* Chat Header */}
           <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-gray-50 to-white dark:from-[#192734] dark:to-[#15202b] rounded-t-2xl flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="size-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
+              <div className="size-9 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center shadow-md">
                 <Users className="size-4 text-white" />
               </div>
               <div>
@@ -417,7 +417,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
               />
               <Button
                 size="sm"
-                className="size-9 p-0 rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-md transition-all"
+                className="size-9 p-0 rounded-full bg-black hover:bg-gray-800 text-white shadow-md transition-all"
                 onClick={handleSendMessage}
                 disabled={sending || !newMessage.trim()}
               >

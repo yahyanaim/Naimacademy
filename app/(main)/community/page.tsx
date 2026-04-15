@@ -362,7 +362,7 @@ export default function CommunityHomePage() {
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">Questions</h1>
-          <Button onClick={() => setShowNewPostForm(true)} className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4">
+          <Button onClick={() => setShowNewPostForm(true)} className="bg-black hover:bg-gray-800 text-white rounded-full px-4">
             Ask Question
           </Button>
         </div>
@@ -383,14 +383,14 @@ export default function CommunityHomePage() {
                 placeholder="What's your question?"
                 value={newPost}
                 onChange={(e) => setNewPost(e.target.value)}
-                className="w-full min-h-[120px] resize-none border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full min-h-[120px] resize-none border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-gray-500"
               />
               
               <div className="flex flex-wrap gap-2">
                 {newTags.map(tag => (
-                  <span key={tag} className="px-2.5 py-1 text-xs rounded-full bg-blue-100 text-blue-600 flex items-center gap-1">
+                  <span key={tag} className="px-2.5 py-1 text-xs rounded-full bg-gray-200 text-gray-700 flex items-center gap-1">
                     #{tag}
-                    <button onClick={() => handleRemoveTag(tag)} className="hover:text-blue-800">
+                    <button onClick={() => handleRemoveTag(tag)} className="hover:text-gray-900">
                       <X className="size-3" />
                     </button>
                   </span>
@@ -411,7 +411,7 @@ export default function CommunityHomePage() {
               
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="outline" onClick={() => setShowNewPostForm(false)}>Cancel</Button>
-                <Button onClick={handleCreatePost} disabled={posting || newPost.trim().length < 10} className="bg-blue-500 hover:bg-blue-600">
+                <Button onClick={handleCreatePost} disabled={posting || newPost.trim().length < 10} className="bg-black hover:bg-gray-800">
                   Post
                 </Button>
               </div>
