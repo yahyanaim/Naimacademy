@@ -572,7 +572,7 @@ export default function CommunityHomePage() {
                     <div className="flex-1 min-w-0 space-y-2">
                       {/* Pinned Badge */}
                       {post.isPinned && (
-                        <Badge variant="outline" className="gap-1 w-fit text-black border-black/50">
+                        <Badge className="gap-1 w-fit bg-black text-white hover:bg-black/80">
                           <Pin className="size-3" />
                           Pinned
                         </Badge>
