@@ -176,9 +176,73 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">
       {/* Left Sidebar - Twitter Style */}
-      <aside className="w-64 fixed left-0 top-14 bottom-0 z-30 hidden md:flex flex-col bg-background">
+      <aside className="w-72 fixed left-0 top-14 bottom-0 z-30 hidden md:flex flex-col bg-background border-r">
+        {/* Search Bar - Twitter Style */}
+        <div className="p-4">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search N8N Community"
+              className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-[#1d9bf0]/10 hover:bg-gray-200 dark:hover:bg-[#1d9bf0]/20 rounded-full text-sm focus:outline-none focus:bg-white dark:focus:bg-[#1d9bf0]/20 transition-all border border-transparent focus:border-blue-400"
+            />
+          </div>
+        </div>
+
+        {/* User Profile Card - Twitter Style */}
+        <div className="px-4">
+          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="size-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center overflow-hidden flex-shrink-0">
+                {user.avatar ? (
+                  <Image src={user.avatar} alt="" width={48} height={48} className="object-cover" />
+                ) : (
+                  <span className="text-lg font-bold text-white">{user.name?.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-base truncate">{user.name}</p>
+                <p className="text-sm text-gray-500 truncate">@{user.name?.toLowerCase().replace(/\s+/g, "")}</p>
+              </div>
+              <div className="relative group">
+                <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                  <MoreHorizontal className="size-5 text-gray-500" />
+                </button>
+                {/* Dropdown Menu */}
+                <div className="absolute right-0 top-full w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all mt-1 z-50">
+                  <Link href="/profile" className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <Settings className="size-4" />
+                    Settings
+                  </Link>
+                  <button 
+                    onClick={async () => {
+                      await fetch("/api/auth/logout", { method: "POST" });
+                      router.push("/");
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-red-500"
+                  >
+                    <LogOut className="size-4" />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+            {/* Stats */}
+            <div className="flex gap-4 text-sm">
+              <Link href="/community/saved" className="hover:underline">
+                <span className="font-bold">0</span>
+                <span className="text-gray-500 ml-1">Saved</span>
+              </Link>
+              <span>
+                <span className="font-bold">0</span>
+                <span className="text-gray-500 ml-1">Questions</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Navigation */}
-        <nav className="flex-1 py-4 px-3">
+        <nav className="flex-1 py-4 px-3 mt-2">
           <div className="space-y-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
@@ -189,7 +253,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                   className={cn(
                     "flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
                     isActive
-                      ? "bg-primary/10 text-primary font-bold"
+                      ? "bg-blue-500/10 text-blue-500 font-bold"
                       : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
                   )}
                 >
@@ -205,7 +269,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
               className={cn(
                 "w-full flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors",
                 chatOpen
-                  ? "bg-primary/10 text-primary font-bold"
+                  ? "bg-blue-500/10 text-blue-500 font-bold"
                   : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
               )}
             >
@@ -216,65 +280,12 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
               )}
             </button>
           </div>
-
-          {/* Search Bar - Twitter Style */}
-          <div className="px-3 mt-4">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search"
-                className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-[#1d9bf0]/10 border border-transparent focus:border-blue-400 dark:focus:border-blue-500 rounded-full text-sm focus:outline-none transition-all"
-              />
-            </div>
-          </div>
         </nav>
-
-        {/* User Profile Section */}
-        <div className="p-3">
-          <div className="group relative">
-            <div className="flex items-center gap-3 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer">
-              <div className="size-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center overflow-hidden flex-shrink-0">
-                {user.avatar ? (
-                  <Image src={user.avatar} alt="" width={40} height={40} className="object-cover" />
-                ) : (
-                  <span className="text-base font-bold text-white">{user.name?.charAt(0).toUpperCase()}</span>
-                )}
-              </div>
-              <div className="flex-1 min-w-0 hidden xl:block">
-                <p className="font-bold text-sm truncate">{user.name}</p>
-                <p className="text-xs text-gray-500 truncate">@{user.name?.toLowerCase().replace(/\s+/g, "")}</p>
-              </div>
-              <div className="hidden xl:block">
-                <button className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                  <MoreHorizontal className="size-5 text-gray-500" />
-                </button>
-              </div>
-            </div>
-            {/* Dropdown Menu */}
-            <div className="absolute bottom-full left-0 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all mb-2 z-50">
-              <Link href="/profile" className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
-                <Settings className="size-4" />
-                Settings
-              </Link>
-              <button 
-                onClick={async () => {
-                  await fetch("/api/auth/logout", { method: "POST" });
-                  router.push("/");
-                }}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-red-500"
-              >
-                <LogOut className="size-4" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
       </aside>
 
       {/* Main Content */}
       <main className={cn(
-        "flex-1 min-h-full transition-all duration-300 ml-0 md:ml-64"
+        "flex-1 min-h-full transition-all duration-300 ml-0 md:ml-72"
       )}>
         {children}
       </main>
