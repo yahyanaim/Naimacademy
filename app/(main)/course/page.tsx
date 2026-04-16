@@ -354,7 +354,7 @@ END:VEVENT
           </div>
         ) : (
           <>
-            <div className="w-full max-w-md">
+            <div className="w-full">
               <ProgressBar percentage={percentage} />
             </div>
 
