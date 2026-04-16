@@ -17,6 +17,7 @@ import {
   Bell,
   FileText,
   Users,
+  MessageCircle,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -222,6 +223,7 @@ export default function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-all duration-200 mx-2"
                 >
+                  <MessageCircle className="size-5" />
                   Community
                 </Link>
                 

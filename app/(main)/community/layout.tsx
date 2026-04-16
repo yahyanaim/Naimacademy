@@ -78,6 +78,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   const [searchQuery, setSearchQuery] = useState("");
   const [savedCount, setSavedCount] = useState(0);
   const [questionsCount, setQuestionsCount] = useState(0);
+  const [hasNewQuestions, setHasNewQuestions] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -145,6 +146,21 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
     }
   }, [chatOpen, messages]);
 
+  useEffect(() => {
+    const storedCount = localStorage.getItem("lastViewedQuestionsCount");
+    const lastCount = storedCount ? parseInt(storedCount) : 0;
+    if (questionsCount > lastCount && lastCount > 0) {
+      setHasNewQuestions(true);
+    }
+  }, [questionsCount]);
+
+  useEffect(() => {
+    if (questionsCount > 0) {
+      localStorage.setItem("lastViewedQuestionsCount", questionsCount.toString());
+      setHasNewQuestions(false);
+    }
+  }, [pathname, questionsCount]);
+
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user) return;
 
@@ -191,26 +207,6 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">
-      {/* Mobile Header */}
-      <div className="md:hidden fixed top-14 left-0 right-0 z-20 bg-background border-b px-4 py-3 flex items-center gap-3">
-        <MessageCircle className="size-5 text-gray-600 dark:text-gray-400" />
-        <h1 className="font-bold text-lg">Community</h1>
-        <button
-          onClick={() => setChatOpen(!chatOpen)}
-          className={cn(
-            "ml-auto size-10 rounded-full flex items-center justify-center transition-colors",
-            chatOpen
-              ? "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
-              : "bg-blue-500 text-white"
-          )}
-        >
-          <MessageCircle className="size-5" />
-          {!chatOpen && (
-            <span className="absolute top-0 right-0 size-2 rounded-full bg-green-500" />
-          )}
-        </button>
-      </div>
-
       {/* Left Sidebar - Twitter Style */}
       <aside className="w-72 fixed left-0 top-14 bottom-0 z-30 hidden md:flex flex-col bg-background border-r">
         {/* Search Bar */}
@@ -297,6 +293,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
           <div className="space-y-1">
             {baseNavItems.map((item) => {
               const isActive = pathname === item.href;
+              const showDot = item.href === "/community" && hasNewQuestions;
               return (
                 <Link
                   key={item.href}
@@ -310,6 +307,9 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
                 >
                   <item.icon className="size-6" />
                   <span>{item.label}</span>
+                  {showDot && (
+                    <span className="ml-auto size-2 rounded-full bg-green-500" />
+                  )}
                 </Link>
               );
             })}
@@ -492,6 +492,22 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       )}
+
+      {/* Floating Chat Button - Mobile Only */}
+      <button
+        onClick={() => setChatOpen(!chatOpen)}
+        className={cn(
+          "md:hidden fixed bottom-4 right-4 z-50 size-12 rounded-full flex items-center justify-center shadow-lg transition-all",
+          chatOpen
+            ? "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+            : "bg-blue-500 text-white hover:bg-blue-600"
+        )}
+      >
+        <MessageCircle className="size-6" />
+        {!chatOpen && (
+          <span className="absolute -top-1 -right-1 size-3 rounded-full bg-green-500 border-2 border-white dark:border-gray-900" />
+        )}
+      </button>
     </div>
   );
 }
