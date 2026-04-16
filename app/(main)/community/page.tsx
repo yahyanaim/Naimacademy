@@ -831,103 +831,46 @@ function CommunityContent({
                         </Link>
                       </div>
 
-                      {/* Answers Section - Always Visible */}
-                      <div className="pt-4 border-t border-border/50">
-                        {/* Header */}
-                        <div className="flex items-center gap-2 mb-3">
-                          <MessageCircle className="size-4 text-green-600" />
-                          <h4 className="text-sm font-semibold text-foreground">
-                            {post.comments?.length || 0} {post.comments?.length === 1 ? "Answer" : "Answers"}
-                          </h4>
-                        </div>
-                        
-                        {/* Answers List */}
-                        {post.comments && post.comments.length > 0 && (
-                          <div className="space-y-3 mb-4">
-                            {post.comments.map((comment: Comment, index: number) => (
-                              <div 
-                                key={comment._id} 
-                                className="group relative p-4 bg-gray-50/70 dark:bg-gray-900/50 rounded-xl border border-border/50 hover:border-border transition-colors"
-                              >
-                                {/* Author Header */}
-                                <div className="flex items-start justify-between mb-2">
-                                  <div className="flex items-center gap-2.5">
-                                    <Avatar className="size-8">
-                                      {comment.authorAvatar ? (
-                                        <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
-                                      ) : null}
-                                      <AvatarFallback className="text-xs bg-gradient-to-br from-gray-900 to-gray-700 text-white">
-                                        {comment.authorName?.charAt(0).toUpperCase() || "?"}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                      <Link 
-                                        href={`/community/profile/${comment.authorId}`} 
-                                        className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
-                                      >
-                                        {escapeHtml(comment.authorName)}
-                                      </Link>
-                                      <p className="text-[10px] text-muted-foreground">
-                                        {formatDistanceToNow(new Date(comment.createdAt))}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  
-                                  {/* Delete Button */}
-                                  {(comment.authorId === user?.id || user?.role === "admin") && (
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                                      onClick={() => handleDeleteComment(post._id, comment._id)}
-                                    >
-                                      <Trash2 className="size-3.5" />
-                                    </Button>
-                                  )}
-                                </div>
-                                
-                                {/* Content */}
-                                <p className="text-sm text-foreground/90 leading-relaxed pl-10">
-                                  {escapeHtml(comment.content)}
-                                </p>
+                      {/* Answers - Always Shown */}
+                      {post.comments && post.comments.length > 0 && (
+                        <div className="pt-3 space-y-2">
+                          {post.comments.map((comment: Comment) => (
+                            <div key={comment._id} className="flex gap-2 text-xs">
+                              <Avatar className="size-5">
+                                {comment.authorAvatar ? (
+                                  <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
+                                ) : null}
+                                <AvatarFallback className="text-[8px]">
+                                  {comment.authorName?.charAt(0).toUpperCase() || "?"}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <span className="font-medium">{comment.authorName}: </span>
+                                <span>{escapeHtml(comment.content)}</span>
                               </div>
-                            ))}
-                          </div>
-                        )}
-                        
-                        {/* Empty State */}
-                        {(!post.comments || post.comments.length === 0) && (
-                          <div className="text-center py-4 mb-4">
-                            <p className="text-xs text-muted-foreground">No answers yet. Be the first to help!</p>
-                          </div>
-                        )}
-
-                        {/* Answer Input */}
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <input
-                              type="text"
-                              placeholder="Share your knowledge..."
-                              value={newComment[post._id] || ""}
-                              onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" && !e.shiftKey) {
-                                  e.preventDefault();
-                                  handleAddComment(post._id);
-                                }
-                              }}
-                              className="w-full h-10 pl-4 pr-12 text-sm bg-gray-50 dark:bg-gray-900/50 border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent transition-all placeholder:text-muted-foreground/50"
-                            />
-                            <Button 
-                              size="sm"
-                              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-full bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 disabled:opacity-50"
-                              onClick={() => handleAddComment(post._id)}
-                              disabled={!newComment[post._id]?.trim()}
-                            >
-                              <Send className="size-3.5" />
-                            </Button>
-                          </div>
+                            </div>
+                          ))}
                         </div>
+                      )}
+
+                      {/* Answer Input */}
+                      <div className="flex gap-2 pt-2">
+                        <input
+                          type="text"
+                          placeholder="Write an answer..."
+                          value={newComment[post._id] || ""}
+                          onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault();
+                              handleAddComment(post._id);
+                            }
+                          }}
+                          className="flex-1 h-8 px-3 text-xs border rounded-full focus:outline-none focus:ring-1"
+                        />
+                        <Button size="sm" className="h-8 px-3" onClick={() => handleAddComment(post._id)}>
+                          <Send className="size-3" />
+                        </Button>
                       </div>
                     </div>
                   </div>
