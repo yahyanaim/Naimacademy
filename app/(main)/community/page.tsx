@@ -151,7 +151,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: { currentPage: nu
 function QuestionsList({
   posts, user, filterTag, newComment,
   onLike, onShare, onFlag, onPin, onSave, onDelete,
-  onToggleComments, onSetFilterTag, onNewCommentChange, onAddComment
+  onToggleComments, onSetFilterTag, onNewCommentChange, onAddComment, onOpenPost
 }: {
   posts: Post[]; user: User | null; filterTag: string | null; newComment: { [postId: string]: string };
   onLike: (id: string) => void; onShare: (content: string) => void; onFlag: (id: string) => void;
@@ -159,6 +159,7 @@ function QuestionsList({
   onToggleComments: (id: string) => void; onSetFilterTag: (tag: string | null) => void;
   onNewCommentChange: (comments: { [postId: string]: string }) => void;
   onAddComment: (postId: string) => void;
+  onOpenPost: (post: Post) => void;
 }) {
   if (posts.length === 0) {
     return (
@@ -180,35 +181,35 @@ function QuestionsList({
         const isOwner = user && post.authorId === user.id;
         
         return (
-          <Card key={post._id} className={`hover:shadow-sm transition-shadow ${post.isPinned ? "border border-primary/50" : ""}`}>
+          <Card key={post._id} className={`hover:shadow-md transition-shadow cursor-pointer ${post.isPinned ? "border border-primary/50" : ""}`} onClick={() => onOpenPost(post)}>
             <CardContent className="p-4">
               <div className="flex gap-3">
                 <div className="flex flex-col items-center gap-2 min-w-[40px]">
                   <div className="flex flex-col items-center">
-                    <button onClick={() => onLike(post._id)} className={`transition-colors ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"}`}>
+                    <button onClick={(e) => { e.stopPropagation(); onLike(post._id); }} className={`transition-colors ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"}`}>
                       <Heart className={`size-4 ${isLiked ? "fill-current" : ""}`} />
                     </button>
                     <span className="text-xs font-semibold">{post.likes?.length || 0}</span>
                   </div>
                   <Separator className="w-full" />
                   <div className="flex flex-col items-center">
-                    <button onClick={() => onToggleComments(post._id)} className="text-muted-foreground hover:text-primary">
+                    <span className="text-muted-foreground">
                       <MessageCircle className={`size-4 ${(post.comments?.length || 0) > 0 ? "text-green-600" : ""}`} />
-                    </button>
+                    </span>
                     <span className={`text-xs font-semibold ${(post.comments?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`}>
                       {post.comments?.length || 0}
                     </span>
                   </div>
                   <Separator className="w-full" />
                   <div className="flex flex-col items-center">
-                    <button onClick={() => onPin(post._id)} className={`transition-colors ${post.isPinned ? "text-primary" : "text-muted-foreground hover:text-primary"}`}>
+                    <button onClick={(e) => { e.stopPropagation(); onPin(post._id); }} className={`transition-colors ${post.isPinned ? "text-primary" : "text-muted-foreground hover:text-primary"}`}>
                       <Pin className={`size-4 ${post.isPinned ? "fill-current" : ""}`} />
                     </button>
                     <span className="text-[9px] text-muted-foreground">pin</span>
                   </div>
                   <Separator className="w-full" />
                   <div className="flex flex-col items-center">
-                    <button onClick={() => onSave(post._id)} className={`transition-colors ${post.saved?.includes(user?.id || "") ? "text-yellow-500" : "text-muted-foreground hover:text-yellow-500"}`}>
+                    <button onClick={(e) => { e.stopPropagation(); onSave(post._id); }} className={`transition-colors ${post.saved?.includes(user?.id || "") ? "text-yellow-500" : "text-muted-foreground hover:text-yellow-500"}`}>
                       <Bookmark className={`size-4 ${post.saved?.includes(user?.id || "") ? "fill-current" : ""}`} />
                     </button>
                     <span className="text-[9px] text-muted-foreground">save</span>
@@ -223,7 +224,7 @@ function QuestionsList({
                     </Badge>
                   )}
                   
-                  <h3 className="text-sm font-medium leading-snug hover:text-primary cursor-pointer line-clamp-2">
+                  <h3 className="text-sm font-medium leading-snug">
                     {escapeHtml(post.content)}
                   </h3>
 
@@ -231,61 +232,32 @@ function QuestionsList({
                     <div className="flex flex-wrap gap-1">
                       {post.tags.map((tag: string, index: number) => {
                         const tagColors = [
-                          "bg-blue-100 text-blue-700 hover:bg-blue-200",
-                          "bg-green-100 text-green-700 hover:bg-green-200", 
-                          "bg-purple-100 text-purple-700 hover:bg-purple-200",
-                          "bg-orange-100 text-orange-700 hover:bg-orange-200",
-                          "bg-pink-100 text-pink-700 hover:bg-pink-200",
-                          "bg-indigo-100 text-indigo-700 hover:bg-indigo-200",
+                          "bg-blue-100 text-blue-700",
+                          "bg-green-100 text-green-700", 
+                          "bg-purple-100 text-purple-700",
+                          "bg-orange-100 text-orange-700",
+                          "bg-pink-100 text-pink-700",
+                          "bg-indigo-100 text-indigo-700",
                         ];
                         const colorClass = tagColors[index % tagColors.length];
                         return (
-                          <button
+                          <span
                             key={tag}
-                            onClick={() => onSetFilterTag(filterTag === tag ? null : tag)}
-                            className={`px-1.5 py-0.5 text-[10px] rounded-full transition-colors ${colorClass} ${filterTag === tag ? "ring-1 ring-primary" : ""}`}
+                            className={`px-2 py-0.5 text-xs rounded-full ${colorClass}`}
                           >
-                            {tag}
-                          </button>
+                            #{tag}
+                          </span>
                         );
                       })}
                     </div>
                   )}
 
                   <div className="flex items-center justify-between pt-2 border-t">
-                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                      <button onClick={() => onLike(post._id)} className={`flex items-center gap-1 hover:text-red-500 ${isLiked ? "text-red-500" : ""}`}>
-                        <Heart className={`size-3 ${isLiked ? "fill-current" : ""}`} />
-                        <span>{post.likes?.length || 0}</span>
-                      </button>
-                      <button onClick={() => onShare(post.content)} className="flex items-center gap-1 hover:text-blue-500">
-                        <Share2 className="size-3" />
-                        <span>Share</span>
-                      </button>
-                      <button onClick={() => onFlag(post._id)} className="flex items-center gap-1 hover:text-orange-500">
-                        <Flag className="size-3" />
-                        <span>Flag</span>
-                      </button>
-                      <button onClick={() => onPin(post._id)} className={`flex items-center gap-1 ${post.isPinned ? "text-primary" : "hover:text-primary"}`}>
-                        <Pin className={`size-3 ${post.isPinned ? "fill-current" : ""}`} />
-                        <span>{post.isPinned ? "Pinned" : "Pin"}</span>
-                      </button>
-                      <button onClick={() => onSave(post._id)} className={`flex items-center gap-1 ${isSaved ? "text-yellow-500" : "hover:text-yellow-500"}`}>
-                        <Bookmark className={`size-3 ${isSaved ? "fill-current" : ""}`} />
-                        <span>{isSaved ? "Saved" : "Save"}</span>
-                      </button>
-                      {(isOwner || user?.role === "admin") && (
-                        <button onClick={() => onDelete(post._id)} className="flex items-center gap-1 text-red-500 hover:text-red-600">
-                          <Trash2 className="size-3" />
-                          <span>Delete</span>
-                        </button>
-                      )}
-                    </div>
+                    <span className="text-[10px] text-muted-foreground">
+                      {formatDistanceToNow(new Date(post.createdAt))} · {post.comments?.length || 0} answers
+                    </span>
 
-                    <Link href={`/community/profile/${post.authorId}`} className="flex items-center gap-1.5 hover:bg-muted/50 px-1.5 py-0.5 rounded transition-colors">
-                      <span className="text-[10px] text-muted-foreground">
-                        {formatDistanceToNow(new Date(post.createdAt))}
-                      </span>
+                    <Link href={`/community/profile/${post.authorId}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 hover:bg-muted/50 px-1.5 py-0.5 rounded transition-colors">
                       <Avatar className="size-5">
                         {post.authorAvatar ? (
                           <AvatarImage src={post.authorAvatar} alt={post.authorName} />
@@ -299,54 +271,169 @@ function QuestionsList({
                       </span>
                     </Link>
                   </div>
-
-                  <div className="pt-3 space-y-2">
-                    {post.comments && post.comments.length > 0 ? (
-                      post.comments.map((comment: Comment) => (
-                        <div key={comment._id} className="flex gap-2 text-xs">
-                          <Avatar className="size-5">
-                            {comment.authorAvatar ? (
-                              <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
-                            ) : null}
-                            <AvatarFallback className="text-[8px]">
-                              {comment.authorName?.charAt(0).toUpperCase() || "?"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <span className="font-medium">{comment.authorName}: </span>
-                            <span>{escapeHtml(comment.content)}</span>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-muted-foreground">No answers yet</p>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <input
-                      type="text"
-                      placeholder="Write an answer..."
-                      value={newComment[post._id] || ""}
-                      onChange={(e) => onNewCommentChange({ ...newComment, [post._id]: e.target.value })}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          onAddComment(post._id);
-                        }
-                      }}
-                      className="flex-1 h-8 px-3 text-xs border rounded-full focus:outline-none focus:ring-1"
-                    />
-                    <Button size="sm" className="h-8 px-3" onClick={() => onAddComment(post._id)}>
-                      <Send className="size-3" />
-                    </Button>
-                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         );
       })}
+    </div>
+  );
+}
+
+function QuestionModal({ 
+  post, user, newComment, onClose, onLike, onSave, onPin, onFlag, onShare, onDelete, onNewCommentChange, onAddComment, onDeleteComment 
+}: {
+  post: Post; user: User | null; newComment: string; onClose: () => void;
+  onLike: () => void; onSave: () => void; onPin: () => void; onFlag: () => void;
+  onShare: () => void; onDelete: () => void; onNewCommentChange: (v: string) => void;
+  onAddComment: () => void; onDeleteComment: (commentId: string) => void;
+}) {
+  const isLiked = user && post.likes?.includes(user.id);
+  const isSaved = user && post.saved?.includes(user.id);
+  const isOwner = user && post.authorId === user.id;
+
+  const tagColors = [
+    "bg-blue-100 text-blue-700",
+    "bg-green-100 text-green-700", 
+    "bg-purple-100 text-purple-700",
+    "bg-orange-100 text-orange-700",
+    "bg-pink-100 text-pink-700",
+    "bg-indigo-100 text-indigo-700",
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-background rounded-2xl w-full max-w-2xl mx-4 max-h-[85vh] overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b">
+          <h2 className="font-bold text-lg">Question</h2>
+          <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors">
+            <X className="size-5" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="overflow-y-auto max-h-[calc(85vh-140px)] p-4 space-y-4">
+          {/* Author */}
+          <Link href={`/community/profile/${post.authorId}`} onClick={onClose} className="flex items-center gap-3 hover:bg-muted/50 p-2 -m-2 rounded-lg transition-colors">
+            <Avatar className="size-10">
+              {post.authorAvatar ? (
+                <AvatarImage src={post.authorAvatar} alt={post.authorName} />
+              ) : null}
+              <AvatarFallback className="text-sm bg-gradient-to-br from-blue-500 to-cyan-400 text-white">
+                {post.authorName?.charAt(0).toUpperCase() || "?"}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-semibold text-sm">{escapeHtml(post.authorName || "Anonymous")}</p>
+              <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(post.createdAt))}</p>
+            </div>
+          </Link>
+
+          {/* Question Content */}
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <p className="text-base leading-relaxed whitespace-pre-wrap">{escapeHtml(post.content)}</p>
+          </div>
+
+          {/* Tags */}
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {post.tags.map((tag, index) => (
+                <span key={tag} className={`px-3 py-1 text-sm rounded-full ${tagColors[index % tagColors.length]}`}>
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 pt-2 border-t">
+            <button onClick={onLike} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${isLiked ? "bg-red-100 text-red-600" : "bg-muted hover:bg-muted/80"}`}>
+              <Heart className={`size-4 ${isLiked ? "fill-current" : ""}`} />
+              <span>{post.likes?.length || 0} likes</span>
+            </button>
+            <button onClick={onShare} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm bg-muted hover:bg-muted/80 transition-colors">
+              <Share2 className="size-4" />
+              <span>Share</span>
+            </button>
+            <button onClick={onSave} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${isSaved ? "bg-yellow-100 text-yellow-600" : "bg-muted hover:bg-muted/80"}`}>
+              <Bookmark className={`size-4 ${isSaved ? "fill-current" : ""}`} />
+              <span>{isSaved ? "Saved" : "Save"}</span>
+            </button>
+            <button onClick={onPin} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${post.isPinned ? "bg-primary/10 text-primary" : "bg-muted hover:bg-muted/80"}`}>
+              <Pin className={`size-4 ${post.isPinned ? "fill-current" : ""}`} />
+              <span>{post.isPinned ? "Pinned" : "Pin"}</span>
+            </button>
+            {(isOwner || user?.role === "admin") && (
+              <button onClick={onDelete} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm bg-red-100 text-red-600 hover:bg-red-200 transition-colors ml-auto">
+                <Trash2 className="size-4" />
+                <span>Delete</span>
+              </button>
+            )}
+          </div>
+
+          {/* Answers Section */}
+          <div className="pt-4 border-t">
+            <h3 className="font-semibold text-lg mb-3">{post.comments?.length || 0} Answers</h3>
+            
+            <div className="space-y-3">
+              {post.comments && post.comments.length > 0 ? (
+                post.comments.map((comment) => (
+                  <div key={comment._id} className="group p-3 bg-muted/50 rounded-xl">
+                    <div className="flex items-start justify-between">
+                      <Link href={`/community/profile/${comment.authorId}`} onClick={onClose} className="flex items-center gap-2">
+                        <Avatar className="size-8">
+                          {comment.authorAvatar ? (
+                            <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
+                          ) : null}
+                          <AvatarFallback className="text-[10px] bg-gradient-to-br from-gray-700 to-gray-900 text-white">
+                            {comment.authorName?.charAt(0).toUpperCase() || "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-semibold">{escapeHtml(comment.authorName)}</p>
+                          <p className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(comment.createdAt))}</p>
+                        </div>
+                      </Link>
+                      {(comment.authorId === user?.id || user?.role === "admin") && (
+                        <button onClick={() => onDeleteComment(comment._id)} className="opacity-0 group-hover:opacity-100 p-1 hover:bg-background rounded transition-all text-muted-foreground hover:text-red-500">
+                          <Trash2 className="size-4" />
+                        </button>
+                      )}
+                    </div>
+                    <p className="mt-2 text-sm pl-10">{escapeHtml(comment.content)}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No answers yet. Be the first to help!</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Answer Input */}
+        <div className="p-4 border-t bg-muted/30">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Write your answer..."
+              value={newComment}
+              onChange={(e) => onNewCommentChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  onAddComment();
+                }
+              }}
+              className="flex-1 h-10 px-4 text-sm border rounded-full bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <Button onClick={onAddComment} className="rounded-full px-4">
+              <Send className="size-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -690,6 +777,162 @@ function CommunityContent({
   toggleComments: (postId: string) => void; handleLike: (postId: string) => Promise<void>; handleSave: (postId: string) => Promise<void>; handleDeletePost: (postId: string) => Promise<void>; handleAddComment: (postId: string) => Promise<void>; handlePin: (postId: string) => Promise<void>; handleFlag: (postId: string) => Promise<void>; handleShare: (postContent: string) => Promise<void>; handleDeleteComment: (postId: string, commentId: string) => Promise<void>;
   currentPage: number; totalPages: number; onPageChange: (page: number) => void;
 }) {
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [selectedPostNewComment, setSelectedPostNewComment] = useState("");
+
+  const handleOpenPost = (post: Post) => {
+    setSelectedPost(post);
+    setSelectedPostNewComment("");
+  };
+
+  const handleClosePost = () => {
+    setSelectedPost(null);
+    setSelectedPostNewComment("");
+  };
+
+  const handleLikeSelectedPost = async () => {
+    if (!selectedPost) return;
+    try {
+      const res = await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "like", postId: selectedPost._id }),
+      });
+      if (res.ok) {
+        onPageChange(currentPage);
+        const updated = posts.find(p => p._id === selectedPost._id);
+        if (updated) {
+          setSelectedPost({ ...selectedPost, likes: updated.likes });
+        }
+      }
+    } catch {
+      toast.error("Failed to like");
+    }
+  };
+
+  const handleSaveSelectedPost = async () => {
+    if (!selectedPost) return;
+    try {
+      const res = await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "save", postId: selectedPost._id }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(data.isSaved ? "Question saved" : "Question unsaved");
+        onPageChange(currentPage);
+        const updated = posts.find(p => p._id === selectedPost._id);
+        if (updated) {
+          setSelectedPost({ ...selectedPost, saved: updated.saved });
+        }
+      }
+    } catch {
+      toast.error("Failed to save");
+    }
+  };
+
+  const handlePinSelectedPost = async () => {
+    if (!selectedPost) return;
+    try {
+      const res = await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "pin", postId: selectedPost._id }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(data.isPinned ? "Question pinned" : "Question unpinned");
+        onPageChange(currentPage);
+        const updated = posts.find(p => p._id === selectedPost._id);
+        if (updated) {
+          setSelectedPost({ ...selectedPost, isPinned: updated.isPinned });
+        }
+      }
+    } catch {
+      toast.error("Failed to pin");
+    }
+  };
+
+  const handleFlagSelectedPost = () => {
+    toast.info("Post flagged for review");
+  };
+
+  const handleShareSelectedPost = async () => {
+    if (!selectedPost) return;
+    try {
+      await navigator.clipboard.writeText(selectedPost.content.substring(0, 100) + "...");
+      toast.success("Link copied!");
+    } catch {
+      toast.error("Failed to copy");
+    }
+  };
+
+  const handleDeleteSelectedPost = async () => {
+    if (!selectedPost) return;
+    if (!confirm("Are you sure you want to delete this question?")) return;
+    try {
+      const res = await fetch(`/api/community/post/${selectedPost._id}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("Question deleted");
+        handleClosePost();
+        onPageChange(currentPage);
+      }
+    } catch {
+      toast.error("Failed to delete question");
+    }
+  };
+
+  const handleAddCommentSelectedPost = async () => {
+    if (!selectedPost || !selectedPostNewComment.trim()) return;
+    try {
+      const res = await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "comment",
+          postId: selectedPost._id,
+          content: selectedPostNewComment,
+          authorName: user?.name,
+          authorEmail: user?.email,
+          authorAvatar: user?.avatar,
+        }),
+      });
+      if (res.ok) {
+        setSelectedPostNewComment("");
+        onPageChange(currentPage);
+        const updated = posts.find(p => p._id === selectedPost._id);
+        if (updated) {
+          setSelectedPost(updated);
+        }
+      }
+    } catch {
+      toast.error("Failed to add answer");
+    }
+  };
+
+  const handleDeleteCommentSelectedPost = async (commentId: string) => {
+    if (!selectedPost) return;
+    if (!confirm("Delete this answer?")) return;
+    try {
+      const res = await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "deleteComment", postId: selectedPost._id, commentId }),
+      });
+      if (res.ok) {
+        toast.success("Answer deleted");
+        onPageChange(currentPage);
+        const updated = posts.find(p => p._id === selectedPost._id);
+        if (updated) {
+          setSelectedPost(updated);
+        }
+      }
+    } catch {
+      toast.error("Failed to delete answer");
+    }
+  };
+
   const allTags = Array.from(new Set(posts.flatMap((p: Post) => p.tags || []))).slice(0, 15);
   if (loading) {
     return (
@@ -968,7 +1211,27 @@ function CommunityContent({
         onSetFilterTag={setFilterTag}
         onNewCommentChange={setNewComment}
         onAddComment={handleAddComment}
+        onOpenPost={handleOpenPost}
       />
+
+      {/* Question Modal */}
+      {selectedPost && (
+        <QuestionModal
+          post={selectedPost}
+          user={user}
+          newComment={selectedPostNewComment}
+          onClose={handleClosePost}
+          onLike={handleLikeSelectedPost}
+          onSave={handleSaveSelectedPost}
+          onPin={handlePinSelectedPost}
+          onFlag={handleFlagSelectedPost}
+          onShare={handleShareSelectedPost}
+          onDelete={handleDeleteSelectedPost}
+          onNewCommentChange={setSelectedPostNewComment}
+          onAddComment={handleAddCommentSelectedPost}
+          onDeleteComment={handleDeleteCommentSelectedPost}
+        />
+      )}
 
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 pt-6">
