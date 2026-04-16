@@ -519,7 +519,7 @@ function CommunityContent({
         </div>
       )}
 
-      {/* Filters */}
+      {/* Sort Filters */}
       <div className="flex gap-1 p-1 bg-muted/50 rounded-lg w-fit">
         <Button 
           variant={sortBy === "newest" ? "default" : "ghost"} 
@@ -546,6 +546,31 @@ function CommunityContent({
           Unanswered
         </Button>
       </div>
+
+      {/* Tag Filters */}
+      {allTags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={filterTag === null ? "default" : "outline"}
+            size="sm"
+            className={filterTag === null ? "bg-gray-900 text-white" : ""}
+            onClick={() => setFilterTag(null)}
+          >
+            All
+          </Button>
+          {allTags.map((tag) => (
+            <Button
+              key={tag}
+              variant={filterTag === tag ? "default" : "outline"}
+              size="sm"
+              className={filterTag === tag ? "bg-gray-900 text-white" : ""}
+              onClick={() => setFilterTag(filterTag === tag ? null : tag)}
+            >
+              #{tag}
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* Questions List */}
       {posts.length === 0 ? (
