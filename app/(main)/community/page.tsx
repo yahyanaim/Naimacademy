@@ -195,6 +195,7 @@ function CommunityHomePageContent() {
 
       if (res.ok) {
         toast.success("Question posted!");
+        localStorage.setItem("lastPostDate", new Date().toDateString());
         setNewPost("");
         setNewTags([]);
         setShowNewPostForm(false);

@@ -146,20 +146,13 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
     }
   }, [chatOpen, messages]);
 
+  // Check if user has posted today - show dot if they have
   useEffect(() => {
-    const storedCount = localStorage.getItem("lastViewedQuestionsCount");
-    const lastCount = storedCount ? parseInt(storedCount) : 0;
-    if (questionsCount > lastCount && lastCount > 0) {
-      setHasNewQuestions(true);
-    }
+    const today = new Date().toDateString();
+    const lastPostDate = localStorage.getItem("lastPostDate");
+    const hasPostedToday = lastPostDate === today;
+    setHasNewQuestions(hasPostedToday);
   }, [questionsCount]);
-
-  useEffect(() => {
-    if (questionsCount > 0) {
-      localStorage.setItem("lastViewedQuestionsCount", questionsCount.toString());
-      setHasNewQuestions(false);
-    }
-  }, [pathname, questionsCount]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user) return;
