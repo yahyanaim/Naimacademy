@@ -803,9 +803,6 @@ function CommunityContent({
                       <div className="flex items-center justify-between pt-2 border-t">
                         {/* Left: Meta info */}
                         <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                          <button onClick={() => toggleComments(post._id)} className="hover:text-primary">
-                            {post.comments?.length || 0} answers
-                          </button>
                           <span className="flex items-center gap-0.5">
                             <Clock className="size-2.5" />
                             {getHoursUntilExpiry(post.expiresAt)}h left
@@ -831,10 +828,10 @@ function CommunityContent({
                         </Link>
                       </div>
 
-                      {/* Answers - Always Shown */}
-                      {post.comments && post.comments.length > 0 && (
-                        <div className="pt-3 space-y-2">
-                          {post.comments.map((comment: Comment) => (
+                      {/* Answers - Always Visible */}
+                      <div className="pt-3 space-y-2">
+                        {post.comments && post.comments.length > 0 ? (
+                          post.comments.map((comment: Comment) => (
                             <div key={comment._id} className="flex gap-2 text-xs">
                               <Avatar className="size-5">
                                 {comment.authorAvatar ? (
@@ -849,9 +846,11 @@ function CommunityContent({
                                 <span>{escapeHtml(comment.content)}</span>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      )}
+                          ))
+                        ) : (
+                          <p className="text-xs text-muted-foreground">No answers yet</p>
+                        )}
+                      </div>
 
                       {/* Answer Input */}
                       <div className="flex gap-2 pt-2">
