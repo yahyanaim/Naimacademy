@@ -817,13 +817,16 @@ function CommunityContent({
                           </button>
                           <button onClick={() => handlePin(post._id)} className={`flex items-center gap-1 ${post.isPinned ? "text-primary" : "hover:text-primary"}`}>
                             <Pin className={`size-3 ${post.isPinned ? "fill-current" : ""}`} />
+                            <span>{post.isPinned ? "Pinned" : "Pin"}</span>
                           </button>
                           <button onClick={() => handleSave(post._id)} className={`flex items-center gap-1 ${isSaved ? "text-yellow-500" : "hover:text-yellow-500"}`}>
                             <Bookmark className={`size-3 ${isSaved ? "fill-current" : ""}`} />
+                            <span>{isSaved ? "Saved" : "Save"}</span>
                           </button>
                           {(isOwner || user?.role === "admin") && (
-                            <button onClick={() => handleDeletePost(post._id)} className="flex items-center gap-1 hover:text-destructive">
+                            <button onClick={() => handleDeletePost(post._id)} className="flex items-center gap-1 text-red-500 hover:text-red-600">
                               <Trash2 className="size-3" />
+                              <span>Delete</span>
                             </button>
                           )}
                         </div>
