@@ -70,7 +70,7 @@ function formatTimeAgo(dateString: string): string {
 export default function CommunityLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [chatOpen, setChatOpen] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
   const [chatCollapsed, setChatCollapsed] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -191,6 +191,26 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">
+      {/* Mobile Header */}
+      <div className="md:hidden fixed top-14 left-0 right-0 z-20 bg-background border-b px-4 py-3 flex items-center gap-3">
+        <MessageCircle className="size-5 text-gray-600 dark:text-gray-400" />
+        <h1 className="font-bold text-lg">Community</h1>
+        <button
+          onClick={() => setChatOpen(!chatOpen)}
+          className={cn(
+            "ml-auto size-10 rounded-full flex items-center justify-center transition-colors",
+            chatOpen
+              ? "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+              : "bg-blue-500 text-white"
+          )}
+        >
+          <MessageCircle className="size-5" />
+          {!chatOpen && (
+            <span className="absolute top-0 right-0 size-2 rounded-full bg-green-500" />
+          )}
+        </button>
+      </div>
+
       {/* Left Sidebar - Twitter Style */}
       <aside className="w-72 fixed left-0 top-14 bottom-0 z-30 hidden md:flex flex-col bg-background border-r">
         {/* Search Bar */}
@@ -330,7 +350,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
 
       {/* Main Content */}
       <main className={cn(
-        "flex-1 min-h-full transition-all duration-300 ml-0 md:ml-72"
+        "flex-1 min-h-full transition-all duration-300 ml-0 md:ml-72 pt-14 md:pt-0"
       )}>
         {children}
       </main>

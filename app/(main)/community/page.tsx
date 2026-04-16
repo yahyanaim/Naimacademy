@@ -550,25 +550,47 @@ function CommunityContent({
       {/* Tag Filters */}
       {allTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant={filterTag === null ? "default" : "outline"}
-            size="sm"
-            className={filterTag === null ? "bg-gray-900 text-white" : ""}
+          <button
             onClick={() => setFilterTag(null)}
+            className={`px-3 py-1.5 text-xs rounded-full font-medium transition-colors ${
+              filterTag === null
+                ? "bg-gray-900 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            }`}
           >
             All
-          </Button>
-          {allTags.map((tag) => (
-            <Button
-              key={tag}
-              variant={filterTag === tag ? "default" : "outline"}
-              size="sm"
-              className={filterTag === tag ? "bg-gray-900 text-white" : ""}
-              onClick={() => setFilterTag(filterTag === tag ? null : tag)}
-            >
-              #{tag}
-            </Button>
-          ))}
+          </button>
+          {allTags.map((tag, index) => {
+            const tagColors = [
+              "bg-blue-100 text-blue-700 hover:bg-blue-200",
+              "bg-green-100 text-green-700 hover:bg-green-200",
+              "bg-purple-100 text-purple-700 hover:bg-purple-200",
+              "bg-orange-100 text-orange-700 hover:bg-orange-200",
+              "bg-pink-100 text-pink-700 hover:bg-pink-200",
+              "bg-indigo-100 text-indigo-700 hover:bg-indigo-200",
+            ];
+            const activeColors = [
+              "bg-blue-500 text-white",
+              "bg-green-500 text-white",
+              "bg-purple-500 text-white",
+              "bg-orange-500 text-white",
+              "bg-pink-500 text-white",
+              "bg-indigo-500 text-white",
+            ];
+            const colorClass = tagColors[index % tagColors.length];
+            const activeClass = activeColors[index % activeColors.length];
+            return (
+              <button
+                key={tag}
+                onClick={() => setFilterTag(filterTag === tag ? null : tag)}
+                className={`px-3 py-1.5 text-xs rounded-full font-medium transition-colors ${
+                  filterTag === tag ? activeClass : colorClass
+                }`}
+              >
+                #{tag}
+              </button>
+            );
+          })}
         </div>
       )}
 
