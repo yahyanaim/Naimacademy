@@ -831,90 +831,104 @@ function CommunityContent({
                         </Link>
                       </div>
 
-                      {/* Actions - Compact */}
-                      <div className="flex items-center gap-0.5 pt-1">
-                        <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5" onClick={() => handleLike(post._id)}>
-                          <Heart className={`size-2.5 ${isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
-                          <span className={isLiked ? "text-red-500" : "text-muted-foreground"}>{isLiked ? "Liked" : "Like"}</span>
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5" onClick={() => handleShare(post.content)}>
-                          <Share2 className="size-2.5 text-muted-foreground" />
-                          <span className="text-muted-foreground">Share</span>
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5" onClick={() => handleFlag(post._id)}>
-                          <Flag className="size-2.5 text-muted-foreground" />
-                          <span className="text-muted-foreground">Flag</span>
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5" onClick={() => handlePin(post._id)}>
-                          <Pin className={`size-2.5 ${post.isPinned ? "fill-primary text-primary" : "text-muted-foreground"}`} />
-                          <span className={post.isPinned ? "text-primary" : "text-muted-foreground"}>{post.isPinned ? "Pinned" : "Pin"}</span>
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5" onClick={() => handleSave(post._id)}>
-                          <Bookmark className={`size-2.5 ${isSaved ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground"}`} />
-                          <span className={isSaved ? "text-yellow-500" : "text-muted-foreground"}>{isSaved ? "Saved" : "Save"}</span>
-                        </Button>
-                        {(isOwner || user?.role === "admin") && (
-                          <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5 text-destructive" onClick={() => handleDeletePost(post._id)}>
-                            <Trash2 className="size-2.5" />
-                            <span>Delete</span>
-                          </Button>
-                        )}
-                      </div>
-
-                      {/* Answers Section */}
-                      {expandedComments.has(post._id) && (
-                        <div className="pt-3 border-t space-y-3">
-                          <h4 className="font-semibold text-xs">{post.comments?.length || 0} Answers</h4>
-                          
-                          {post.comments && post.comments.length > 0 && (
-                            <div className="space-y-2">
-                              {post.comments.map((comment: Comment) => (
-                                <div key={comment._id} className="flex gap-2 p-2 bg-muted/50 rounded-lg">
-                                  <Avatar className="size-6">
-                                    {comment.authorAvatar ? (
-                                      <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
-                                    ) : null}
-                                    <AvatarFallback className="text-[10px] bg-secondary">
-                                      {comment.authorName?.charAt(0).toUpperCase() || "?"}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1 space-y-0.5">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-1.5">
-                                        <Link href={`/community/profile/${comment.authorId}`} className="text-xs font-medium text-primary hover:underline">
-                                          {escapeHtml(comment.authorName)}
-                                        </Link>
-                                        <span className="text-[10px] text-muted-foreground">
-                                          {formatDistanceToNow(new Date(comment.createdAt))}
-                                        </span>
-                                      </div>
-                                      {(comment.authorId === user?.id || user?.role === "admin") && (
-                                        <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-destructive hover:text-destructive" onClick={() => handleDeleteComment(post._id, comment._id)}>
-                                          <Trash2 className="size-2.5" />
-                                        </Button>
-                                      )}
+                      {/* Answers Section - Always Visible */}
+                      <div className="pt-4 border-t border-border/50">
+                        {/* Header */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <MessageCircle className="size-4 text-green-600" />
+                          <h4 className="text-sm font-semibold text-foreground">
+                            {post.comments?.length || 0} {post.comments?.length === 1 ? "Answer" : "Answers"}
+                          </h4>
+                        </div>
+                        
+                        {/* Answers List */}
+                        {post.comments && post.comments.length > 0 && (
+                          <div className="space-y-3 mb-4">
+                            {post.comments.map((comment: Comment, index: number) => (
+                              <div 
+                                key={comment._id} 
+                                className="group relative p-4 bg-gray-50/70 dark:bg-gray-900/50 rounded-xl border border-border/50 hover:border-border transition-colors"
+                              >
+                                {/* Author Header */}
+                                <div className="flex items-start justify-between mb-2">
+                                  <div className="flex items-center gap-2.5">
+                                    <Avatar className="size-8">
+                                      {comment.authorAvatar ? (
+                                        <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
+                                      ) : null}
+                                      <AvatarFallback className="text-xs bg-gradient-to-br from-gray-900 to-gray-700 text-white">
+                                        {comment.authorName?.charAt(0).toUpperCase() || "?"}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <Link 
+                                        href={`/community/profile/${comment.authorId}`} 
+                                        className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                                      >
+                                        {escapeHtml(comment.authorName)}
+                                      </Link>
+                                      <p className="text-[10px] text-muted-foreground">
+                                        {formatDistanceToNow(new Date(comment.createdAt))}
+                                      </p>
                                     </div>
-                                    <p className="text-xs">{escapeHtml(comment.content)}</p>
                                   </div>
+                                  
+                                  {/* Delete Button */}
+                                  {(comment.authorId === user?.id || user?.role === "admin") && (
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                      onClick={() => handleDeleteComment(post._id, comment._id)}
+                                    >
+                                      <Trash2 className="size-3.5" />
+                                    </Button>
+                                  )}
                                 </div>
-                              ))}
-                            </div>
-                          )}
+                                
+                                {/* Content */}
+                                <p className="text-sm text-foreground/90 leading-relaxed pl-10">
+                                  {escapeHtml(comment.content)}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Empty State */}
+                        {(!post.comments || post.comments.length === 0) && (
+                          <div className="text-center py-4 mb-4">
+                            <p className="text-xs text-muted-foreground">No answers yet. Be the first to help!</p>
+                          </div>
+                        )}
 
-                          <div className="flex gap-2 pt-2">
-                            <Input
-                              placeholder="Write your answer..."
+                        {/* Answer Input */}
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <input
+                              type="text"
+                              placeholder="Share your knowledge..."
                               value={newComment[post._id] || ""}
                               onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
-                              onKeyDown={(e) => e.key === "Enter" && handleAddComment(post._id)}
-                              className="flex-1 h-8 text-xs"
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                  e.preventDefault();
+                                  handleAddComment(post._id);
+                                }
+                              }}
+                              className="w-full h-10 pl-4 pr-12 text-sm bg-gray-50 dark:bg-gray-900/50 border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent transition-all placeholder:text-muted-foreground/50"
                             />
-                            <Button size="sm" className="h-8" onClick={() => handleAddComment(post._id)}>
-                              <Send className="size-3" />
+                            <Button 
+                              size="sm"
+                              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-full bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 disabled:opacity-50"
+                              onClick={() => handleAddComment(post._id)}
+                              disabled={!newComment[post._id]?.trim()}
+                            >
+                              <Send className="size-3.5" />
                             </Button>
                           </div>
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
