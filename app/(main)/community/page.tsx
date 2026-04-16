@@ -16,7 +16,9 @@ import {
   Share2,
   Flag,
   Trash2,
-  Bookmark
+  Bookmark,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -95,6 +97,260 @@ const SUGGESTED_TAGS = [
   "api", "database", "mongodb", "nextjs", "typescript", "git"
 ];
 
+function Pagination({ currentPage, totalPages, onPageChange }: { currentPage: number; totalPages: number; onPageChange: (page: number) => void }) {
+  if (totalPages <= 1) return null;
+  
+  return (
+    <div className="flex items-center justify-center gap-2 pt-6">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          onPageChange(currentPage - 1);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        disabled={currentPage === 1}
+        className="gap-1"
+      >
+        <ChevronLeft className="size-4" />
+        Previous
+      </Button>
+      <div className="flex items-center gap-1">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <Button
+            key={page}
+            variant={currentPage === page ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              onPageChange(page);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="w-9"
+          >
+            {page}
+          </Button>
+        ))}
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          onPageChange(currentPage + 1);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        disabled={currentPage === totalPages}
+        className="gap-1"
+      >
+        Next
+        <ChevronRight className="size-4" />
+      </Button>
+    </div>
+  );
+}
+
+function QuestionsList({
+  posts, user, filterTag, newComment,
+  onLike, onShare, onFlag, onPin, onSave, onDelete,
+  onToggleComments, onSetFilterTag, onNewCommentChange, onAddComment
+}: {
+  posts: Post[]; user: User | null; filterTag: string | null; newComment: { [postId: string]: string };
+  onLike: (id: string) => void; onShare: (content: string) => void; onFlag: (id: string) => void;
+  onPin: (id: string) => void; onSave: (id: string) => void; onDelete: (id: string) => void;
+  onToggleComments: (id: string) => void; onSetFilterTag: (tag: string | null) => void;
+  onNewCommentChange: (comments: { [postId: string]: string }) => void;
+  onAddComment: (postId: string) => void;
+}) {
+  if (posts.length === 0) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <MessageCircle className="size-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+          <h3 className="font-semibold text-lg">No questions found</h3>
+          <p className="text-muted-foreground">Be the first to ask!</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {posts.map((post: any) => {
+        const isLiked = user && post.likes?.includes(user.id);
+        const isSaved = user && post.saved?.includes(user.id);
+        const isOwner = user && post.authorId === user.id;
+        
+        return (
+          <Card key={post._id} className={`hover:shadow-sm transition-shadow ${post.isPinned ? "border border-primary/50" : ""}`}>
+            <CardContent className="p-4">
+              <div className="flex gap-3">
+                <div className="flex flex-col items-center gap-2 min-w-[40px]">
+                  <div className="flex flex-col items-center">
+                    <button onClick={() => onLike(post._id)} className={`transition-colors ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"}`}>
+                      <Heart className={`size-4 ${isLiked ? "fill-current" : ""}`} />
+                    </button>
+                    <span className="text-xs font-semibold">{post.likes?.length || 0}</span>
+                  </div>
+                  <Separator className="w-full" />
+                  <div className="flex flex-col items-center">
+                    <button onClick={() => onToggleComments(post._id)} className="text-muted-foreground hover:text-primary">
+                      <MessageCircle className={`size-4 ${(post.comments?.length || 0) > 0 ? "text-green-600" : ""}`} />
+                    </button>
+                    <span className={`text-xs font-semibold ${(post.comments?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`}>
+                      {post.comments?.length || 0}
+                    </span>
+                  </div>
+                  <Separator className="w-full" />
+                  <div className="flex flex-col items-center">
+                    <button onClick={() => onPin(post._id)} className={`transition-colors ${post.isPinned ? "text-primary" : "text-muted-foreground hover:text-primary"}`}>
+                      <Pin className={`size-4 ${post.isPinned ? "fill-current" : ""}`} />
+                    </button>
+                    <span className="text-[9px] text-muted-foreground">pin</span>
+                  </div>
+                  <Separator className="w-full" />
+                  <div className="flex flex-col items-center">
+                    <button onClick={() => onSave(post._id)} className={`transition-colors ${post.saved?.includes(user?.id || "") ? "text-yellow-500" : "text-muted-foreground hover:text-yellow-500"}`}>
+                      <Bookmark className={`size-4 ${post.saved?.includes(user?.id || "") ? "fill-current" : ""}`} />
+                    </button>
+                    <span className="text-[9px] text-muted-foreground">save</span>
+                  </div>
+                </div>
+
+                <div className="flex-1 min-w-0 space-y-2">
+                  {post.isPinned && (
+                    <Badge className="gap-1 w-fit bg-black text-white hover:bg-black/80">
+                      <Pin className="size-3" />
+                      Pinned
+                    </Badge>
+                  )}
+                  
+                  <h3 className="text-sm font-medium leading-snug hover:text-primary cursor-pointer line-clamp-2">
+                    {escapeHtml(post.content)}
+                  </h3>
+
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {post.tags.map((tag: string, index: number) => {
+                        const tagColors = [
+                          "bg-blue-100 text-blue-700 hover:bg-blue-200",
+                          "bg-green-100 text-green-700 hover:bg-green-200", 
+                          "bg-purple-100 text-purple-700 hover:bg-purple-200",
+                          "bg-orange-100 text-orange-700 hover:bg-orange-200",
+                          "bg-pink-100 text-pink-700 hover:bg-pink-200",
+                          "bg-indigo-100 text-indigo-700 hover:bg-indigo-200",
+                        ];
+                        const colorClass = tagColors[index % tagColors.length];
+                        return (
+                          <button
+                            key={tag}
+                            onClick={() => onSetFilterTag(filterTag === tag ? null : tag)}
+                            className={`px-1.5 py-0.5 text-[10px] rounded-full transition-colors ${colorClass} ${filterTag === tag ? "ring-1 ring-primary" : ""}`}
+                          >
+                            {tag}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                      <button onClick={() => onLike(post._id)} className={`flex items-center gap-1 hover:text-red-500 ${isLiked ? "text-red-500" : ""}`}>
+                        <Heart className={`size-3 ${isLiked ? "fill-current" : ""}`} />
+                        <span>{post.likes?.length || 0}</span>
+                      </button>
+                      <button onClick={() => onShare(post.content)} className="flex items-center gap-1 hover:text-blue-500">
+                        <Share2 className="size-3" />
+                        <span>Share</span>
+                      </button>
+                      <button onClick={() => onFlag(post._id)} className="flex items-center gap-1 hover:text-orange-500">
+                        <Flag className="size-3" />
+                        <span>Flag</span>
+                      </button>
+                      <button onClick={() => onPin(post._id)} className={`flex items-center gap-1 ${post.isPinned ? "text-primary" : "hover:text-primary"}`}>
+                        <Pin className={`size-3 ${post.isPinned ? "fill-current" : ""}`} />
+                        <span>{post.isPinned ? "Pinned" : "Pin"}</span>
+                      </button>
+                      <button onClick={() => onSave(post._id)} className={`flex items-center gap-1 ${isSaved ? "text-yellow-500" : "hover:text-yellow-500"}`}>
+                        <Bookmark className={`size-3 ${isSaved ? "fill-current" : ""}`} />
+                        <span>{isSaved ? "Saved" : "Save"}</span>
+                      </button>
+                      {(isOwner || user?.role === "admin") && (
+                        <button onClick={() => onDelete(post._id)} className="flex items-center gap-1 text-red-500 hover:text-red-600">
+                          <Trash2 className="size-3" />
+                          <span>Delete</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <Link href={`/community/profile/${post.authorId}`} className="flex items-center gap-1.5 hover:bg-muted/50 px-1.5 py-0.5 rounded transition-colors">
+                      <span className="text-[10px] text-muted-foreground">
+                        {formatDistanceToNow(new Date(post.createdAt))}
+                      </span>
+                      <Avatar className="size-5">
+                        {post.authorAvatar ? (
+                          <AvatarImage src={post.authorAvatar} alt={post.authorName} />
+                        ) : null}
+                        <AvatarFallback className="text-[8px] bg-muted text-muted-foreground">
+                          {post.authorName?.charAt(0).toUpperCase() || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs font-medium text-foreground hover:text-primary">
+                        {escapeHtml(post.authorName || "Anonymous")}
+                      </span>
+                    </Link>
+                  </div>
+
+                  <div className="pt-3 space-y-2">
+                    {post.comments && post.comments.length > 0 ? (
+                      post.comments.map((comment: Comment) => (
+                        <div key={comment._id} className="flex gap-2 text-xs">
+                          <Avatar className="size-5">
+                            {comment.authorAvatar ? (
+                              <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
+                            ) : null}
+                            <AvatarFallback className="text-[8px]">
+                              {comment.authorName?.charAt(0).toUpperCase() || "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <span className="font-medium">{comment.authorName}: </span>
+                            <span>{escapeHtml(comment.content)}</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground">No answers yet</p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <input
+                      type="text"
+                      placeholder="Write an answer..."
+                      value={newComment[post._id] || ""}
+                      onChange={(e) => onNewCommentChange({ ...newComment, [post._id]: e.target.value })}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          onAddComment(post._id);
+                        }
+                      }}
+                      className="flex-1 h-8 px-3 text-xs border rounded-full focus:outline-none focus:ring-1"
+                    />
+                    <Button size="sm" className="h-8 px-3" onClick={() => onAddComment(post._id)}>
+                      <Send className="size-3" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function CommunityHomePage() {
   return (
     <Suspense fallback={
@@ -120,15 +376,19 @@ function CommunityHomePageContent() {
   const [newComment, setNewComment] = useState<{ [postId: string]: string }>({});
   const [sortBy, setSortBy] = useState<"newest" | "votes" | "unanswered">("newest");
   const [filterTag, setFilterTag] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
 
-  const fetchPosts = async () => {
+  const fetchPosts = async (page = 1) => {
     try {
-      const res = await fetch("/api/community?type=posts");
+      const res = await fetch(`/api/community?type=posts&page=${page}&limit=5`);
       if (res.ok) {
         const data = await res.json();
         setPosts(data.posts || []);
+        setTotalPages(data.pagination?.pages || 1);
+        setCurrentPage(page);
       }
     } catch {
       toast.error("Failed to load posts");
@@ -139,7 +399,7 @@ function CommunityHomePageContent() {
     const init = async () => {
       const [userRes, postsRes] = await Promise.all([
         fetch("/api/auth/me"),
-        fetch("/api/community?type=posts")
+        fetch("/api/community?type=posts&page=1&limit=5")
       ]);
       
       if (userRes.ok) {
@@ -149,6 +409,7 @@ function CommunityHomePageContent() {
       if (postsRes.ok) {
         const postsData = await postsRes.json();
         setPosts(postsData.posts || []);
+        setTotalPages(postsData.pagination?.pages || 1);
       }
       setLoading(false);
     };
@@ -406,6 +667,9 @@ function CommunityHomePageContent() {
     handleFlag={handleFlag}
     handleShare={handleShare}
     handleDeleteComment={handleDeleteComment}
+    currentPage={currentPage}
+    totalPages={totalPages}
+    onPageChange={fetchPosts}
   />;
 }
 
@@ -415,7 +679,8 @@ function CommunityContent({
   expandedComments, setExpandedComments, newComment, setNewComment,
   posting, setPosting, loading, showNewPostForm, setShowNewPostForm,
   handleAddTag, handleRemoveTag, handleCreatePost,
-  toggleComments, handleLike, handleSave, handleDeletePost, handleAddComment, handlePin, handleFlag, handleShare, handleDeleteComment
+  toggleComments, handleLike, handleSave, handleDeletePost, handleAddComment, handlePin, handleFlag, handleShare, handleDeleteComment,
+  currentPage, totalPages, onPageChange
 }: {
   user: User | null; posts: Post[]; filteredPostsCount: number; setPosts: React.Dispatch<React.SetStateAction<Post[]>>; searchQuery: string; sortBy: string; setSortBy: React.Dispatch<React.SetStateAction<"votes" | "newest" | "unanswered">>; filterTag: string | null; setFilterTag: React.Dispatch<React.SetStateAction<string | null>>;
   newPost: string; setNewPost: React.Dispatch<React.SetStateAction<string>>; newTags: string[]; setNewTags: React.Dispatch<React.SetStateAction<string[]>>; tagInput: string; setTagInput: React.Dispatch<React.SetStateAction<string>>;
@@ -423,6 +688,7 @@ function CommunityContent({
   posting: boolean; setPosting: React.Dispatch<React.SetStateAction<boolean>>; loading: boolean; showNewPostForm: boolean; setShowNewPostForm: React.Dispatch<React.SetStateAction<boolean>>;
   handleAddTag: (tag: string) => void; handleRemoveTag: (tag: string) => void; handleCreatePost: () => Promise<void>;
   toggleComments: (postId: string) => void; handleLike: (postId: string) => Promise<void>; handleSave: (postId: string) => Promise<void>; handleDeletePost: (postId: string) => Promise<void>; handleAddComment: (postId: string) => Promise<void>; handlePin: (postId: string) => Promise<void>; handleFlag: (postId: string) => Promise<void>; handleShare: (postContent: string) => Promise<void>; handleDeleteComment: (postId: string, commentId: string) => Promise<void>;
+  currentPage: number; totalPages: number; onPageChange: (page: number) => void;
 }) {
   const allTags = Array.from(new Set(posts.flatMap((p: Post) => p.tags || []))).slice(0, 15);
   if (loading) {
@@ -687,219 +953,43 @@ function CommunityContent({
       )}
 
       {/* Questions List */}
-      {posts.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <MessageCircle className="size-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="font-semibold text-lg">No questions found</h3>
-            <p className="text-muted-foreground">Be the first to ask!</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {posts.map((post: any) => {
-            const isLiked = user && post.likes?.includes(user.id);
-            const isSaved = user && post.saved?.includes(user.id);
-            const isOwner = user && post.authorId === user.id;
-            
-              return (
-              <Card key={post._id} className={`hover:shadow-sm transition-shadow ${post.isPinned ? "border border-primary/50" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex gap-3">
-                    {/* Stats Column */}
-                    <div className="flex flex-col items-center gap-2 min-w-[40px]">
-                      {/* Like */}
-                      <div className="flex flex-col items-center">
-                        <button
-                          onClick={() => handleLike(post._id)}
-                          className={`transition-colors ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"}`}
-                        >
-                          <Heart className={`size-4 ${isLiked ? "fill-current" : ""}`} />
-                        </button>
-                        <span className="text-xs font-semibold">{post.likes?.length || 0}</span>
-                      </div>
-                      
-                      <Separator className="w-full" />
-                      
-                      {/* Comments */}
-                      <div className="flex flex-col items-center">
-                        <button onClick={() => toggleComments(post._id)} className="text-muted-foreground hover:text-primary">
-                          <MessageCircle className={`size-4 ${(post.comments?.length || 0) > 0 ? "text-green-600" : ""}`} />
-                        </button>
-                        <span className={`text-xs font-semibold ${(post.comments?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`}>
-                          {post.comments?.length || 0}
-                        </span>
-                      </div>
-                      
-                      <Separator className="w-full" />
-                      
-                      {/* Pin */}
-                      <div className="flex flex-col items-center">
-                        <button
-                          onClick={() => handlePin(post._id)}
-                          className={`transition-colors ${post.isPinned ? "text-primary" : "text-muted-foreground hover:text-primary"}`}
-                          title={post.isPinned ? "Unpin question" : "Pin question to profile"}
-                        >
-                          <Pin className={`size-4 ${post.isPinned ? "fill-current" : ""}`} />
-                        </button>
-                        <span className="text-[9px] text-muted-foreground">pin</span>
-                      </div>
-                      
-                      <Separator className="w-full" />
-                      
-                      {/* Save */}
-                      <div className="flex flex-col items-center">
-                        <button
-                          onClick={() => handleSave(post._id)}
-                          className={`transition-colors ${post.saved?.includes(user?.id || "") ? "text-yellow-500" : "text-muted-foreground hover:text-yellow-500"}`}
-                          title={post.saved?.includes(user?.id || "") ? "Unsave question" : "Save question"}
-                        >
-                          <Bookmark className={`size-4 ${post.saved?.includes(user?.id || "") ? "fill-current" : ""}`} />
-                        </button>
-                        <span className="text-[9px] text-muted-foreground">save</span>
-                      </div>
-                    </div>
+      <QuestionsList
+        posts={posts}
+        user={user}
+        filterTag={filterTag}
+        newComment={newComment}
+        onLike={handleLike}
+        onShare={handleShare}
+        onFlag={handleFlag}
+        onPin={handlePin}
+        onSave={handleSave}
+        onDelete={handleDeletePost}
+        onToggleComments={toggleComments}
+        onSetFilterTag={setFilterTag}
+        onNewCommentChange={setNewComment}
+        onAddComment={handleAddComment}
+      />
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0 space-y-2">
-                      {/* Pinned Badge */}
-                      {post.isPinned && (
-                        <Badge className="gap-1 w-fit bg-black text-white hover:bg-black/80">
-                          <Pin className="size-3" />
-                          Pinned
-                        </Badge>
-                      )}
-                      
-                      <h3 className="text-sm font-medium leading-snug hover:text-primary cursor-pointer line-clamp-2">
-                        {escapeHtml(post.content)}
-                      </h3>
-
-                      {/* Tags */}
-                      {post.tags && post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {post.tags.map((tag: string, index: number) => {
-                            const tagColors = [
-                              "bg-blue-100 text-blue-700 hover:bg-blue-200",
-                              "bg-green-100 text-green-700 hover:bg-green-200", 
-                              "bg-purple-100 text-purple-700 hover:bg-purple-200",
-                              "bg-orange-100 text-orange-700 hover:bg-orange-200",
-                              "bg-pink-100 text-pink-700 hover:bg-pink-200",
-                              "bg-indigo-100 text-indigo-700 hover:bg-indigo-200",
-                            ];
-                            const colorClass = tagColors[index % tagColors.length];
-                            return (
-                              <button
-                                key={tag}
-                                onClick={() => setFilterTag(filterTag === tag ? null : tag)}
-                                className={`px-1.5 py-0.5 text-[10px] rounded-full transition-colors ${colorClass} ${filterTag === tag ? "ring-1 ring-primary" : ""}`}
-                              >
-                                {tag}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* Footer */}
-                      <div className="flex items-center justify-between pt-2 border-t">
-                        {/* Actions */}
-                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                          <button onClick={() => handleLike(post._id)} className={`flex items-center gap-1 hover:text-red-500 ${isLiked ? "text-red-500" : ""}`}>
-                            <Heart className={`size-3 ${isLiked ? "fill-current" : ""}`} />
-                            <span>{post.likes?.length || 0}</span>
-                          </button>
-                          <button onClick={() => handleShare(post.content)} className="flex items-center gap-1 hover:text-blue-500">
-                            <Share2 className="size-3" />
-                            <span>Share</span>
-                          </button>
-                          <button onClick={() => handleFlag(post._id)} className="flex items-center gap-1 hover:text-orange-500">
-                            <Flag className="size-3" />
-                            <span>Flag</span>
-                          </button>
-                          <button onClick={() => handlePin(post._id)} className={`flex items-center gap-1 ${post.isPinned ? "text-primary" : "hover:text-primary"}`}>
-                            <Pin className={`size-3 ${post.isPinned ? "fill-current" : ""}`} />
-                            <span>{post.isPinned ? "Pinned" : "Pin"}</span>
-                          </button>
-                          <button onClick={() => handleSave(post._id)} className={`flex items-center gap-1 ${isSaved ? "text-yellow-500" : "hover:text-yellow-500"}`}>
-                            <Bookmark className={`size-3 ${isSaved ? "fill-current" : ""}`} />
-                            <span>{isSaved ? "Saved" : "Save"}</span>
-                          </button>
-                          {(isOwner || user?.role === "admin") && (
-                            <button onClick={() => handleDeletePost(post._id)} className="flex items-center gap-1 text-red-500 hover:text-red-600">
-                              <Trash2 className="size-3" />
-                              <span>Delete</span>
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Author */}
-                        <Link href={`/community/profile/${post.authorId}`} className="flex items-center gap-1.5 hover:bg-muted/50 px-1.5 py-0.5 rounded transition-colors">
-                          <span className="text-[10px] text-muted-foreground">
-                            {formatDistanceToNow(new Date(post.createdAt))}
-                          </span>
-                          <Avatar className="size-5">
-                            {post.authorAvatar ? (
-                              <AvatarImage src={post.authorAvatar} alt={post.authorName} />
-                            ) : null}
-                            <AvatarFallback className="text-[8px] bg-muted text-muted-foreground">
-                              {post.authorName?.charAt(0).toUpperCase() || "?"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs font-medium text-foreground hover:text-primary">
-                            {escapeHtml(post.authorName || "Anonymous")}
-                          </span>
-                        </Link>
-                      </div>
-
-                      {/* Answers - Always Visible */}
-                      <div className="pt-3 space-y-2">
-                        {post.comments && post.comments.length > 0 ? (
-                          post.comments.map((comment: Comment) => (
-                            <div key={comment._id} className="flex gap-2 text-xs">
-                              <Avatar className="size-5">
-                                {comment.authorAvatar ? (
-                                  <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
-                                ) : null}
-                                <AvatarFallback className="text-[8px]">
-                                  {comment.authorName?.charAt(0).toUpperCase() || "?"}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <span className="font-medium">{comment.authorName}: </span>
-                                <span>{escapeHtml(comment.content)}</span>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-xs text-muted-foreground">No answers yet</p>
-                        )}
-                      </div>
-
-                      {/* Answer Input */}
-                      <div className="flex gap-2 pt-2">
-                        <input
-                          type="text"
-                          placeholder="Write an answer..."
-                          value={newComment[post._id] || ""}
-                          onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && !e.shiftKey) {
-                              e.preventDefault();
-                              handleAddComment(post._id);
-                            }
-                          }}
-                          className="flex-1 h-8 px-3 text-xs border rounded-full focus:outline-none focus:ring-1"
-                        />
-                        <Button size="sm" className="h-8 px-3" onClick={() => handleAddComment(post._id)}>
-                          <Send className="size-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-6">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => { onPageChange(currentPage - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="size-4 mr-1" /> Previous
+          </Button>
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button key={page} variant={currentPage === page ? "default" : "outline"} size="sm" onClick={() => { onPageChange(page); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                {page}
+              </Button>
+            ))}
+          </div>
+          <Button variant="outline" size="sm" onClick={() => { onPageChange(currentPage + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }} disabled={currentPage === totalPages}>
+            Next <ChevronRight className="size-4 ml-1" />
+          </Button>
         </div>
       )}
     </div>
