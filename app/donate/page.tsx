@@ -10,8 +10,8 @@ export default function DonatePage() {
   const router = useRouter();
   
   return (
-    <div className="flex flex-col h-screen pt-14 overflow-hidden" style={{ backgroundColor: "#f5f5f5" }}>
-      <main className="flex-1 flex flex-col items-center px-4 lg:px-8 max-w-md mx-auto py-8 overflow-y-auto">
+    <div className="flex flex-col min-h-screen pt-14 overflow-hidden" style={{ backgroundColor: "#f5f5f5" }}>
+      <main className="flex-1 flex flex-col items-center px-4 lg:px-8 max-w-md mx-auto py-8">
         <button 
           onClick={() => router.back()} 
           className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#C41E3A] transition-colors mb-4"
