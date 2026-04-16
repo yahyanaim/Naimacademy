@@ -801,15 +801,34 @@ function CommunityContent({
 
                       {/* Footer */}
                       <div className="flex items-center justify-between pt-2 border-t">
-                        {/* Left: Meta info */}
+                        {/* Actions */}
                         <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                          <span className="flex items-center gap-0.5">
-                            <Clock className="size-2.5" />
-                            {getHoursUntilExpiry(post.expiresAt)}h left
-                          </span>
+                          <button onClick={() => handleLike(post._id)} className={`flex items-center gap-1 hover:text-red-500 ${isLiked ? "text-red-500" : ""}`}>
+                            <Heart className={`size-3 ${isLiked ? "fill-current" : ""}`} />
+                            <span>{post.likes?.length || 0}</span>
+                          </button>
+                          <button onClick={() => handleShare(post.content)} className="flex items-center gap-1 hover:text-blue-500">
+                            <Share2 className="size-3" />
+                            <span>Share</span>
+                          </button>
+                          <button onClick={() => handleFlag(post._id)} className="flex items-center gap-1 hover:text-orange-500">
+                            <Flag className="size-3" />
+                            <span>Flag</span>
+                          </button>
+                          <button onClick={() => handlePin(post._id)} className={`flex items-center gap-1 ${post.isPinned ? "text-primary" : "hover:text-primary"}`}>
+                            <Pin className={`size-3 ${post.isPinned ? "fill-current" : ""}`} />
+                          </button>
+                          <button onClick={() => handleSave(post._id)} className={`flex items-center gap-1 ${isSaved ? "text-yellow-500" : "hover:text-yellow-500"}`}>
+                            <Bookmark className={`size-3 ${isSaved ? "fill-current" : ""}`} />
+                          </button>
+                          {(isOwner || user?.role === "admin") && (
+                            <button onClick={() => handleDeletePost(post._id)} className="flex items-center gap-1 hover:text-destructive">
+                              <Trash2 className="size-3" />
+                            </button>
+                          )}
                         </div>
 
-                        {/* Right: Author */}
+                        {/* Author */}
                         <Link href={`/community/profile/${post.authorId}`} className="flex items-center gap-1.5 hover:bg-muted/50 px-1.5 py-0.5 rounded transition-colors">
                           <span className="text-[10px] text-muted-foreground">
                             {formatDistanceToNow(new Date(post.createdAt))}
