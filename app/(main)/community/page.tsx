@@ -444,74 +444,165 @@ function CommunityContent({
 
       {/* New Post Form Modal */}
       {showNewPostForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-background rounded-xl w-full max-w-lg mx-4 shadow-xl">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-bold">Ask a question</h2>
-              <Button variant="ghost" size="sm" onClick={() => setShowNewPostForm(false)}>
-                <X className="size-5" />
-              </Button>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowNewPostForm(false);
+          }}
+        >
+          <div className="bg-background rounded-2xl w-full max-w-xl mx-4 shadow-2xl border border-border/50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="relative px-6 py-5 border-b border-border/50 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center">
+                    <MessageCircle className="size-5 text-white dark:text-gray-900" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-foreground">Ask a Question</h2>
+                    <p className="text-xs text-muted-foreground">Share your knowledge or get help</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowNewPostForm(false)}
+                  className="size-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition-colors"
+                >
+                  <X className="size-5 text-muted-foreground" />
+                </button>
+              </div>
             </div>
-            <div className="p-4 space-y-4">
-              <textarea
-                placeholder="What's your question?"
-                value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
-                className="w-full min-h-[120px] resize-none border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              />
-              
-              {/* Manual tag input */}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Add a tag..."
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === ",") {
-                      e.preventDefault();
-                      handleAddTag(tagInput);
-                    }
-                  }}
-                  className="flex-1 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+            
+            {/* Body */}
+            <div className="p-6 space-y-5">
+              {/* Question Input */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-foreground">Your Question</label>
+                  <span className={`text-xs ${newPost.length < 10 ? 'text-muted-foreground' : 'text-green-600'}`}>
+                    {newPost.length}/500
+                  </span>
+                </div>
+                <textarea
+                  placeholder="What's your question? Be specific and clear..."
+                  value={newPost}
+                  onChange={(e) => setNewPost(e.target.value.slice(0, 500))}
+                  className="w-full min-h-[140px] resize-none border border-border rounded-xl p-4 text-sm bg-gray-50 dark:bg-gray-900/50 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent transition-all placeholder:text-muted-foreground/50"
                 />
+                {newPost.trim().length < 10 && newPost.length > 0 && (
+                  <p className="text-xs text-amber-600">Minimum 10 characters required</p>
+                )}
+              </div>
+              
+              {/* Tags Section */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-foreground">
+                  Add Tags <span className="text-muted-foreground font-normal">(at least 1 required)</span>
+                </label>
+                
+                {/* Selected Tags */}
+                {newTags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-border">
+                    {newTags.map((tag, index) => {
+                      const tagColors = [
+                        "bg-blue-100 text-blue-700 border-blue-200",
+                        "bg-green-100 text-green-700 border-green-200", 
+                        "bg-purple-100 text-purple-700 border-purple-200",
+                        "bg-orange-100 text-orange-700 border-orange-200",
+                        "bg-pink-100 text-pink-700 border-pink-200",
+                      ];
+                      return (
+                        <span 
+                          key={tag} 
+                          className={`px-3 py-1 text-xs rounded-full border flex items-center gap-1.5 font-medium ${tagColors[index % tagColors.length]}`}
+                        >
+                          #{tag}
+                          <button 
+                            onClick={() => handleRemoveTag(tag)} 
+                            className="hover:opacity-70 transition-opacity ml-1"
+                          >
+                            <X className="size-3" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+                
+                {/* Tag Input */}
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">#</span>
+                    <input
+                      type="text"
+                      placeholder="Type a tag and press Enter"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === ",") {
+                          e.preventDefault();
+                          handleAddTag(tagInput);
+                        }
+                      }}
+                      className="w-full pl-7 pr-3 py-2.5 text-sm border border-border rounded-xl bg-gray-50 dark:bg-gray-900/50 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent transition-all placeholder:text-muted-foreground/50"
+                    />
+                  </div>
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddTag(tagInput)}
+                    disabled={!tagInput.trim() || newTags.includes(tagInput) || newTags.length >= 5}
+                    className="px-4 rounded-xl"
+                  >
+                    Add
+                  </Button>
+                </div>
+                
+                {/* Suggested Tags */}
+                {newTags.length < 5 && (
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">Popular tags:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {SUGGESTED_TAGS.filter(t => !newTags.includes(t)).slice(0, 8).map((tag) => (
+                        <button
+                          key={tag}
+                          onClick={() => handleAddTag(tag)}
+                          className="px-3 py-1.5 text-xs rounded-full border border-border hover:border-gray-900 dark:hover:border-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-muted-foreground hover:text-foreground"
+                        >
+                          + {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-border/50 bg-gray-50/50 dark:bg-gray-900/50 flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                {newTags.length === 0 && <span className="text-amber-600">Add at least 1 tag</span>}
+                {newTags.length > 0 && newTags.length < 5 && <span>{5 - newTags.length} more tag slots available</span>}
+                {newTags.length >= 5 && <span className="text-green-600">Maximum tags reached</span>}
+              </p>
+              <div className="flex gap-2">
                 <Button 
                   variant="outline" 
-                  size="sm"
-                  onClick={() => handleAddTag(tagInput)}
-                  disabled={!tagInput.trim()}
+                  onClick={() => {
+                    setShowNewPostForm(false);
+                    setNewPost("");
+                    setNewTags([]);
+                    setTagInput("");
+                  }}
+                  className="rounded-xl px-5"
                 >
-                  Add Tag
+                  Cancel
                 </Button>
-              </div>
-              
-              <div className="flex flex-wrap gap-2">
-                {newTags.map(tag => (
-                  <span key={tag} className="px-2.5 py-1 text-xs rounded-full bg-gray-200 text-gray-700 flex items-center gap-1">
-                    #{tag}
-                    <button onClick={() => handleRemoveTag(tag)} className="hover:text-gray-900">
-                      <X className="size-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              
-              <div className="flex flex-wrap gap-2">
-                {SUGGESTED_TAGS.filter(t => !newTags.includes(t)).slice(0, 6).map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => handleAddTag(tag)}
-                    className="px-2 py-1 text-xs rounded-full border hover:bg-gray-100 dark:hover:bg-gray-800"
-                  >
-                    +{tag}
-                  </button>
-                ))}
-              </div>
-              
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => setShowNewPostForm(false)}>Cancel</Button>
-                <Button onClick={handleCreatePost} disabled={posting || newPost.trim().length < 10 || newTags.length === 0} className="bg-gray-900 hover:bg-gray-800 text-white">
-                  Post
+                <Button 
+                  onClick={handleCreatePost} 
+                  disabled={posting || newPost.trim().length < 10 || newTags.length === 0}
+                  className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 rounded-xl px-6 font-medium disabled:opacity-50"
+                >
+                  {posting ? "Posting..." : "Post Question"}
                 </Button>
               </div>
             </div>
