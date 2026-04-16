@@ -17,7 +17,9 @@ import {
   X,
   Minus,
   MoreHorizontal,
-  Search
+  Search,
+  Bell,
+  Loader
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -79,10 +81,15 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   const [savedCount, setSavedCount] = useState(0);
   const [questionsCount, setQuestionsCount] = useState(0);
   const [hasNewQuestions, setHasNewQuestions] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const chatEndRef = useRef<HTMLDivElement>(null);
   const hasFetchedChat = useRef(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   const fetchUser = useCallback(async () => {
     try {
@@ -153,6 +160,45 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
     const hasPostedToday = lastPostDate === today;
     setHasNewQuestions(hasPostedToday);
   }, [questionsCount]);
+
+  // Fetch notification count
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const lastViewed = localStorage.getItem("lastViewedCommunity");
+        const res = await fetch(`/api/community?type=notifications&lastViewed=${lastViewed || ""}`);
+        if (res.ok) {
+          const data = await res.json();
+          setNotificationCount(data.count || 0);
+        }
+      } catch (err) {
+        console.error("Error fetching notifications:", err);
+      }
+    };
+    fetchNotifications();
+    
+    // Poll every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Update last viewed when leaving community
+  useEffect(() => {
+    return () => {
+      localStorage.setItem("lastViewedCommunity", new Date().toISOString());
+    };
+  }, [pathname]);
+
+  // Click outside to close notifications
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user) return;
@@ -320,6 +366,51 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
               <Users className="size-6" />
               <span>Profile</span>
             </Link>
+
+            {/* Notifications */}
+            <div ref={notificationRef} className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="w-full flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <div className="relative">
+                  <Bell className="size-6" />
+                  {notificationCount > 0 && (
+                    <span className="absolute -top-1 -right-1 size-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                      {notificationCount > 9 ? "9+" : notificationCount}
+                    </span>
+                  )}
+                </div>
+                <span>Notifications</span>
+              </button>
+              
+              {/* Notifications Dropdown */}
+              {showNotifications && (
+                <div className="absolute left-0 top-full mt-2 w-72 bg-background border border-border rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
+                  <div className="p-3 border-b border-border">
+                    <h3 className="font-semibold text-sm">New Questions</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {notificationCount > 0 ? `${notificationCount} new question${notificationCount > 1 ? "s" : ""} since your last visit` : "No new questions"}
+                    </p>
+                  </div>
+                  {notificationCount > 0 && (
+                    <div className="p-2">
+                      <button
+                        onClick={() => {
+                          localStorage.setItem("lastViewedCommunity", new Date().toISOString());
+                          setNotificationCount(0);
+                          setShowNotifications(false);
+                          router.push("/community");
+                        }}
+                        className="w-full text-center py-2 px-3 text-sm bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors"
+                      >
+                        View New Questions
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Chat Toggle Button */}
             <button

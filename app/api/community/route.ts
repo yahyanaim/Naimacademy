@@ -74,6 +74,31 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ count });
     }
 
+    if (type === "notifications") {
+      const token = request.cookies.get(SESSION.COOKIE_NAME)?.value;
+      if (!token) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      const payload = await verifyToken(token);
+      if (!payload) {
+        return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+      }
+
+      // Get last viewed time from query param or default to 24 hours ago
+      const lastViewed = searchParams.get("lastViewed");
+      const sinceDate = lastViewed ? new Date(lastViewed) : new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+      // Count posts from others since last viewed
+      const count = await CommunityPost.countDocuments({ 
+        authorId: { $ne: payload.userId },
+        createdAt: { $gte: sinceDate },
+        isExpired: false 
+      });
+
+      return NextResponse.json({ count });
+    }
+
     const skip = (page - 1) * limit;
     const [pinnedPosts, regularPosts, total] = await Promise.all([
       CommunityPost.find({ isPinned: true, isExpired: false }).sort({ createdAt: -1 }).limit(10).lean(),
