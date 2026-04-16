@@ -98,11 +98,11 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
           setSavedCount(savedData.posts?.length || 0);
         }
         
-        // Fetch all posts count
-        const postsRes = await fetch("/api/community?type=posts");
-        if (postsRes.ok) {
-          const postsData = await postsRes.json();
-          setQuestionsCount(postsData.posts?.length || 0);
+        // Fetch user's posts count only
+        const myPostsRes = await fetch("/api/community?type=my-posts");
+        if (myPostsRes.ok) {
+          const myPostsData = await myPostsRes.json();
+          setQuestionsCount(myPostsData.count || 0);
         }
       } else {
         router.push("/login");

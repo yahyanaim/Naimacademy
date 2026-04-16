@@ -8,8 +8,8 @@ import {
   Clock, 
   MessageCircle, 
   Loader2, 
-  Send, 
-  X, 
+  Send,
+  X,
   Share2,
   Flag,
   Trash2,
@@ -18,10 +18,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 interface Post {
@@ -81,17 +79,10 @@ function formatDistanceToNow(date: Date): string {
   return "just now";
 }
 
-function getHoursUntilExpiry(expiresAt: string): number {
-  const expires = new Date(expiresAt);
-  const now = new Date();
-  return Math.max(0, Math.ceil((expires.getTime() - now.getTime()) / (1000 * 60 * 60)));
-}
-
 export default function SavedQuestionsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [newComment, setNewComment] = useState<{ [postId: string]: string }>({});
 
   const fetchPosts = async () => {
@@ -136,6 +127,9 @@ export default function SavedQuestionsPage() {
 
       if (res.ok) {
         fetchPosts();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to like");
       }
     } catch {
       toast.error("Failed to like");
@@ -151,8 +145,11 @@ export default function SavedQuestionsPage() {
       });
 
       if (res.ok) {
-        toast.success("Question unsaved");
+        toast.success("Question removed from saved");
         fetchPosts();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to unsave");
       }
     } catch {
       toast.error("Failed to unsave");
@@ -186,16 +183,6 @@ export default function SavedQuestionsPage() {
     }
   };
 
-  const toggleComments = (postId: string) => {
-    const newExpanded = new Set(expandedComments);
-    if (newExpanded.has(postId)) {
-      newExpanded.delete(postId);
-    } else {
-      newExpanded.add(postId);
-    }
-    setExpandedComments(newExpanded);
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -207,31 +194,36 @@ export default function SavedQuestionsPage() {
   return (
     <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
-          <Bookmark className="size-5 sm:size-6 text-yellow-500" />
-          Saved Questions
-        </h1>
-        <p className="text-muted-foreground text-sm">{posts.length} saved questions</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/community" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+            <ArrowLeft className="size-5" />
+          </Link>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold">Saved Questions</h1>
+            <p className="text-sm text-muted-foreground">{posts.length} saved</p>
+          </div>
+        </div>
       </div>
 
       {/* Questions List */}
       {posts.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center">
+          <CardContent className="py-16 text-center">
             <Bookmark className="size-12 mx-auto mb-4 text-muted-foreground opacity-50" />
             <h3 className="font-semibold text-lg">No saved questions</h3>
-            <p className="text-muted-foreground">Bookmark questions to find them here</p>
+            <p className="text-muted-foreground mt-1">Bookmark questions to find them here</p>
             <Link href="/community">
               <Button className="mt-4">Browse Questions</Button>
             </Link>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {posts.map((post) => {
             const isLiked = user && post.likes?.includes(user.id);
             const isSaved = user && post.saved?.includes(user.id);
+            const isOwner = user && post.authorId === user.id;
             
             return (
               <Card key={post._id} className="hover:shadow-sm transition-shadow">
@@ -239,54 +231,18 @@ export default function SavedQuestionsPage() {
                   <div className="flex gap-3">
                     {/* Stats Column */}
                     <div className="flex flex-col items-center gap-2 min-w-[40px]">
-                      {/* Like */}
-                      <div className="flex flex-col items-center">
-                        <button
-                          onClick={() => handleLike(post._id)}
-                          className={`transition-colors ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"}`}
-                        >
-                          <Heart className={`size-4 ${isLiked ? "fill-current" : ""}`} />
-                        </button>
+                      <button
+                        onClick={() => handleLike(post._id)}
+                        className={`flex flex-col items-center gap-0.5 ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"}`}
+                      >
+                        <Heart className={`size-4 ${isLiked ? "fill-current" : ""}`} />
                         <span className="text-xs font-semibold">{post.likes?.length || 0}</span>
-                      </div>
-                      
-                      <Separator className="w-full" />
-                      
-                      {/* Comments */}
-                      <div className="flex flex-col items-center">
-                        <button onClick={() => toggleComments(post._id)} className="text-muted-foreground hover:text-primary">
-                          <MessageCircle className={`size-4 ${(post.comments?.length || 0) > 0 ? "text-green-600" : ""}`} />
-                        </button>
-                        <span className={`text-xs font-semibold ${(post.comments?.length || 0) > 0 ? "text-green-600" : "text-muted-foreground"}`}>
-                          {post.comments?.length || 0}
-                        </span>
-                      </div>
-                      
-                      <Separator className="w-full" />
-                      
-                      {/* Pin */}
-                      <div className="flex flex-col items-center">
-                        <Pin className={`size-4 ${post.isPinned ? "text-primary" : "text-muted-foreground"}`} />
-                        <span className="text-[9px] text-muted-foreground">pin</span>
-                      </div>
-                      
-                      <Separator className="w-full" />
-                      
-                      {/* Save */}
-                      <div className="flex flex-col items-center">
-                        <button
-                          onClick={() => handleSave(post._id)}
-                          className={`transition-colors ${isSaved ? "text-yellow-500" : "text-muted-foreground hover:text-yellow-500"}`}
-                          title="Unsave question"
-                        >
-                          <Bookmark className={`size-4 ${isSaved ? "fill-current" : ""}`} />
-                        </button>
-                        <span className="text-[9px] text-muted-foreground">save</span>
-                      </div>
+                      </button>
+                      <span className="text-[10px] text-muted-foreground">likes</span>
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex-1 min-w-0 space-y-3">
                       {/* Pinned Badge */}
                       {post.isPinned && (
                         <Badge className="gap-1 w-fit bg-black text-white hover:bg-black/80">
@@ -295,7 +251,7 @@ export default function SavedQuestionsPage() {
                         </Badge>
                       )}
                       
-                      <h3 className="text-sm font-medium leading-snug hover:text-primary cursor-pointer line-clamp-2">
+                      <h3 className="text-sm font-medium leading-snug">
                         {escapeHtml(post.content)}
                       </h3>
 
@@ -313,8 +269,8 @@ export default function SavedQuestionsPage() {
                             ];
                             const colorClass = tagColors[index % tagColors.length];
                             return (
-                              <span key={tag} className={`px-1.5 py-0.5 text-[10px] rounded-full ${colorClass}`}>
-                                {tag}
+                              <span key={tag} className={`px-2 py-0.5 text-xs rounded-full ${colorClass}`}>
+                                #{tag}
                               </span>
                             );
                           })}
@@ -323,16 +279,44 @@ export default function SavedQuestionsPage() {
 
                       {/* Footer */}
                       <div className="flex items-center justify-between pt-2 border-t">
+                        {/* Actions */}
                         <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                          <button onClick={() => toggleComments(post._id)} className="hover:text-primary">
-                            {post.comments?.length || 0} answers
+                          <button onClick={() => handleLike(post._id)} className={`flex items-center gap-1 hover:text-red-500 ${isLiked ? "text-red-500" : ""}`}>
+                            <Heart className={`size-3 ${isLiked ? "fill-current" : ""}`} />
+                            <span>{post.likes?.length || 0}</span>
                           </button>
-                          <span className="flex items-center gap-0.5">
-                            <Clock className="size-2.5" />
-                            {getHoursUntilExpiry(post.expiresAt)}h left
-                          </span>
+                          <button onClick={() => {
+                            navigator.clipboard.writeText(post.content);
+                            toast.success("Link copied!");
+                          }} className="flex items-center gap-1 hover:text-blue-500">
+                            <Share2 className="size-3" />
+                            <span>Share</span>
+                          </button>
+                          <button onClick={() => handleSave(post._id)} className="flex items-center gap-1 text-yellow-500 hover:text-yellow-600">
+                            <Bookmark className={`size-3 ${isSaved ? "fill-current" : ""}`} />
+                            <span>Saved</span>
+                          </button>
+                          {(isOwner || user?.role === "admin") && (
+                            <button onClick={async () => {
+                              if (confirm("Delete this question?")) {
+                                const res = await fetch("/api/community", {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ type: "delete", postId: post._id }),
+                                });
+                                if (res.ok) {
+                                  toast.success("Question deleted");
+                                  fetchPosts();
+                                }
+                              }
+                            }} className="flex items-center gap-1 text-red-500 hover:text-red-600">
+                              <Trash2 className="size-3" />
+                              <span>Delete</span>
+                            </button>
+                          )}
                         </div>
 
+                        {/* Author */}
                         <Link href={`/community/profile/${post.authorId}`} className="flex items-center gap-1.5 hover:bg-muted/50 px-1.5 py-0.5 rounded transition-colors">
                           <span className="text-[10px] text-muted-foreground">
                             {formatDistanceToNow(new Date(post.createdAt))}
@@ -351,67 +335,49 @@ export default function SavedQuestionsPage() {
                         </Link>
                       </div>
 
-                      {/* Actions - Compact */}
-                      <div className="flex items-center gap-0.5 pt-1">
-                        <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5" onClick={() => handleLike(post._id)}>
-                          <Heart className={`size-2.5 ${isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
-                          <span className={isLiked ? "text-red-500" : "text-muted-foreground"}>{isLiked ? "Liked" : "Like"}</span>
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] gap-0.5" onClick={() => handleSave(post._id)}>
-                          <Bookmark className={`size-2.5 ${isSaved ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground"}`} />
-                          <span className={isSaved ? "text-yellow-500" : "text-muted-foreground"}>Saved</span>
-                        </Button>
+                      {/* Answers - Always Visible */}
+                      <div className="pt-3 space-y-2">
+                        {post.comments && post.comments.length > 0 ? (
+                          post.comments.map((comment) => (
+                            <div key={comment._id} className="flex gap-2 text-xs">
+                              <Avatar className="size-5">
+                                {comment.authorAvatar ? (
+                                  <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
+                                ) : null}
+                                <AvatarFallback className="text-[8px]">
+                                  {comment.authorName?.charAt(0).toUpperCase() || "?"}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <span className="font-medium">{comment.authorName}: </span>
+                                <span>{escapeHtml(comment.content)}</span>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-xs text-muted-foreground">No answers yet</p>
+                        )}
                       </div>
 
-                      {/* Answers Section */}
-                      {expandedComments.has(post._id) && (
-                        <div className="pt-3 border-t space-y-3">
-                          <h4 className="font-semibold text-xs">{post.comments?.length || 0} Answers</h4>
-                          
-                          {post.comments && post.comments.length > 0 && (
-                            <div className="space-y-2">
-                              {post.comments.map((comment) => (
-                                <div key={comment._id} className="flex gap-2 p-2 bg-muted/50 rounded-lg">
-                                  <Avatar className="size-6">
-                                    {comment.authorAvatar ? (
-                                      <AvatarImage src={comment.authorAvatar} alt={comment.authorName} />
-                                    ) : null}
-                                    <AvatarFallback className="text-[10px] bg-secondary">
-                                      {comment.authorName?.charAt(0).toUpperCase() || "?"}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1 space-y-0.5">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-1.5">
-                                        <Link href={`/community/profile/${comment.authorId}`} className="text-xs font-medium text-primary hover:underline">
-                                          {escapeHtml(comment.authorName)}
-                                        </Link>
-                                        <span className="text-[10px] text-muted-foreground">
-                                          {formatDistanceToNow(new Date(comment.createdAt))}
-                                        </span>
-                                      </div>
-                                    </div>
-                                    <p className="text-xs">{escapeHtml(comment.content)}</p>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          <div className="flex gap-2 pt-2">
-                            <Input
-                              placeholder="Write your answer..."
-                              value={newComment[post._id] || ""}
-                              onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
-                              onKeyDown={(e) => e.key === "Enter" && handleAddComment(post._id)}
-                              className="flex-1 h-8 text-xs"
-                            />
-                            <Button size="sm" className="h-8" onClick={() => handleAddComment(post._id)}>
-                              <Send className="size-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      )}
+                      {/* Answer Input */}
+                      <div className="flex gap-2 pt-2">
+                        <input
+                          type="text"
+                          placeholder="Write an answer..."
+                          value={newComment[post._id] || ""}
+                          onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault();
+                              handleAddComment(post._id);
+                            }
+                          }}
+                          className="flex-1 h-8 px-3 text-xs border rounded-full focus:outline-none focus:ring-1"
+                        />
+                        <Button size="sm" className="h-8 px-3" onClick={() => handleAddComment(post._id)}>
+                          <Send className="size-3" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>

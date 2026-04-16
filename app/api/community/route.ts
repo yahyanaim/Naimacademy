@@ -55,6 +55,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ posts });
     }
 
+    if (type === "my-posts") {
+      const token = request.cookies.get(SESSION.COOKIE_NAME)?.value;
+      if (!token) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      const payload = await verifyToken(token);
+      if (!payload) {
+        return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+      }
+
+      const count = await CommunityPost.countDocuments({ 
+        authorId: payload.userId,
+        isExpired: false 
+      });
+
+      return NextResponse.json({ count });
+    }
+
     const skip = (page - 1) * limit;
     const [pinnedPosts, regularPosts, total] = await Promise.all([
       CommunityPost.find({ isPinned: true, isExpired: false }).sort({ createdAt: -1 }).limit(10).lean(),
@@ -111,6 +130,19 @@ export async function POST(request: NextRequest) {
 
       if (!content || content.trim().length < 10) {
         return NextResponse.json({ error: "Post must be at least 10 characters" }, { status: 400 });
+      }
+
+      // Check daily limit (5 questions per day)
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      
+      const todayPostsCount = await CommunityPost.countDocuments({
+        authorId: payload.userId,
+        createdAt: { $gte: startOfDay }
+      });
+
+      if (todayPostsCount >= 5) {
+        return NextResponse.json({ error: "Daily limit reached. You can post up to 5 questions per day." }, { status: 400 });
       }
 
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -200,6 +232,22 @@ export async function POST(request: NextRequest) {
 
       const userId = payload.userId;
       const saveIndex = post.saved.indexOf(userId);
+
+      // If trying to save (not unsave), check daily limit
+      if (saveIndex === -1) {
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        
+        // Count saves made by this user today
+        const todaySaves = await CommunityPost.countDocuments({
+          saved: userId,
+          updatedAt: { $gte: startOfDay }
+        });
+
+        if (todaySaves >= 2) {
+          return NextResponse.json({ error: "Daily save limit reached. You can save up to 2 posts per day." }, { status: 400 });
+        }
+      }
 
       if (saveIndex > -1) {
         post.saved.splice(saveIndex, 1);
