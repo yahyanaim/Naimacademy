@@ -6,6 +6,27 @@ import { User } from "@/lib/models/user.model";
 import { verifyToken } from "@/lib/auth/jwt";
 import { SESSION } from "@/lib/constants";
 
+let liveSessionData: { active: boolean; hostId: string; hostName: string; messages: any[]; startedAt: Date } | null = null;
+
+async function getLiveSessionData() {
+  if (!liveSessionData) {
+    return { session: null, messages: [] };
+  }
+  const recentMessages = await CommunityChat.find()
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .lean();
+  return {
+    session: {
+      active: liveSessionData.active,
+      hostId: liveSessionData.hostId,
+      hostName: liveSessionData.hostName,
+      startedAt: liveSessionData.startedAt,
+    },
+    messages: recentMessages.reverse(),
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -101,6 +122,11 @@ export async function GET(request: NextRequest) {
       });
 
       return NextResponse.json({ count });
+    }
+
+    if (type === "live") {
+      const liveData = await getLiveSessionData();
+      return NextResponse.json(liveData);
     }
 
     const skip = (page - 1) * limit;
@@ -214,6 +240,43 @@ export async function POST(request: NextRequest) {
       });
 
       return NextResponse.json({ message }, { status: 201 });
+    }
+
+    if (type === "startLive") {
+      const user = await User.findById(payload.userId);
+      liveSessionData = {
+        active: true,
+        hostId: payload.userId,
+        hostName: user?.name || "Host",
+        messages: [],
+        startedAt: new Date(),
+      };
+      return NextResponse.json({ 
+        success: true, 
+        sessionId: Date.now().toString(),
+        hostId: payload.userId,
+        hostName: user?.name,
+      });
+    }
+
+    if (type === "endLive") {
+      liveSessionData = null;
+      return NextResponse.json({ success: true });
+    }
+
+    if (type === "liveChat") {
+      const { content } = body;
+      if (!content || content.trim().length < 1) {
+        return NextResponse.json({ error: "Message cannot be empty" }, { status: 400 });
+      }
+      await CommunityChat.create({
+        authorId: payload.userId,
+        authorName: body.authorName || "Anonymous",
+        authorEmail: body.authorEmail || "",
+        authorAvatar: body.authorAvatar || "",
+        content: content.trim(),
+      });
+      return NextResponse.json({ success: true });
     }
 
     if (type === "like") {

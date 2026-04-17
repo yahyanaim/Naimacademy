@@ -19,7 +19,11 @@ import {
   MoreHorizontal,
   Search,
   Bell,
-  Loader
+  Loader,
+  Video,
+  Phone,
+  Copy,
+  ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -85,6 +89,14 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [showLive, setShowLive] = useState(false);
+  const [liveSession, setLiveSession] = useState<{active: boolean; hostId: string; hostName: string} | null>(null);
+  const [liveChat, setLiveChat] = useState<{messages: ChatMessage[]; newMessage: string; sending: boolean}>({
+    messages: [],
+    newMessage: "",
+    sending: false
+  });
+  const [inviteLink, setInviteLink] = useState("");
   const pathname = usePathname();
   const router = useRouter();
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -232,6 +244,97 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
     }
   };
 
+  const fetchLiveSession = useCallback(async () => {
+    try {
+      const res = await fetch("/api/community?type=live");
+      if (res.ok) {
+        const data = await res.json();
+        setLiveSession(data.session || null);
+        if (data.session) {
+          setLiveChat(prev => ({ ...prev, messages: data.messages || [] }));
+        }
+      }
+    } catch (e) { console.error(e); }
+  }, []);
+
+  const startLiveSession = async () => {
+    if (!user) return;
+    try {
+      const res = await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "startLive" }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setLiveSession({ active: true, hostId: user.id, hostName: user.name });
+        setInviteLink(data.inviteLink || `${window.location.origin}/community?live=true&session=${data.sessionId}`);
+      }
+    } catch {}
+  };
+
+  const endLiveSession = async () => {
+    try {
+      await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "endLive" }),
+      });
+      setLiveSession(null);
+      setLiveChat(prev => ({ ...prev, messages: [] }));
+      setInviteLink("");
+    } catch {}
+  };
+
+  const sendLiveMessage = async () => {
+    if (!liveChat.newMessage.trim() || !user) return;
+    setLiveChat(prev => ({ ...prev, sending: true }));
+    try {
+      const res = await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "liveChat",
+          content: liveChat.newMessage,
+          authorName: user.name,
+          authorEmail: user.email,
+          authorAvatar: user.avatar,
+        }),
+      });
+      if (res.ok) {
+        setLiveChat(prev => ({ ...prev, newMessage: "" }));
+        fetchLiveSession();
+      }
+    } catch {
+      console.error("Failed to send live message");
+    } finally {
+      setLiveChat(prev => ({ ...prev, sending: false }));
+    }
+  };
+
+  const generateInviteLink = async () => {
+    const link = `${window.location.origin}/community?live=true&session=${Date.now()}`;
+    setInviteLink(link);
+    try {
+      await navigator.clipboard.writeText(link);
+    } catch {
+      const textArea = document.createElement("textarea");
+      textArea.value = link;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+    }
+  };
+
+  useEffect(() => {
+    if (showLive) {
+      fetchLiveSession();
+      const interval = setInterval(fetchLiveSession, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [showLive, fetchLiveSession]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -366,6 +469,23 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
               <Users className="size-6" />
               <span>Profile</span>
             </Link>
+
+            {/* Live Session Button */}
+            <button
+              onClick={() => setShowLive(!showLive)}
+              className={cn(
+                "flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors w-full",
+                showLive
+                  ? "bg-red-500 text-white"
+                  : "text-red-600 hover:bg-red-50"
+              )}
+            >
+              <Video className="size-6" />
+              <span>{showLive ? "End Live" : "Go Live"}</span>
+              {liveSession?.active && !showLive && (
+                <span className="ml-auto size-2 rounded-full bg-red-500 animate-pulse" />
+              )}
+            </button>
 
             {/* Notifications */}
             <div ref={notificationRef} className="relative">
@@ -574,6 +694,129 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Live Session Panel */}
+      {showLive && liveSession && (
+        <div
+          className={cn(
+            "fixed right-2 top-14 w-96 bg-white dark:bg-[#15202b] border border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-40 rounded-xl shadow-2xl mx-2 mt-2",
+            "h-[calc(100vh-5rem)]"
+          )}
+        >
+          {/* Live Header */}
+          <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-red-50 to-white dark:from-red-900/20 dark:to-[#15202b] rounded-t-xl flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="size-9 rounded-full bg-red-500 flex items-center justify-center shadow-md animate-pulse">
+                <Video className="size-4 text-white" />
+              </div>
+              <div>
+                <h2 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                  <span className="size-2 rounded-full bg-red-500 animate-pulse" />
+                  Live Session
+                </h2>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                  Hosted by {liveSession.hostName}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-red-500 hover:bg-red-50"
+              onClick={generateInviteLink}
+            >
+              <ExternalLink className="size-4" />
+            </Button>
+          </div>
+
+          {/* Invite Link Section */}
+          <div className="p-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/30">
+            <p className="text-xs text-muted-foreground mb-2">Invite others:</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                readOnly
+                value={inviteLink || `${window.location.origin}/community?live=true`}
+                className="flex-1 px-3 py-2 text-xs bg-white dark:bg-gray-900 border rounded-lg text-gray-600 dark:text-gray-300"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={generateInviteLink}
+                className="text-xs"
+              >
+                <Copy className="size-3 mr-1" />
+                Copy
+              </Button>
+            </div>
+          </div>
+
+          {/* Video Placeholder */}
+          <div className="flex-1 bg-gray-900 dark:bg-black flex items-center justify-center min-h-[200px]">
+            <div className="text-center text-white">
+              <Video className="size-12 mx-auto mb-2 opacity-50" />
+              <p className="text-sm opacity-70">Live Video Stream</p>
+              <p className="text-xs opacity-50">Waiting for stream...</p>
+            </div>
+          </div>
+
+          {/* Live Chat */}
+          <div className="flex-1 flex flex-col border-t border-gray-100 dark:border-gray-800 min-h-[150px]">
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/30">
+              <Users className="size-4 text-gray-400" />
+              <span className="text-xs font-medium text-gray-500">Live Chat</span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3 space-y-2">
+              {liveChat.messages.slice(-10).map((msg: any) => (
+                <div key={msg._id} className="flex items-start gap-2">
+                  <div className="size-6 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center flex-shrink-0">
+                    {msg.authorAvatar ? (
+                      <Image src={msg.authorAvatar} alt="" width={24} height={24} className="object-cover rounded-full" />
+                    ) : (
+                      <span className="text-[10px] font-bold text-white">{msg.authorName?.charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-900 dark:text-white">{msg.authorName}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 break-words">{msg.content}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2 p-3 border-t border-gray-100 dark:border-gray-800">
+              <input
+                type="text"
+                placeholder="Send a message..."
+                value={liveChat.newMessage}
+                onChange={(e) => setLiveChat(prev => ({ ...prev, newMessage: e.target.value }))}
+                onKeyDown={(e) => e.key === "Enter" && sendLiveMessage()}
+                className="flex-1 px-4 py-2.5 text-sm rounded-full bg-gray-100 dark:bg-[#253341] border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white placeholder-gray-400"
+              />
+              <Button
+                size="sm"
+                className="size-9 p-0 rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-md transition-all"
+                onClick={sendLiveMessage}
+                disabled={liveChat.sending || !liveChat.newMessage.trim()}
+              >
+                <Send className="size-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* End Live Button */}
+          {liveSession.hostId === user?.id && (
+            <div className="p-3 border-t border-gray-100 dark:border-gray-800">
+              <Button
+                className="w-full bg-red-500 hover:bg-red-600 text-white"
+                onClick={endLiveSession}
+              >
+                <Phone className="size-4 mr-2" />
+                End Live Session
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
