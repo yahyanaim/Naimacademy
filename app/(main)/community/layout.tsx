@@ -23,7 +23,8 @@ import {
   Video,
   Phone,
   Copy,
-  ExternalLink
+  ExternalLink,
+  Menu
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -99,12 +100,15 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   });
   const [inviteLink, setInviteLink] = useState("");
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const pathname = usePathname();
   const router = useRouter();
   const chatEndRef = useRef<HTMLDivElement>(null);
   const hasFetchedChat = useRef(false);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef(0);
 
   const fetchUser = useCallback(async () => {
     try {
@@ -393,7 +397,13 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">
       {/* Left Sidebar - Twitter Style */}
-      <aside className="w-72 fixed left-0 top-14 bottom-0 z-30 hidden md:flex flex-col bg-background border-r">
+      <aside 
+        ref={sidebarRef}
+        className={cn(
+          "w-72 fixed left-0 top-14 bottom-0 z-40 flex flex-col bg-background border-r transition-transform duration-300",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        )}
+      >
         {/* Search Bar */}
         <div className="p-4">
           <div className="relative">
@@ -601,9 +611,31 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main Content */}
-      <main className={cn(
-        "flex-1 min-h-full transition-all duration-300 ml-0 md:ml-72 pt-14 md:pt-0"
-      )}>
+      <main 
+        className={cn(
+          "flex-1 min-h-full transition-all duration-300 ml-0 md:ml-72 pt-14 md:pt-0",
+          sidebarOpen && "md:ml-72"
+        )}
+        onTouchStart={(e) => {
+          touchStartX.current = e.touches[0].clientX;
+        }}
+        onTouchEnd={(e) => {
+          const touchEndX = e.changedTouches[0].clientX;
+          const diff = touchStartX.current - touchEndX;
+          if (diff > 50) {
+            setSidebarOpen(true);
+          } else if (diff < -50) {
+            setSidebarOpen(false);
+          }
+        }}
+      >
+        {/* Mobile Hamburger Button */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="md:hidden fixed top-20 left-3 z-50 p-2 bg-background border rounded-lg shadow-lg"
+        >
+          <Menu className="size-6" />
+        </button>
         {children}
       </main>
 
