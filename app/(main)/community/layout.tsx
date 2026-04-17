@@ -98,6 +98,8 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
     sending: false
   });
   const [inviteLink, setInviteLink] = useState("");
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const pathname = usePathname();
   const router = useRouter();
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -289,6 +291,10 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
 
   const endLiveSession = async () => {
     try {
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        setLocalStream(null);
+      }
       await fetch("/api/community", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -297,7 +303,30 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       setLiveSession(null);
       setLiveChat(prev => ({ ...prev, messages: [] }));
       setInviteLink("");
+      setShowLive(false);
     } catch {}
+  };
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      setLocalStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      toast.success("Camera started!");
+    } catch (e) {
+      console.error("Camera error:", e);
+      toast.error("Could not access camera. Please allow camera permission.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      setLocalStream(null);
+      toast.info("Camera stopped");
+    }
   };
 
   const sendLiveMessage = async () => {
@@ -772,13 +801,47 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
             </div>
           </div>
 
-          {/* Video Placeholder */}
-          <div className="flex-1 bg-gray-900 dark:bg-black flex items-center justify-center min-h-[200px]">
-            <div className="text-center text-white">
-              <Video className="size-12 mx-auto mb-2 opacity-50" />
-              <p className="text-sm opacity-70">Live Video Stream</p>
-              <p className="text-xs opacity-50">Waiting for stream...</p>
-            </div>
+          {/* Video Stream */}
+          <div className="flex-1 bg-gray-900 dark:bg-black flex flex-col items-center justify-center min-h-[200px] relative">
+            {localStream ? (
+              <>
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-3 left-3 flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={stopCamera}
+                    className="rounded-full"
+                  >
+                    <X className="size-3 mr-1" />
+                    Stop
+                  </Button>
+                </div>
+                <div className="absolute top-3 right-3">
+                  <span className="size-3 rounded-full bg-red-500 animate-pulse" />
+                  <span className="ml-2 text-xs text-white">LIVE</span>
+                </div>
+              </>
+            ) : (
+              <div className="text-center text-white">
+                <Video className="size-12 mx-auto mb-2 opacity-50" />
+                <p className="text-sm opacity-70 mb-3">Start your camera to stream</p>
+                <Button
+                  onClick={startCamera}
+                  className="bg-red-500 hover:bg-red-600 text-white rounded-full"
+                >
+                  <Video className="size-4 mr-2" />
+                  Start Camera
+                </Button>
+                <p className="text-xs opacity-50 mt-2">Allow camera permission when asked</p>
+              </div>
+            )}
           </div>
 
           {/* Live Chat */}
