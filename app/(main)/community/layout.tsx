@@ -250,6 +250,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
       if (res.ok) {
         const data = await res.json();
         setLiveSession(data.session || null);
+        setInviteLink(data.session ? `${window.location.origin}/community?live=true` : "");
         if (data.session) {
           setLiveChat(prev => ({ ...prev, messages: data.messages || [] }));
         }
@@ -472,7 +473,12 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
 
             {/* Live Session Button */}
             <button
-              onClick={() => setShowLive(!showLive)}
+              onClick={async () => {
+                if (!liveSession?.active) {
+                  await startLiveSession();
+                }
+                setShowLive(!showLive);
+              }}
               className={cn(
                 "flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-medium transition-colors w-full",
                 showLive
@@ -481,7 +487,7 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
               )}
             >
               <Video className="size-6" />
-              <span>{showLive ? "End Live" : "Go Live"}</span>
+              <span>{showLive ? "Live Panel" : "Go Live"}</span>
               {liveSession?.active && !showLive && (
                 <span className="ml-auto size-2 rounded-full bg-red-500 animate-pulse" />
               )}
