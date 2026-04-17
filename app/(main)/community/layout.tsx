@@ -25,6 +25,7 @@ import {
   Copy,
   ExternalLink
 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -259,19 +260,31 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
   }, []);
 
   const startLiveSession = async () => {
-    if (!user) return;
+    if (!user) {
+      router.push("/login");
+      return;
+    }
     try {
+      console.log("Starting live session...");
       const res = await fetch("/api/community", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "startLive" }),
       });
+      const data = await res.json();
+      console.log("Live response:", data);
+      
       if (res.ok) {
-        const data = await res.json();
         setLiveSession({ active: true, hostId: user.id, hostName: user.name });
         setInviteLink(data.inviteLink || `${window.location.origin}/community?live=true&session=${data.sessionId}`);
+        setShowLive(true);
+        toast.success("Live session started!");
+      } else {
+        toast.error(data.error || "Failed to start");
       }
-    } catch {}
+    } catch (e) {
+      console.error("Start live error:", e);
+    }
   };
 
   const endLiveSession = async () => {
