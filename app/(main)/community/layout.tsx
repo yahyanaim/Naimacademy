@@ -23,8 +23,7 @@ import {
   Video,
   Phone,
   Copy,
-  ExternalLink,
-  Menu
+  ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -629,13 +628,6 @@ export default function CommunityLayout({ children }: { children: React.ReactNod
           }
         }}
       >
-        {/* Mobile Hamburger Button */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="md:hidden fixed top-20 left-3 z-50 p-2 bg-background border rounded-lg shadow-lg"
-        >
-          <Menu className="size-6" />
-        </button>
         {children}
       </main>
 
