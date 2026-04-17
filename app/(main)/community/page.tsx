@@ -654,10 +654,20 @@ function CommunityHomePageContent() {
 
   const handleShare = async (postContent: string) => {
     try {
-      await navigator.clipboard.writeText(postContent.substring(0, 100) + "...");
-      toast.success("Link copied!");
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(postContent.substring(0, 100) + "...");
+        toast.success("Copied to clipboard!");
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = postContent.substring(0, 100) + "...";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        toast.success("Copied to clipboard!");
+      }
     } catch {
-      toast.error("Failed to copy");
+      toast.error("Failed to copy. Please try selecting and copying manually.");
     }
   };
 
