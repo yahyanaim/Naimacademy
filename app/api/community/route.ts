@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongoose";
 import { CommunityPost } from "@/lib/models/community-post.model";
 import { CommunityChat } from "@/lib/models/community-chat.model";
+import { User } from "@/lib/models/user.model";
 import { verifyToken } from "@/lib/auth/jwt";
 import { SESSION } from "@/lib/constants";
 
@@ -43,12 +44,16 @@ export async function GET(request: NextRequest) {
         .limit(50)
         .lean();
 
-      const posts = savedPosts.map(post => ({
-        ...post,
-        tags: post.tags || [],
-        likes: post.likes || [],
-        saved: post.saved || [],
-        comments: post.comments || [],
+      const posts = await Promise.all(savedPosts.map(async (post: any) => {
+        const author = await User.findById(post.authorId).select("avatar").lean();
+        return {
+          ...post,
+          authorAvatar: author?.avatar || post.authorAvatar || "",
+          tags: post.tags || [],
+          likes: post.likes || [],
+          saved: post.saved || [],
+          comments: post.comments || [],
+        };
       }));
 
       return NextResponse.json({ posts });
@@ -110,12 +115,20 @@ export async function GET(request: NextRequest) {
       CommunityPost.countDocuments({ $or: [{ expiresAt: { $gt: now } }, { expiresAt: null }] }),
     ]);
 
-    const posts = [...pinnedPosts, ...regularPosts].map(post => ({
-      ...post,
-      tags: post.tags || [],
-      likes: post.likes || [],
-      saved: post.saved || [],
-      comments: post.comments || [],
+    const posts = await Promise.all([...pinnedPosts, ...regularPosts].map(async post => {
+      const author = await User.findById(post.authorId).select("avatar").lean();
+      const commentsWithAvatar = await Promise.all((post.comments || []).map(async (comment: any) => {
+        const commentAuthor = await User.findById(comment.authorId).select("avatar").lean();
+        return { ...comment, authorAvatar: commentAuthor?.avatar || "" };
+      }));
+      return {
+        ...post,
+        authorAvatar: author?.avatar || post.authorAvatar || "",
+        tags: post.tags || [],
+        likes: post.likes || [],
+        saved: post.saved || [],
+        comments: commentsWithAvatar,
+      };
     }));
 
     return NextResponse.json({

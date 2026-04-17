@@ -25,6 +25,11 @@ export async function GET(
       .sort({ isPinned: -1, createdAt: -1 })
       .lean();
 
+    const postsWithAvatar = posts.map(post => ({
+      ...post,
+      authorAvatar: user.avatar || post.authorAvatar || "",
+    }));
+
     const stats = {
       totalPosts: posts.length,
       totalComments: posts.reduce((sum, p) => sum + (p.comments?.length || 0), 0),
@@ -41,7 +46,7 @@ export async function GET(
         role: user.role,
         createdAt: user.createdAt,
       },
-      posts,
+      posts: postsWithAvatar,
       stats,
     });
   } catch (error) {
