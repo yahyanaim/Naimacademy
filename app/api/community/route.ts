@@ -170,15 +170,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Daily limit reached. You can post up to 5 questions per day." }, { status: 400 });
       }
 
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
       const post = await CommunityPost.create({
         authorId: payload.userId,
         authorName: body.authorName || "Anonymous",
         authorEmail: body.authorEmail || "",
         authorAvatar: body.authorAvatar || "",
         content: content.trim(),
-        expiresAt,
         tags: tags || [],
       });
 
@@ -258,19 +255,14 @@ export async function POST(request: NextRequest) {
       const userId = payload.userId;
       const saveIndex = post.saved.indexOf(userId);
 
-      // If trying to save (not unsave), check daily limit
+      // If trying to save (not unsave), check total limit of 3 saved posts (saved posts never expire)
       if (saveIndex === -1) {
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        
-        // Count saves made by this user today
-        const todaySaves = await CommunityPost.countDocuments({
-          saved: userId,
-          updatedAt: { $gte: startOfDay }
+        const totalSaved = await CommunityPost.countDocuments({
+          saved: userId
         });
 
-        if (todaySaves >= 2) {
-          return NextResponse.json({ error: "Daily save limit reached. You can save up to 2 posts per day." }, { status: 400 });
+        if (totalSaved >= 3) {
+          return NextResponse.json({ error: "Save limit reached. You can save up to 3 posts." }, { status: 400 });
         }
       }
 
