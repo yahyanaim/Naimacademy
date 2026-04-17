@@ -20,7 +20,7 @@ export async function GET(
 
     const posts = await CommunityPost.find({
       authorId: userId,
-      isExpired: false,
+      $or: [{ expiresAt: { $gt: new Date() } }, { expiresAt: null }]
     })
       .sort({ isPinned: -1, createdAt: -1 })
       .lean();

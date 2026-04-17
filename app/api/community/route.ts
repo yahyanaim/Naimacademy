@@ -37,8 +37,7 @@ export async function GET(request: NextRequest) {
       }
 
       const savedPosts = await CommunityPost.find({ 
-        saved: payload.userId,
-        isExpired: false 
+        saved: payload.userId
       })
         .sort({ createdAt: -1 })
         .limit(50)
@@ -68,7 +67,7 @@ export async function GET(request: NextRequest) {
 
       const count = await CommunityPost.countDocuments({ 
         authorId: payload.userId,
-        isExpired: false 
+        $or: [{ expiresAt: { $gt: new Date() } }, { expiresAt: null }]
       });
 
       return NextResponse.json({ count });
@@ -93,21 +92,22 @@ export async function GET(request: NextRequest) {
       const count = await CommunityPost.countDocuments({ 
         authorId: { $ne: payload.userId },
         createdAt: { $gte: sinceDate },
-        isExpired: false 
+        $or: [{ expiresAt: { $gt: new Date() } }, { expiresAt: null }]
       });
 
       return NextResponse.json({ count });
     }
 
     const skip = (page - 1) * limit;
+    const now = new Date();
     const [pinnedPosts, regularPosts, total] = await Promise.all([
-      CommunityPost.find({ isPinned: true, isExpired: false }).sort({ createdAt: -1 }).limit(10).lean(),
-      CommunityPost.find({ isPinned: false, isExpired: false })
+      CommunityPost.find({ isPinned: true, $or: [{ expiresAt: { $gt: now } }, { expiresAt: null }] }).sort({ createdAt: -1 }).limit(10).lean(),
+      CommunityPost.find({ isPinned: false, $or: [{ expiresAt: { $gt: now } }, { expiresAt: null }] })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      CommunityPost.countDocuments({ isExpired: false }),
+      CommunityPost.countDocuments({ $or: [{ expiresAt: { $gt: now } }, { expiresAt: null }] }),
     ]);
 
     const posts = [...pinnedPosts, ...regularPosts].map(post => ({
@@ -170,12 +170,15 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Daily limit reached. You can post up to 5 questions per day." }, { status: 400 });
       }
 
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
       const post = await CommunityPost.create({
         authorId: payload.userId,
         authorName: body.authorName || "Anonymous",
         authorEmail: body.authorEmail || "",
         authorAvatar: body.authorAvatar || "",
         content: content.trim(),
+        expiresAt,
         tags: tags || [],
       });
 
