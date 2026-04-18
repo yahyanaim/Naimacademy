@@ -28,6 +28,7 @@ const navItems = [
   { href: "/admin/support", label: "Support", icon: MessageSquare },
   { href: "/admin/comments", label: "Comments", icon: MessageCircle },
   { href: "/admin/blog", label: "Blog", icon: FileText },
+  { href: "/admin/community", label: "Community", icon: Users },
 ];
 
 export default function AdminSidebar() {
