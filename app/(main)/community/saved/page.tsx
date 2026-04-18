@@ -243,11 +243,17 @@ export default function SavedQuestionsPage() {
 
                     {/* Content */}
                     <div className="flex-1 min-w-0 space-y-3">
-                      {/* Pinned Badge */}
+                      {/* Pinned & Expired Badges */}
                       {post.isPinned && (
                         <Badge className="gap-1 w-fit bg-black text-white hover:bg-black/80">
                           <Pin className="size-3" />
                           Pinned
+                        </Badge>
+                      )}
+                      {post.expiresAt && new Date(post.expiresAt) < new Date() && (
+                        <Badge variant="outline" className="gap-1 w-fit text-red-500 border-red-300">
+                          <Clock className="size-3" />
+                          Expired
                         </Badge>
                       )}
                       
