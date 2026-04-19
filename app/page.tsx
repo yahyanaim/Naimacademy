@@ -1,177 +1,171 @@
+"use client";
+
 import Link from "next/link";
-import Footer from "@/components/layout/footer";
-import { Share2, Mail, ArrowRight, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 
-const shareUrl = "https://naimacademy.vercel.app";
-const shareText = "Welcome to Naim Academy! Start learning workflow automation with n8n today.";
+const navLinks = [
+  { name: "Home", href: "/" },
+  { name: "Courses", href: "/course" },
+  { name: "Community", href: "/community" },
+  { name: "About", href: "/about" },
+  { name: "Contact", href: "/contact" },
+];
 
-const services = [
-  {
-    title: "Workflow Automation with n8n",
-    description: "Master no-code automation to save hours of manual work and create freelance income.",
-    icon: "⚡",
-  },
-  {
-    title: "AI for Real Projects",
-    description: "Build AI-powered applications that actually generate value and income.",
-    icon: "🤖",
-  },
-  {
-    title: "Prompt Engineering",
-    description: "Learn to communicate with AI effectively and get better results.",
-    icon: "💬",
-  },
-  {
-    title: "English for Tech",
-    description: "Professional English for developers and global communication.",
-    icon: "🌍",
-  },
+const courses = [
+  { title: "Workflow Automation", subtitle: "n8n Mastery", desc: "Build automation systems that save hours" },
+  { title: "AI for Projects", subtitle: "Practical AI", desc: "Create real AI-powered applications" },
+  { title: "Prompt Engineering", subtitle: "Master Communication", desc: "Get better AI results" },
+  { title: "English for Tech", subtitle: "Global Skills", desc: "Professional English for developers" },
 ];
 
 export default function HomePage() {
-  const shareLinks = {
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`,
-    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
-    email: `mailto:?subject=${encodeURIComponent("Naim Academy - Learn Workflow Automation")}&body=${encodeURIComponent(shareText + "\n\n" + shareUrl)}`,
-  };
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Hero Section - Dark */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-16 lg:px-8 max-w-6xl mx-auto text-center" style={{ backgroundColor: "#0f0f0f" }}>
-        <div className="space-y-6 max-w-4xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight" style={{ fontFamily: "system-ui" }}>
-            Master Workflow Automation.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-              Build Skills That Pay.
-            </span>
-          </h1>
-          <p className="text-lg sm:text-xl leading-relaxed text-gray-400 max-w-2xl mx-auto">
-            The complete curriculum to design, build, and deploy sophisticated logic pipelines. 
-            No fluff, just pure engineering. Learn by building, not watching.
-          </p>
+    <div className="min-h-screen bg-[#FFFDF5] font-sans">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FFFDF5] border-b-4 border-black">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="text-2xl font-black tracking-tight uppercase" style={{ fontFamily: "system-ui" }}>
+            Naim Academy
+          </Link>
+          
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => (
+              <Link key={link.name} href={link.href} className="font-bold text-black hover:underline underline-offset-4">
+                {link.name}
+              </Link>
+            ))}
+            <Link href="/course" className="px-6 py-3 bg-[#FFD23F] border-4 border-black font-black hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+              START LEARNING
+            </Link>
+          </div>
+          
+          {/* Mobile Menu Button */}
+          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 border-4 border-black">
+            {menuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+          </button>
         </div>
         
-        <div className="flex items-center justify-center gap-4 mt-10">
-          <Link href="/course" className="inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-8 text-sm font-medium text-white transition-all hover:scale-105">
-            Start Learning <ArrowRight className="size-4" />
-          </Link>
-          <Link href="/signup" className="inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-gray-700 px-8 text-sm font-medium text-white transition-all hover:bg-gray-800">
-            Create Account
-          </Link>
-        </div>
+        {/* Mobile Menu */}
+        {menuOpen && (
+          <div className="md:hidden border-t-4 border-black p-4 bg-[#FFFDF5]">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.name} 
+                href={link.href} 
+                className="block py-3 font-bold border-b-2 border-gray-200"
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+        )}
+      </nav>
 
-        {/* Hero Image */}
-        <div className="w-full max-w-4xl mx-auto mt-12">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/assets/hero.png"
-            alt="Naim Academy Workflow Illustration"
-            className="w-full h-auto rounded-2xl shadow-2xl"
-          />
+      {/* Hero Section */}
+      <main className="pt-28 pb-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="border-4 border-black p-8 md:p-12 bg-white shadow-[8px_8px_0_0_#000]">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-[0.9] mb-6">
+              MASTER AI<br/>
+              & AUTOMATION<br/>
+              <span className="text-[#FF6B6B]">BUILD SKILLS</span><br/>
+              THAT PAY
+            </h1>
+            <p className="text-lg md:text-xl font-bold mb-8 max-w-xl">
+              Not theory. Real working projects. Skills that generate income. 
+              Learn by building, not watching.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link href="/course" className="px-8 py-4 bg-[#74B9FF] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+                EXPLORE COURSES
+              </Link>
+              <Link href="/community" className="px-8 py-4 bg-[#88D498] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+                JOIN COMMUNITY
+              </Link>
+            </div>
+          </div>
         </div>
       </main>
 
       {/* Services Section */}
-      <section className="py-20 px-6" style={{ backgroundColor: "#0f0f0f" }}>
+      <section className="py-20 px-6 bg-[#FFD23F] border-y-4 border-black">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white text-center mb-4">
-            What We Do
-          </h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-            Practical skills that generate income. Not courses—working systems.
-          </p>
+          <h2 className="text-4xl md:text-5xl font-black mb-12">WHAT WE DO</h2>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((service, index) => (
-              <div 
-                key={index}
-                className="p-6 rounded-2xl border border-gray-800 bg-gray-900/50 hover:border-purple-500/50 transition-all group"
-              >
-                <div className="text-4xl mb-4">{service.icon}</div>
-                <h3 className="text-lg font-semibold text-white mb-2">{service.title}</h3>
-                <p className="text-sm text-gray-400">{service.description}</p>
+          <div className="grid md:grid-cols-2 gap-6">
+            {courses.map((course, index) => (
+              <div key={index} className="p-8 bg-white border-4 border-black hover:translate-x-1 hover:translate-y-1 transition-all shadow-[6px_6px_0_0_#000]">
+                <div className="text-xs font-black text-gray-400 mb-2">0{index + 1}</div>
+                <h3 className="text-2xl font-black mb-1">{course.title}</h3>
+                <p className="text-sm font-bold text-gray-500 mb-4">{course.subtitle}</p>
+                <p className="font-medium">{course.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features / Why Choose Us */}
-      <section className="py-20 px-6" style={{ backgroundColor: "#fafafa" }}>
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Why Naim Academy?
-          </h2>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            {[
-              "Build Real Projects (not just watch videos)",
-              "Learn industry tools used in companies",
-              "AI + Automation + Productivity stack",
-              "Community of builders & founders",
-              "Career & freelancing opportunities",
-              "Practical focus - learn by doing"
-            ].map((feature, index) => (
-              <div key={index} className="flex items-center gap-3 p-4 bg-white rounded-xl border shadow-sm">
-                <div className="size-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <Check className="size-4 text-green-600" />
-                </div>
-                <span className="text-gray-700 font-medium">{feature}</span>
-              </div>
-            ))}
+      {/* About Section */}
+      <section className="py-20 px-6 bg-white border-b-4 border-black">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-black mb-8">WHO BUILT THIS</h2>
+          <div className="grid md:grid-cols-2 gap-12">
+            <div>
+              <h3 className="text-3xl font-black mb-4">Yahia Naim</h3>
+              <p className="text-lg font-bold mb-6">
+                After seeing thousands stuck in endless courses without real skills, 
+                I created Naim Academy to focus on what actually matters: 
+                building working systems that generate income.
+              </p>
+              <p className="font-medium">
+                Our approach: learn by building, not watching. No fluff—just practical skills 
+                you can use immediately to create real value.
+              </p>
+            </div>
+            <div className="h-64 md:h-80 bg-[#FFA552] border-4 border-black flex items-center justify-center">
+              <span className="font-black text-2xl">[FOUNDER IMAGE]</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6" style={{ backgroundColor: "#0f0f0f" }}>
+      <section className="py-20 px-6 bg-[#B8A9FA] border-y-4 border-black">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Ready to Start Building?
+          <h2 className="text-4xl md:text-5xl font-black mb-4">
+            READY TO BUILD?
           </h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
-            Join thousands of learners mastering workflow automation, AI, and practical tech skills.
+          <p className="text-xl font-bold mb-8">
+            Join thousands learning practical tech skills.
           </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/course" className="inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-white text-black px-8 text-sm font-bold transition-all hover:scale-105">
-              Explore Courses <ArrowRight className="size-4" />
-            </Link>
-            <Link href="/signup" className="inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-gray-700 px-8 text-sm font-medium text-white transition-all hover:bg-gray-800">
-              Get Started Free
-            </Link>
-          </div>
+          <Link href="/course" className="inline-block px-10 py-5 bg-[#FFD23F] border-4 border-black font-black text-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+            START LEARNING →
+          </Link>
         </div>
       </section>
 
-      {/* Share Section */}
-      <section className="py-12 px-6" style={{ backgroundColor: "#fafafa" }}>
-        <div className="max-w-xl mx-auto text-center">
-          <p className="text-sm text-gray-500 mb-4 flex items-center justify-center gap-2">
-            <Share2 className="size-4" />
-            Share with your network:
-          </p>
-          <div className="flex items-center justify-center gap-3">
-            <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" className="p-3 rounded-full bg-black hover:bg-[#1877F2] text-white hover:text-white transition-colors">
-              <svg className="size-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            </a>
-            <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" className="p-3 rounded-full bg-black hover:bg-black text-white hover:text-white transition-colors">
-              <svg className="size-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-            <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 rounded-full bg-black hover:bg-[#0A66C2] text-white hover:text-white transition-colors">
-              <svg className="size-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-            </a>
-            <a href={shareLinks.email} className="p-3 rounded-full bg-black hover:bg-red-600 text-white hover:text-white transition-colors">
-              <Mail className="size-5" />
-            </a>
+      {/* Footer */}
+      <footer className="py-12 px-6 bg-[#FFFDF5] border-t-4 border-black">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-2xl font-black uppercase">Naim Academy</div>
+          <div className="flex items-center gap-6 font-bold">
+            <Link href="/privacy" className="hover:underline">PRIVACY</Link>
+            <Link href="/terms" className="hover:underline">TERMS</Link>
+            <Link href="/contact" className="hover:underline">CONTACT</Link>
+          </div>
+          <div className="flex gap-2">
+            <span className="font-bold text-sm">SHARE:</span>
+            <button className="px-3 py-1 bg-[#74B9FF] border-2 border-black font-bold text-sm hover:bg-[#FF6B6B]">
+              ×
+            </button>
           </div>
         </div>
-      </section>
-      
-      <Footer />
+      </footer>
     </div>
   );
 }
