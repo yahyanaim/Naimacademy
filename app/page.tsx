@@ -104,16 +104,6 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-              <div className="flex-1">
-                <div className="border-4 border-black shadow-[8px_8px_0_0_#000]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img 
-                    src="https://miro.medium.com/v2/resize:fit:1400/1*mAbwvyCCSi4B1jQRlxO1iA.jpeg" 
-                    alt="Naim Academy - Learn AI & Automation" 
-                    className="w-full h-auto"
-                  />
-                </div>
-              </div>
             </div>
           </div>
         </div>
