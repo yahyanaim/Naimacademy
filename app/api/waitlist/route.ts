@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
-    const existing = await User.findOne({ email });
+    const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) {
       return NextResponse.json(
         { error: "You've already applied!" },
@@ -30,22 +30,24 @@ export async function POST(request: NextRequest) {
 
     await User.create({
       name,
-      email,
+      email: email.toLowerCase(),
       country: country || "",
       role,
       skillsInterest: interest,
-      motivation,
+      motivation: motivation || "",
       isWaitlisted: true,
+      password: "waitlist-user",
     });
 
     return NextResponse.json(
       { success: true, message: "Application submitted!" },
       { status: 201, headers: corsHeaders }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Waitlist error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to submit application" },
+      { error: "Failed to submit application", details: errorMessage },
       { status: 500, headers: corsHeaders }
     );
   }
