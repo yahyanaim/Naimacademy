@@ -7,8 +7,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, email, country, role, interest, motivation } = body;
 
-    if (!name || !email || !role || !interest || !motivation) {
-      return NextResponse.json({ error: "All required fields must be filled" }, { status: 400 });
+    if (!name || !email || !role || !interest) {
+      return NextResponse.json({ error: "Required fields: name, email, role, interest" }, { status: 400 });
     }
 
     await connectDB();
