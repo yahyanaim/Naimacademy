@@ -85,25 +85,24 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="border-4 border-black p-8 md:p-12 bg-white shadow-[8px_8px_0_0_#000]">
             <div className="flex flex-col items-center text-center">
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[0.9] mb-6">
-                  MASTER<br/>
-                  AI & <span className="text-[#FF6B6B]">AUTOMATION</span>
-                </h1>
-                <p className="text-lg md:text-xl font-bold mb-8">
-                  Not theory. Real working projects.<br/>
-                  Skills that generate income.<br/>
-                  Learn by building, not watching.
-                </p>
-                <div className="flex flex-wrap gap-4">
-                  <a href="https://discord.com" target="_blank" rel="noopener" className="px-8 py-4 bg-[#74B9FF] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-                    JOIN DISCORD
-                  </a>
-                  <Link href="#waitlist" className="px-8 py-4 bg-[#FFD23F] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-                    JOIN WAITLIST
-                  </Link>
-                </div>
-              </div>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[0.9] mb-6">
+              MASTER<br/>
+              AI & <span className="text-[#FF6B6B]">AUTOMATION</span>
+            </h1>
+            <p className="text-lg md:text-xl font-bold mb-8">
+              Not theory. Real working projects.<br/>
+              Skills that generate income.<br/>
+              Learn by building, not watching.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <a href="https://discord.com" target="_blank" rel="noopener" className="px-8 py-4 bg-[#74B9FF] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+                JOIN DISCORD
+              </a>
+              <Link href="#waitlist" className="px-8 py-4 bg-[#FFD23F] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+                JOIN WAITLIST
+              </Link>
             </div>
+          </div>
           </div>
         </div>
       </main>
