@@ -327,43 +327,6 @@ export default function AdminCommunityPage() {
         </Card>
       </div>
 
-      {/* Top Users & Hourly */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/50">
-          <CardHeader className="px-2 pb-4">
-            <div className="flex items-center gap-2">
-              <Users className="size-4 text-muted-foreground" />
-              <CardTitle className="text-sm font-semibold">Top Contributors</CardTitle>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Most active members by questions + answers. Consider recognizing them for their contributions.
-            </p>
-          </CardHeader>
-          <CardContent className="px-2">
-            <div className="space-y-3">
-              {userStats.slice(0, 5).map((user, index) => (
-                <div key={user.userId} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                      {index + 1}
-                    </span>
-                    <span className="text-sm font-medium">{user.name}</span>
-                  </div>
-                  <div className="flex gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <FileText className="size-3" />{user.postCount}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <MessageCircle className="size-3" />{user.answerCount}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* All Posts Management */}
       <div>
         <div className="mb-4">
