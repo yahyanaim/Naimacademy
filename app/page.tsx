@@ -105,22 +105,22 @@ export default function HomePage() {
       {/* Hero Section */}
       <main className="pt-28 pb-20 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="border-4 border-black p-8 md:p-12 bg-white shadow-[8px_8px_0_0_#000]">
+          <div className="border-[5px] border-black p-10 md:p-14 bg-white shadow-[10px_10px_0_0_#000]">
             <div className="flex flex-col items-center text-center">
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[0.9] mb-6">
+            <h1 className="text-5xl md:text-7xl lg:text-[5rem] font-black leading-[0.95] mb-8 tracking-tight">
               MASTER<br/>
               AI & <span className="text-[#FF6B6B]">AUTOMATION</span>
             </h1>
-            <p className="text-xl md:text-2xl lg:text-3xl font-black mb-8 max-w-3xl animate-pulse">
+            <p className="text-lg md:text-xl font-bold mb-10 max-w-xl text-gray-600 leading-relaxed">
               Not theory. Real working projects.<br/>
               Skills that generate income.<br/>
               Learn by building, not watching.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <a href="https://discord.gg/3xm8JZ8g" target="_blank" rel="noopener" className="px-8 py-4 bg-[#74B9FF] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+            <div className="flex flex-wrap justify-center gap-5">
+              <a href="https://discord.gg/3xm8JZ8g" target="_blank" rel="noopener" className="px-9 py-4 bg-[#74B9FF] border-[4px] border-black font-black text-lg hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all shadow-[5px_5px_0_0_#000]">
                 JOIN DISCORD
               </a>
-              <Link href="#waitlist" className="px-8 py-4 bg-[#FFD23F] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+              <Link href="#waitlist" className="px-9 py-4 bg-[#FFD23F] border-[4px] border-black font-black text-lg hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all shadow-[5px_5px_0_0_#000]">
                 JOIN WAITLIST
               </Link>
             </div>
@@ -130,17 +130,17 @@ export default function HomePage() {
       </main>
 
       {/* Services Section */}
-      <section className="py-20 px-6 bg-[#FFD23F] border-y-4 border-black">
+      <section className="py-20 px-6 bg-[#FFD23F] border-y-[4px] border-black">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-black mb-12">COURSES WE OFFER</h2>
+          <h2 className="text-4xl md:text-5xl font-black mb-12 text-center">COURSES WE OFFER</h2>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-8">
             {courses.map((course, index) => (
-              <div key={index} className="p-6 bg-white border-4 border-black hover:translate-x-1 hover:translate-y-1 transition-all shadow-[6px_6px_0_0_#000]">
-                <div className="text-xs font-black text-gray-400 mb-2">0{index + 1}</div>
-                <h3 className="text-xl font-black mb-1">{course.title}</h3>
-                <p className="text-sm font-bold text-gray-500 mb-2">{course.subtitle}</p>
-                <p className="font-medium text-sm">{course.desc}</p>
+              <div key={index} className="p-7 bg-white border-[4px] border-black hover:-translate-y-1.5 transition-transform duration-200 shadow-[6px_6px_0_0_#000]">
+                <div className="text-xs font-black text-gray-400 mb-3 tracking-widest">0{index + 1}</div>
+                <h3 className="text-xl font-black mb-2">{course.title}</h3>
+                <p className="text-sm font-bold text-gray-500 mb-3">{course.subtitle}</p>
+                <p className="font-medium text-sm text-gray-600 leading-relaxed">{course.desc}</p>
               </div>
             ))}
           </div>
@@ -148,44 +148,45 @@ export default function HomePage() {
       </section>
 
       {/* Join Form Section */}
-      <section id="waitlist" className="py-20 px-6 bg-white border-b-4 border-black">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-black mb-4 text-center">JOIN THE WAITLIST</h2>
-          <p className="text-lg font-bold mb-8 text-center">Be the first to know when we launch.</p>
+      <section id="waitlist" className="py-20 px-6 bg-white border-b-[4px] border-black">
+        <div className="max-w-xl mx-auto">
+          <div className="border-[4px] border-black p-8 bg-white shadow-[8px_8px_0_0_#000]">
+            <h2 className="text-4xl md:text-5xl font-black mb-3 text-center">JOIN THE WAITLIST</h2>
+            <p className="text-base font-semibold mb-8 text-center text-gray-600">Be the first to know when we launch.</p>
           
           {submitted ? (
-            <div className="p-8 bg-[#88D498] border-4 border-black text-center">
+            <div className="p-6 bg-[#88D498] border-[3px] border-black text-center">
               <p className="text-2xl font-black">THANKS! YOU'RE ON THE LIST.</p>
               <p className="font-bold mt-2">We'll contact you soon.</p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block font-bold mb-2">FULL NAME *</label>
+                <label className="block font-bold mb-2 text-sm uppercase tracking-wide">Full Name *</label>
                 <input 
                   type="text" 
                   value={form.name}
                   onChange={(e) => setForm({...form, name: e.target.value})}
-                  className="w-full p-4 border-4 border-black font-bold"
+                  className="w-full p-3.5 border-[3px] border-black font-semibold focus:outline-none focus:ring-2 focus:ring-[#FFD23F] focus:ring-offset-1 transition-all"
                   required
                 />
               </div>
               <div>
-                <label className="block font-bold mb-2">EMAIL *</label>
+                <label className="block font-bold mb-2 text-sm uppercase tracking-wide">Email *</label>
                 <input 
                   type="email" 
                   value={form.email}
                   onChange={(e) => setForm({...form, email: e.target.value})}
-                  className="w-full p-4 border-4 border-black font-bold"
+                  className="w-full p-3.5 border-[3px] border-black font-semibold focus:outline-none focus:ring-2 focus:ring-[#FFD23F] focus:ring-offset-1 transition-all"
                   required
                 />
               </div>
               <div>
-                <label className="block font-bold mb-2">EDUCATION LEVEL *</label>
+                <label className="block font-bold mb-2 text-sm uppercase tracking-wide">Education Level *</label>
                 <select 
                   value={form.education}
                   onChange={(e) => setForm({...form, education: e.target.value})}
-                  className="w-full p-4 border-4 border-black font-bold bg-white"
+                  className="w-full p-3.5 border-[3px] border-black font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#FFD23F] focus:ring-offset-1 transition-all"
                   required
                 >
                   <option value="">Select your education level</option>
@@ -195,11 +196,11 @@ export default function HomePage() {
                 </select>
               </div>
               <div>
-                <label className="block font-bold mb-2">WHAT DO YOU WANT TO LEARN? *</label>
+                <label className="block font-bold mb-2 text-sm uppercase tracking-wide">What do you want to learn? *</label>
                 <select 
                   value={form.interest}
                   onChange={(e) => setForm({...form, interest: e.target.value})}
-                  className="w-full p-4 border-4 border-black font-bold bg-white"
+                  className="w-full p-3.5 border-[3px] border-black font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#FFD23F] focus:ring-offset-1 transition-all"
                   required
                 >
                   <option value="">Select your interest</option>
@@ -208,24 +209,25 @@ export default function HomePage() {
                   ))}
                 </select>
               </div>
-              <button type="submit" className="w-full py-4 bg-[#FF6B6B] border-4 border-black font-black text-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+              <button type="submit" className="w-full py-4 bg-[#FF6B6B] border-[3px] border-black font-black text-lg hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
                 JOIN WAITLIST
               </button>
             </form>
           )}
+          </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-[#B8A9FA] border-y-4 border-black">
+      <section className="py-20 px-6 bg-[#B8A9FA] border-y-[4px] border-black">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-black mb-4">
+          <h2 className="text-4xl md:text-5xl font-black mb-5">
             READY TO BUILD?
           </h2>
-          <p className="text-xl font-bold mb-8">
+          <p className="text-lg font-semibold mb-8 text-gray-700">
             Join thousands learning practical tech skills.
           </p>
-          <Link href="/course" className="inline-block px-10 py-5 bg-[#88D498] border-4 border-black font-black text-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+          <Link href="/course" className="inline-block px-10 py-4 bg-[#88D498] border-[3px] border-black font-black text-lg hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
             START LEARNING →
           </Link>
         </div>
