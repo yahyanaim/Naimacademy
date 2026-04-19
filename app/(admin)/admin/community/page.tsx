@@ -316,7 +316,7 @@ export default function AdminCommunityPage() {
                   nameKey="name"
                 >
                   {tagStats.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"][index % 8]} />
+                    <Cell key={`cell-${index}`} fill={["#1f2937", "#374151", "#4b5563", "#6b7280", "#9ca3af", "#d1d5db", "#e5e7eb", "#f3f4f6"][index % 8]} />
                   ))}
                 </Pie>
                 <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }} />
