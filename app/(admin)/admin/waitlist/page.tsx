@@ -20,7 +20,7 @@ interface WaitlistEntry {
   name: string;
   email: string;
   education?: string;
-  interest?: string;
+  skillsInterest?: string;
   isWaitlisted: boolean;
   createdAt?: string;
 }
@@ -69,7 +69,7 @@ export default function WaitlistPage() {
       e.name,
       e.email,
       e.education || "",
-      e.skillsInterest || e.interest || "",
+      e.skillsInterest || "",
       e.createdAt ? new Date(e.createdAt).toLocaleDateString() : ""
     ]);
     
@@ -86,7 +86,7 @@ export default function WaitlistPage() {
     e =>
       e.name.toLowerCase().includes(search.toLowerCase()) ||
       e.email.toLowerCase().includes(search.toLowerCase()) ||
-      e.interest?.toLowerCase().includes(search.toLowerCase())
+      e.skillsInterest?.toLowerCase().includes(search.toLowerCase())
   );
 
   if (loading) {
@@ -163,7 +163,7 @@ export default function WaitlistPage() {
                   <TableCell>
                     <span className="flex items-center gap-2">
                       <Target className="h-4 w-4" />
-                      {entry.interest || "-"}
+                      {entry.skillsInterest || "-"}
                     </span>
                   </TableCell>
                   <TableCell>
