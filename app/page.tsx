@@ -84,16 +84,16 @@ export default function HomePage() {
       <main className="pt-28 pb-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="border-4 border-black p-8 md:p-12 bg-white shadow-[8px_8px_0_0_#000]">
-            <div className="flex flex-col lg:flex-row items-center gap-8">
+            <div className="flex flex-col lg:flex-row items-center gap-12">
               <div className="flex-1">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-[0.9] mb-6">
-                  MASTER AI<br/>
-                  & AUTOMATION<br/>
-                  <span className="text-[#FF6B6B]">BUILD SKILLS</span><br/>
-                  THAT PAY
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[0.9] mb-6">
+                  MASTER<br/>
+                  AI &<br/>
+                  <span className="text-[#FF6B6B]">AUTOMATION</span>
                 </h1>
                 <p className="text-lg md:text-xl font-bold mb-8">
-                  Not theory. Real working projects. Skills that generate income. 
+                  Not theory. Real working projects.<br/>
+                  Skills that generate income.<br/>
                   Learn by building, not watching.
                 </p>
                 <div className="flex flex-wrap gap-4">
@@ -101,17 +101,19 @@ export default function HomePage() {
                     EXPLORE COURSES
                   </Link>
                   <Link href="/community" className="px-8 py-4 bg-[#88D498] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-                    JOIN COMMUNITY
+                    JOIN DISCORD
                   </Link>
                 </div>
               </div>
-              <div className="flex-1 border-4 border-black shadow-[8px_8px_0_0_#000]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src="/assets/hero.png" 
-                  alt="Naim Academy - Learn AI & Automation" 
-                  className="w-full h-auto max-h-[400px] object-cover"
-                />
+              <div className="flex-1">
+                <div className="border-4 border-black shadow-[8px_8px_0_0_#000]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src="https://miro.medium.com/v2/resize:fit:1400/1*mAbwvyCCSi4B1jQRlxO1iA.jpeg" 
+                    alt="Naim Academy - Learn AI & Automation" 
+                    className="w-full h-auto"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -123,7 +125,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-black mb-12">COURSES WE OFFER</h2>
           
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
             {courses.map((course, index) => (
               <div key={index} className="p-6 bg-white border-4 border-black hover:translate-x-1 hover:translate-y-1 transition-all shadow-[6px_6px_0_0_#000]">
                 <div className="text-xs font-black text-gray-400 mb-2">0{index + 1}</div>
@@ -212,7 +214,7 @@ export default function HomePage() {
             READY TO BUILD?
           </h2>
           <p className="text-xl font-bold mb-8">
-            Join thousands learning practical tech skills.
+            Join thousands learning practical tech skills in Discord.
           </p>
           <Link href="/course" className="inline-block px-10 py-5 bg-[#FFD23F] border-4 border-black font-black text-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
             START LEARNING →
