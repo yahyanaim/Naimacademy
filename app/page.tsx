@@ -15,12 +15,11 @@ const courses = [
   { title: "Workflow Automation", subtitle: "n8n Mastery", desc: "Build automation systems that save hours" },
   { title: "AI Engineering", subtitle: "Practical AI Skills", desc: "Build real AI-powered applications that generate value" },
   { title: "Prompt Engineering", subtitle: "Master Communication", desc: "Get better AI results from AI tools" },
-  { title: "English Tech", subtitle: "Tech Communication", desc: "Professional English for developers & global work" },
-  { title: "Soft Skills", subtitle: "Career Mindset", desc: "Communication, productivity & entrepreneurship" },
+  { title: "English Tech & Soft Skills", subtitle: "Career & Communication", desc: "Professional English + communication, productivity & entrepreneurship" },
 ];
 
 const educationLevels = ["High School", "University Student", "Bachelor", "Master", "PhD", "Other"];
-const interests = ["Workflow Automation", "AI Engineering", "Prompt Engineering", "English Tech", "Soft Skills", "All of them"];
+const interests = ["Workflow Automation", "AI Engineering", "Prompt Engineering", "English Tech & Soft Skills", "All of them"];
 
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
