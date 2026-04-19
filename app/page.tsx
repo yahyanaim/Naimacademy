@@ -5,11 +5,9 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
-  { name: "Home", href: "/" },
   { name: "Courses", href: "/course" },
+  { name: "Articles", href: "/blog" },
   { name: "Community", href: "/community" },
-  { name: "About", href: "/about" },
-  { name: "Contact", href: "/contact" },
 ];
 
 const courses = [
@@ -19,15 +17,27 @@ const courses = [
   { title: "English for Tech", subtitle: "Global Skills", desc: "Professional English for developers" },
 ];
 
+const educationLevels = ["High School", "University Student", "Bachelor", "Master", "PhD", "Other"];
+const interests = ["Workflow Automation", "AI for Projects", "Prompt Engineering", "English for Tech", "All of them"];
+
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", education: "", interest: "" });
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (form.name && form.email && form.education && form.interest) {
+      setSubmitted(true);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#FFFDF5] font-sans">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FFFDF5] border-b-4 border-black">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-black tracking-tight uppercase" style={{ fontFamily: "system-ui" }}>
+          <Link href="/" className="text-2xl font-black tracking-tight uppercase">
             Naim Academy
           </Link>
           
@@ -110,27 +120,72 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* About Section */}
+      {/* Join Form Section */}
       <section className="py-20 px-6 bg-white border-b-4 border-black">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-black mb-8">WHO BUILT THIS</h2>
-          <div className="grid md:grid-cols-2 gap-12">
-            <div>
-              <h3 className="text-3xl font-black mb-4">Yahia Naim</h3>
-              <p className="text-lg font-bold mb-6">
-                After seeing thousands stuck in endless courses without real skills, 
-                I created Naim Academy to focus on what actually matters: 
-                building working systems that generate income.
-              </p>
-              <p className="font-medium">
-                Our approach: learn by building, not watching. No fluff—just practical skills 
-                you can use immediately to create real value.
-              </p>
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-black mb-4 text-center">JOIN THE WAITLIST</h2>
+          <p className="text-lg font-bold mb-8 text-center">Be the first to know when we launch.</p>
+          
+          {submitted ? (
+            <div className="p-8 bg-[#88D498] border-4 border-black text-center">
+              <p className="text-2xl font-black">THANKS! YOU'RE ON THE LIST.</p>
+              <p className="font-bold mt-2">We'll contact you soon.</p>
             </div>
-            <div className="h-64 md:h-80 bg-[#FFA552] border-4 border-black flex items-center justify-center">
-              <span className="font-black text-2xl">[FOUNDER IMAGE]</span>
-            </div>
-          </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block font-bold mb-2">FULL NAME *</label>
+                <input 
+                  type="text" 
+                  value={form.name}
+                  onChange={(e) => setForm({...form, name: e.target.value})}
+                  className="w-full p-4 border-4 border-black font-bold"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-bold mb-2">EMAIL *</label>
+                <input 
+                  type="email" 
+                  value={form.email}
+                  onChange={(e) => setForm({...form, email: e.target.value})}
+                  className="w-full p-4 border-4 border-black font-bold"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-bold mb-2">EDUCATION LEVEL *</label>
+                <select 
+                  value={form.education}
+                  onChange={(e) => setForm({...form, education: e.target.value})}
+                  className="w-full p-4 border-4 border-black font-bold bg-white"
+                  required
+                >
+                  <option value="">Select your education level</option>
+                  {educationLevels.map(level => (
+                    <option key={level} value={level}>{level}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block font-bold mb-2">WHAT DO YOU WANT TO LEARN? *</label>
+                <select 
+                  value={form.interest}
+                  onChange={(e) => setForm({...form, interest: e.target.value})}
+                  className="w-full p-4 border-4 border-black font-bold bg-white"
+                  required
+                >
+                  <option value="">Select your interest</option>
+                  {interests.map(i => (
+                    <option key={i} value={i}>{i}</option>
+                  ))}
+                </select>
+              </div>
+              <button type="submit" className="w-full py-4 bg-[#FF6B6B] border-4 border-black font-black text-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+                JOIN WAITLIST
+              </button>
+            </form>
+          )}
         </div>
       </section>
 
@@ -151,18 +206,23 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="py-12 px-6 bg-[#FFFDF5] border-t-4 border-black">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-2xl font-black uppercase">Naim Academy</div>
-          <div className="flex items-center gap-6 font-bold">
-            <Link href="/privacy" className="hover:underline">PRIVACY</Link>
-            <Link href="/terms" className="hover:underline">TERMS</Link>
-            <Link href="/contact" className="hover:underline">CONTACT</Link>
-          </div>
-          <div className="flex gap-2">
-            <span className="font-bold text-sm">SHARE:</span>
-            <button className="px-3 py-1 bg-[#74B9FF] border-2 border-black font-bold text-sm hover:bg-[#FF6B6B]">
-              ×
-            </button>
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="text-2xl font-black uppercase">Naim Academy</div>
+            <div className="flex gap-3">
+              <a href="https://facebook.com" target="_blank" rel="noopener" className="px-4 py-2 bg-[#74B9FF] border-2 border-black font-bold text-sm hover:bg-blue-500 hover:text-white">
+                FACEBOOK
+              </a>
+              <a href="https://twitter.com" target="_blank" rel="noopener" className="px-4 py-2 bg-black border-2 border-black font-bold text-sm text-white hover:bg-gray-700">
+                TWITTER
+              </a>
+              <a href="https://instagram.com" target="_blank" rel="noopener" className="px-4 py-2 bg-[#FF6B6B] border-2 border-black font-bold text-sm hover:bg-pink-600 hover:text-white">
+                INSTAGRAM
+              </a>
+              <a href="mailto:hello@naimacademy.com" className="px-4 py-2 bg-[#FFD23F] border-2 border-black font-bold text-sm hover:bg-yellow-500">
+                EMAIL
+              </a>
+            </div>
           </div>
         </div>
       </footer>
