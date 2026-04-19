@@ -1,6 +1,15 @@
 import Link from "next/link";
 import Footer from "@/components/layout/footer";
 
+export const metadata = {
+  title: "Privacy Policy - Naim Academy",
+  openGraph: {
+    title: "Privacy Policy - Naim Academy",
+    description: "Welcome to Naim Academy",
+    images: ["https://naimacademy.com/assets/og-image.png"],
+  },
+};
+
 export default function PrivacyPolicyPage() {
   return (
     <div className="flex flex-col min-h-screen pt-14" style={{ backgroundColor: "#fefdfb", overflowX: "hidden" }}>

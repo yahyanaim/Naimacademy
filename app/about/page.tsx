@@ -4,6 +4,11 @@ import Footer from "@/components/layout/footer";
 export const metadata = {
   title: "About Us - Naim Academy",
   description: "Learn about Naim Academy, our mission to provide free n8n, AI, and data science education, and how we operate through voluntary donations.",
+  openGraph: {
+    title: "About Us - Naim Academy",
+    description: "Welcome to Naim Academy - Learn practical tech skills that generate income.",
+    images: ["https://naimacademy.com/assets/og-image.png"],
+  },
 };
 
 export default function AboutPage() {

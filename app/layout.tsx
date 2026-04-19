@@ -11,8 +11,29 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Mastering Naim Academy",
-  description: "Learn n8n workflow automation from foundational level to expert operations.",
+  title: "Naim Academy - Master AI & Automation",
+  description: "Learn practical tech skills. Not theory. Real working projects. Skills that generate income.",
+  openGraph: {
+    title: "Naim Academy - Master AI & Automation",
+    description: "Not theory. Real working projects. Skills that generate income. Learn by building, not watching.",
+    url: "https://naimacademy.com",
+    siteName: "Naim Academy",
+    images: [
+      {
+        url: "https://naimacademy.com/assets/og-image.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Naim Academy - Master AI & Automation",
+    description: "Not theory. Real working projects. Skills that generate income.",
+    images: ["https://naimacademy.com/assets/og-image.png"],
+  },
 };
 
 export default function RootLayout({

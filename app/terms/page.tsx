@@ -1,6 +1,15 @@
 import Link from "next/link";
 import Footer from "@/components/layout/footer";
 
+export const metadata = {
+  title: "Terms of Service - Naim Academy",
+  openGraph: {
+    title: "Terms of Service - Naim Academy",
+    description: "Welcome to Naim Academy",
+    images: ["https://naimacademy.com/assets/og-image.png"],
+  },
+};
+
 export default function TermsPage() {
   return (
     <div className="flex flex-col min-h-screen pt-14 overflow-hidden" style={{ backgroundColor: "#fefdfb" }}>
