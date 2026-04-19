@@ -41,11 +41,15 @@ export default function HomePage() {
             motivation: "",
           }),
         });
+        const data = await res.json();
         if (res.ok) {
           setSubmitted(true);
+        } else {
+          alert(data.error || "Something went wrong");
         }
       } catch (error) {
         console.error("Failed to submit:", error);
+        alert("Failed to submit");
       }
     }
   };
