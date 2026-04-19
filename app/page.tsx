@@ -84,8 +84,7 @@ export default function HomePage() {
       <main className="pt-28 pb-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="border-4 border-black p-8 md:p-12 bg-white shadow-[8px_8px_0_0_#000]">
-            <div className="flex flex-col lg:flex-row items-center gap-12">
-              <div className="flex-1">
+            <div className="flex flex-col items-center text-center">
                 <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[0.9] mb-6">
                   MASTER<br/>
                   AI & <span className="text-[#FF6B6B]">AUTOMATION</span>
