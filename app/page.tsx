@@ -111,7 +111,7 @@ export default function HomePage() {
               MASTER<br/>
               AI & <span className="text-[#FF6B6B]">AUTOMATION</span>
             </h1>
-            <p className="text-lg md:text-xl font-bold mb-10 max-w-xl text-gray-600 leading-relaxed">
+            <p className="text-lg md:text-xl font-bold mb-10 max-w-xl text-gray-600 leading-relaxed animate-in slide-in-from-bottom-4 duration-700">
               Not theory. Real working projects.<br/>
               Skills that generate income.<br/>
               Learn by building, not watching.
