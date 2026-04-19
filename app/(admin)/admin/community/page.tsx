@@ -256,13 +256,16 @@ export default function AdminCommunityPage() {
         </div>
       </div>
 
-      {/* Charts Row */}
+{/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Daily Activity */}
-        <Card className="bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800">
-          <CardHeader>
+        <Card className="p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/50">
+          <CardHeader className="px-2 pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Daily Activity</CardTitle>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="size-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-semibold">Daily Activity</CardTitle>
+              </div>
               <div className="flex gap-1">
                 {(["7d", "30d", "all"] as const).map((d) => (
                   <Button key={d} variant={dateRange === d ? "default" : "outline"} size="sm" onClick={() => setDateRange(d)}>
@@ -271,50 +274,53 @@ export default function AdminCommunityPage() {
                 ))}
               </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-muted-foreground">
               Questions posted each day. Higher lines = more engagement. Use to identify peak times and track growth.
             </p>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+          <CardContent className="h-[300px] p-0">
+            <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dailyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="date" fontSize={12} />
-                <YAxis fontSize={12} />
-                <Tooltip />
-                <Line type="monotone" dataKey="posts" stroke="#000" strokeWidth={2} dot={{ fill: "#000" }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} fontSize={12} tick={{ fill: "#64748b" }} />
+                <YAxis axisLine={false} tickLine={false} fontSize={12} tick={{ fill: "#64748b" }} />
+                <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }} />
+                <Line type="monotone" dataKey="posts" stroke="#000000" strokeWidth={2.5} dot={{ fill: "#000000", strokeWidth: 2, r: 4 }} activeDot={{ r: 6, strokeWidth: 0 }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Tag Distribution */}
-        <Card className="bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800">
-          <CardHeader>
-            <CardTitle className="text-base">Top Tags</CardTitle>
-            <p className="text-xs text-muted-foreground mt-2">
+        <Card className="p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/50">
+          <CardHeader className="px-2 pb-4">
+            <div className="flex items-center gap-2">
+              <Hash className="size-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-semibold">Top Tags</CardTitle>
+            </div>
+            <p className="text-xs text-muted-foreground">
               Most popular topics. Larger slices = more questions. Use to understand what interests your community.
             </p>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+          <CardContent className="h-[300px] p-0">
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={tagStats}
                   cx="50%"
                   cy="50%"
-                  innerRadius={40}
-                  outerRadius={80}
+                  innerRadius={60}
+                  outerRadius={100}
                   paddingAngle={2}
                   dataKey="count"
                   nameKey="name"
                 >
                   {tagStats.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={["#000", "#374151", "#4b5563", "#6b7280", "#9ca3af", "#d1d5db", "#e5e7eb", "#f3f4f6"][index % 8]} />
+                    <Cell key={`cell-${index}`} fill={["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"][index % 8]} />
                   ))}
                 </Pie>
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: "11px" }} />
+                <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }} />
+                <Legend verticalAlign="bottom" height={36} formatter={(value) => <span className="text-xs text-muted-foreground">{value}</span>} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -323,10 +329,73 @@ export default function AdminCommunityPage() {
 
       {/* Top Users & Hourly */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800">
-          <CardHeader>
-            <CardTitle className="text-base">Top Contributors</CardTitle>
-            <p className="text-xs text-muted-foreground mt-2">
+        <Card className="p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/50">
+          <CardHeader className="px-2 pb-4">
+            <div className="flex items-center gap-2">
+              <Users className="size-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-semibold">Top Contributors</CardTitle>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Most active members by questions + answers. Consider recognizing them for their contributions.
+            </p>
+          </CardHeader>
+          <CardContent className="px-2">
+            <div className="space-y-3">
+              {userStats.slice(0, 5).map((user, index) => (
+                <div key={user.userId} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                      {index + 1}
+                    </span>
+                    <span className="text-sm font-medium">{user.name}</span>
+                  </div>
+                  <div className="flex gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <FileText className="size-3" />{user.postCount}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageCircle className="size-3" />{user.answerCount}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/50">
+          <CardHeader className="px-2 pb-4">
+            <div className="flex items-center gap-2">
+              <Clock className="size-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-semibold">Posting Time (24h)</CardTitle>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              When questions are posted. Schedule your availability when the community is most active.
+            </p>
+          </CardHeader>
+          <CardContent className="h-[250px] p-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={hourlyData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="hour" axisLine={false} tickLine={false} fontSize={11} tick={{ fill: "#64748b" }} />
+                <YAxis axisLine={false} tickLine={false} fontSize={11} tick={{ fill: "#64748b" }} />
+                <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }} />
+                <Bar dataKey="posts" fill="#000000" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Top Users & Hourly */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/50">
+          <CardHeader className="px-2 pb-4">
+            <div className="flex items-center gap-2">
+              <Users className="size-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-semibold">Top Contributors</CardTitle>
+            </div>
+            <p className="text-xs text-muted-foreground">
               Most active members by questions + answers. Consider recognizing them for their contributions.
             </p>
           </CardHeader>
@@ -354,21 +423,24 @@ export default function AdminCommunityPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800">
-          <CardHeader>
-            <CardTitle className="text-base">Posting Time (24h)</CardTitle>
-            <p className="text-xs text-muted-foreground mt-2">
+        <Card className="p-4 transition-all duration-200 hover:shadow-lg hover:border-primary/50">
+          <CardHeader className="px-2 pb-4">
+            <div className="flex items-center gap-2">
+              <Clock className="size-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-semibold">Posting Time (24h)</CardTitle>
+            </div>
+            <p className="text-xs text-muted-foreground">
               When questions are posted. Schedule your availability when the community is most active.
             </p>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
+          <CardContent className="h-[250px] p-0">
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={hourlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="hour" fontSize={10} />
-                <YAxis fontSize={10} />
-                <Tooltip />
-                <Bar dataKey="posts" fill="#000" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="hour" axisLine={false} tickLine={false} fontSize={11} tick={{ fill: "#64748b" }} />
+                <YAxis axisLine={false} tickLine={false} fontSize={11} tick={{ fill: "#64748b" }} />
+                <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }} />
+                <Bar dataKey="posts" fill="#000000" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
