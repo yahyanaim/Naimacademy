@@ -8,17 +8,19 @@ const navLinks = [
   { name: "Courses", href: "/course" },
   { name: "Articles", href: "/blog" },
   { name: "Community", href: "/community" },
+  { name: "Join Waitlist", href: "#waitlist" },
 ];
 
 const courses = [
-  { title: "AI Engineering", subtitle: "Practical AI Skills", desc: "Build real AI-powered applications that generate value" },
-  { title: "English Track", subtitle: "Tech Communication", desc: "Professional English for developers & global work" },
-  { title: "Soft Skills", subtitle: "Career Mindset", desc: "Communication, productivity & entrepreneurship" },
   { title: "Workflow Automation", subtitle: "n8n Mastery", desc: "Build automation systems that save hours" },
+  { title: "AI Engineering", subtitle: "Practical AI Skills", desc: "Build real AI-powered applications that generate value" },
+  { title: "Prompt Engineering", subtitle: "Master Communication", desc: "Get better AI results from AI tools" },
+  { title: "English Tech", subtitle: "Tech Communication", desc: "Professional English for developers & global work" },
+  { title: "Soft Skills", subtitle: "Career Mindset", desc: "Communication, productivity & entrepreneurship" },
 ];
 
 const educationLevels = ["High School", "University Student", "Bachelor", "Master", "PhD", "Other"];
-const interests = ["Workflow Automation", "AI for Projects", "Prompt Engineering", "English for Tech", "All of them"];
+const interests = ["Workflow Automation", "AI Engineering", "Prompt Engineering", "English Tech", "Soft Skills", "All of them"];
 
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -42,15 +44,18 @@ export default function HomePage() {
           </Link>
           
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-4">
             {navLinks.map((link) => (
-              <Link key={link.name} href={link.href} className="font-bold text-black hover:underline underline-offset-4">
-                {link.name}
-              </Link>
+              link.href.startsWith("#") ? (
+                <a key={link.name} href={link.href} className="px-4 py-2 bg-[#FFD23F] border-3 border-black font-bold hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all shadow-[3px_3px_0_0_#000]">
+                  {link.name}
+                </a>
+              ) : (
+                <Link key={link.name} href={link.href} className="font-bold text-black hover:underline underline-offset-4">
+                  {link.name}
+                </Link>
+              )
             ))}
-            <Link href="/course" className="px-6 py-3 bg-[#FFD23F] border-4 border-black font-black hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-              START LEARNING
-            </Link>
           </div>
           
           {/* Mobile Menu Button */}
@@ -80,33 +85,35 @@ export default function HomePage() {
       <main className="pt-28 pb-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="border-4 border-black p-8 md:p-12 bg-white shadow-[8px_8px_0_0_#000]">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-[0.9] mb-6">
-              MASTER AI<br/>
-              & AUTOMATION<br/>
-              <span className="text-[#FF6B6B]">BUILD SKILLS</span><br/>
-              THAT PAY
-            </h1>
-            <p className="text-lg md:text-xl font-bold mb-8 max-w-xl">
-              Not theory. Real working projects. Skills that generate income. 
-              Learn by building, not watching.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/course" className="px-8 py-4 bg-[#74B9FF] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-                EXPLORE COURSES
-              </Link>
-              <Link href="/community" className="px-8 py-4 bg-[#88D498] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-                JOIN COMMUNITY
-              </Link>
-            </div>
-            
-            {/* Hero Image */}
-            <div className="mt-10 border-4 border-black shadow-[8px_8px_0_0_#000]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src="/assets/hero.png" 
-                alt="Naim Academy - Learn AI & Automation" 
-                className="w-full h-auto max-h-[400px] object-cover"
-              />
+            <div className="flex flex-col lg:flex-row items-center gap-8">
+              <div className="flex-1">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-[0.9] mb-6">
+                  MASTER AI<br/>
+                  & AUTOMATION<br/>
+                  <span className="text-[#FF6B6B]">BUILD SKILLS</span><br/>
+                  THAT PAY
+                </h1>
+                <p className="text-lg md:text-xl font-bold mb-8">
+                  Not theory. Real working projects. Skills that generate income. 
+                  Learn by building, not watching.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <Link href="/course" className="px-8 py-4 bg-[#74B9FF] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+                    EXPLORE COURSES
+                  </Link>
+                  <Link href="/community" className="px-8 py-4 bg-[#88D498] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+                    JOIN COMMUNITY
+                  </Link>
+                </div>
+              </div>
+              <div className="flex-1 border-4 border-black shadow-[8px_8px_0_0_#000]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="/assets/hero.png" 
+                  alt="Naim Academy - Learn AI & Automation" 
+                  className="w-full h-auto max-h-[400px] object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -115,15 +122,15 @@ export default function HomePage() {
       {/* Services Section */}
       <section className="py-20 px-6 bg-[#FFD23F] border-y-4 border-black">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-black mb-12">WHAT WE DO</h2>
+          <h2 className="text-4xl md:text-5xl font-black mb-12">COURSES WE OFFER</h2>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {courses.map((course, index) => (
-              <div key={index} className="p-8 bg-white border-4 border-black hover:translate-x-1 hover:translate-y-1 transition-all shadow-[6px_6px_0_0_#000]">
+              <div key={index} className="p-6 bg-white border-4 border-black hover:translate-x-1 hover:translate-y-1 transition-all shadow-[6px_6px_0_0_#000]">
                 <div className="text-xs font-black text-gray-400 mb-2">0{index + 1}</div>
-                <h3 className="text-2xl font-black mb-1">{course.title}</h3>
-                <p className="text-sm font-bold text-gray-500 mb-4">{course.subtitle}</p>
-                <p className="font-medium">{course.desc}</p>
+                <h3 className="text-xl font-black mb-1">{course.title}</h3>
+                <p className="text-sm font-bold text-gray-500 mb-2">{course.subtitle}</p>
+                <p className="font-medium text-sm">{course.desc}</p>
               </div>
             ))}
           </div>
@@ -131,7 +138,7 @@ export default function HomePage() {
       </section>
 
       {/* Join Form Section */}
-      <section className="py-20 px-6 bg-white border-b-4 border-black">
+      <section id="waitlist" className="py-20 px-6 bg-white border-b-4 border-black">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-black mb-4 text-center">JOIN THE WAITLIST</h2>
           <p className="text-lg font-bold mb-8 text-center">Be the first to know when we launch.</p>
