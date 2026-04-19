@@ -11,10 +11,10 @@ const navLinks = [
 ];
 
 const courses = [
+  { title: "AI Engineering", subtitle: "Practical AI Skills", desc: "Build real AI-powered applications that generate value" },
+  { title: "English Track", subtitle: "Tech Communication", desc: "Professional English for developers & global work" },
+  { title: "Soft Skills", subtitle: "Career Mindset", desc: "Communication, productivity & entrepreneurship" },
   { title: "Workflow Automation", subtitle: "n8n Mastery", desc: "Build automation systems that save hours" },
-  { title: "AI for Projects", subtitle: "Practical AI", desc: "Create real AI-powered applications" },
-  { title: "Prompt Engineering", subtitle: "Master Communication", desc: "Get better AI results" },
-  { title: "English for Tech", subtitle: "Global Skills", desc: "Professional English for developers" },
 ];
 
 const educationLevels = ["High School", "University Student", "Bachelor", "Master", "PhD", "Other"];
@@ -97,6 +97,16 @@ export default function HomePage() {
               <Link href="/community" className="px-8 py-4 bg-[#88D498] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
                 JOIN COMMUNITY
               </Link>
+            </div>
+            
+            {/* Hero Image */}
+            <div className="mt-10 border-4 border-black shadow-[8px_8px_0_0_#000]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src="/assets/hero.png" 
+                alt="Naim Academy - Learn AI & Automation" 
+                className="w-full h-auto max-h-[400px] object-cover"
+              />
             </div>
           </div>
         </div>
@@ -209,6 +219,11 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-2xl font-black uppercase">Naim Academy</div>
+            <div className="flex flex-wrap gap-4 text-sm font-bold">
+              <Link href="/about" className="hover:underline">ABOUT US</Link>
+              <Link href="/privacy" className="hover:underline">PRIVACY</Link>
+              <Link href="/terms" className="hover:underline">TERMS</Link>
+            </div>
             <div className="flex gap-3">
               <a href="https://facebook.com" target="_blank" rel="noopener" className="px-4 py-2 bg-[#74B9FF] border-2 border-black font-bold text-sm hover:bg-blue-500 hover:text-white">
                 FACEBOOK
