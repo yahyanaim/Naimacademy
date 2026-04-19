@@ -105,7 +105,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <main className="pt-28 pb-20 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="border-[5px] border-black p-10 md:p-14 bg-white shadow-[10px_10px_0_0_#000]">
+          <div className="border-[5px] border-black p-10 md:p-14 bg-white shadow-[10px_10px_0_0_#000] animate-in fade-in zoom-in duration-500">
             <div className="flex flex-col items-center text-center">
             <h1 className="text-5xl md:text-7xl lg:text-[5rem] font-black leading-[0.95] mb-8 tracking-tight">
               MASTER<br/>
