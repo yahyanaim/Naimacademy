@@ -16,6 +16,7 @@ import {
   Bell,
   FileText,
   MessageCircle,
+  UsersRound,
 } from "lucide-react";
 
 const navItems = [
@@ -29,6 +30,7 @@ const navItems = [
   { href: "/admin/comments", label: "Comments", icon: MessageCircle },
   { href: "/admin/blog", label: "Blog", icon: FileText },
   { href: "/admin/community", label: "Community", icon: Users },
+  { href: "/admin/waitlist", label: "Waitlist", icon: UsersRound },
 ];
 
 export default function AdminSidebar() {
