@@ -88,17 +88,21 @@ export default function HomePage() {
               <div className="flex-1">
                 <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[0.9] mb-6">
                   MASTER<br/>
-                  AI &<br/>
-                  <span className="text-[#FF6B6B]">AUTOMATION</span>
+                  AI & <span className="text-[#FF6B6B]">AUTOMATION</span>
                 </h1>
                 <p className="text-lg md:text-xl font-bold mb-8">
                   Not theory. Real working projects.<br/>
                   Skills that generate income.<br/>
                   Learn by building, not watching.
                 </p>
-                <Link href="/course" className="inline-block px-10 py-5 bg-[#74B9FF] border-4 border-black font-black text-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-                  START LEARNING →
-                </Link>
+                <div className="flex flex-wrap gap-4">
+                  <a href="https://discord.com" target="_blank" rel="noopener" className="px-8 py-4 bg-[#74B9FF] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+                    JOIN DISCORD
+                  </a>
+                  <Link href="#waitlist" className="px-8 py-4 bg-[#FFD23F] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+                    JOIN WAITLIST
+                  </Link>
+                </div>
               </div>
               <div className="flex-1">
                 <div className="border-4 border-black shadow-[8px_8px_0_0_#000]">
@@ -209,11 +213,11 @@ export default function HomePage() {
             READY TO BUILD?
           </h2>
           <p className="text-xl font-bold mb-8">
-            Join thousands learning practical tech skills in Discord.
+            Join thousands learning practical tech skills.
           </p>
-          <a href="https://discord.com" target="_blank" rel="noopener" className="inline-block px-10 py-5 bg-[#88D498] border-4 border-black font-black text-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-            JOIN DISCORD →
-          </a>
+          <Link href="/course" className="inline-block px-10 py-5 bg-[#88D498] border-4 border-black font-black text-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+            START LEARNING →
+          </Link>
         </div>
       </section>
 
