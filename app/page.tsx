@@ -30,7 +30,7 @@ export default function HomePage() {
     e.preventDefault();
     if (form.name && form.email && form.education && form.interest) {
       try {
-        const res = await fetch("/api/waitlist", {
+        const res = await fetch(`${window.location.origin}/api/waitlist`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -42,6 +42,7 @@ export default function HomePage() {
           }),
         });
         const data = await res.json();
+        console.log("Response:", res.status, data);
         if (res.ok) {
           setSubmitted(true);
         } else {
