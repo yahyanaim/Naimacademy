@@ -278,11 +278,11 @@ export default function AdminCommunityPage() {
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={dailyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="date" fontSize={12} stroke="#6b7280" />
-                <YAxis fontSize={12} stroke="#6b7280" />
-                <Tooltip contentStyle={{ backgroundColor: "#111827", borderColor: "#374151" }} labelStyle={{ color: "#fff" }} />
-                <Line type="monotone" dataKey="posts" stroke="#6b7280" strokeWidth={2} dot={{ fill: "#6b7280" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="date" fontSize={12} />
+                <YAxis fontSize={12} />
+                <Tooltip />
+                <Line type="monotone" dataKey="posts" stroke="#000" strokeWidth={2} dot={{ fill: "#000" }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -310,11 +310,11 @@ export default function AdminCommunityPage() {
                   nameKey="name"
                 >
                   {tagStats.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={["#6b7280", "#4b5563", "#374151", "#1f2937", "#111827", "#9ca3af", "#d1d5db", "#e5e7eb"][index % 8]} />
+                    <Cell key={`cell-${index}`} fill={["#000", "#374151", "#4b5563", "#6b7280", "#9ca3af", "#d1d5db", "#e5e7eb", "#f3f4f6"][index % 8]} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: "#111827", borderColor: "#374151" }} labelStyle={{ color: "#fff" }} />
-                <Legend wrapperStyle={{ fontSize: "11px", color: "#9ca3af" }} />
+                <Tooltip />
+                <Legend wrapperStyle={{ fontSize: "11px" }} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -335,7 +335,7 @@ export default function AdminCommunityPage() {
               {userStats.slice(0, 5).map((user, index) => (
                 <div key={user.userId} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="size-6 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold">
+                    <span className="size-6 rounded-full bg-gray-200 text-gray-900 flex items-center justify-center text-xs font-bold">
                       {index + 1}
                     </span>
                     <span className="text-sm">{user.name}</span>
@@ -364,11 +364,11 @@ export default function AdminCommunityPage() {
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={hourlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="hour" fontSize={10} stroke="#6b7280" />
-                <YAxis fontSize={10} stroke="#6b7280" />
-                <Tooltip contentStyle={{ backgroundColor: "#111827", borderColor: "#374151" }} labelStyle={{ color: "#fff" }} />
-                <Bar dataKey="posts" fill="#6b7280" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="hour" fontSize={10} />
+                <YAxis fontSize={10} />
+                <Tooltip />
+                <Bar dataKey="posts" fill="#000" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
