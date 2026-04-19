@@ -69,7 +69,7 @@ interface UserStats {
   saveCount: number;
 }
 
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
+const COLORS = ["#6b7280", "#4b5563", "#374151", "#1f2937", "#111827", "#9ca3af", "#d1d5db", "#e5e7eb"];
 
 export default function AdminCommunityPage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -239,21 +239,17 @@ export default function AdminCommunityPage() {
             <BarChart3 className="size-5" />
             Quick Overview
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Key metrics at a glance. Hover over cards for more details on each metric.
-          </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {cards.map(({ title, value, icon: Icon, description, detail }) => (
-            <Card key={title} className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-gray-700">
+            <Card key={title} className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-400">{title}</CardTitle>
-                <Icon className="size-4 text-gray-500" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+                <Icon className="size-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-white">{value}</div>
-                <p className="text-xs text-gray-400 mt-1">{description}</p>
-                <p className="text-xs text-gray-500 mt-2 italic">{detail}</p>
+                <div className="text-2xl font-bold">{value}</div>
+                <p className="text-xs text-muted-foreground mt-1">{description}</p>
               </CardContent>
             </Card>
           ))}
@@ -263,43 +259,41 @@ export default function AdminCommunityPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Daily Activity */}
-        <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-gray-700">
+        <Card className="bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base text-white">Daily Activity</CardTitle>
+              <CardTitle className="text-base">Daily Activity</CardTitle>
               <div className="flex gap-1">
                 {(["7d", "30d", "all"] as const).map((d) => (
-                  <Button key={d} variant={dateRange === d ? "default" : "ghost"} size="sm" onClick={() => setDateRange(d)} className={dateRange === d ? "" : "text-gray-400"}>
+                  <Button key={d} variant={dateRange === d ? "default" : "outline"} size="sm" onClick={() => setDateRange(d)}>
                     {d}
                   </Button>
                 ))}
               </div>
             </div>
-            <p className="text-xs text-gray-400 mt-2">
-              Shows the number of questions posted each day. Use this to identify peak activity times and monitor growth trends.
-              The line graph helps you spot patterns - higher lines mean more engagement.
+            <p className="text-xs text-muted-foreground mt-2">
+              Questions posted each day. Higher lines = more engagement. Use to identify peak times and track growth.
             </p>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={dailyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="date" fontSize={12} stroke="#9ca3af" />
-                <YAxis fontSize={12} stroke="#9ca3af" />
-                <Tooltip contentStyle={{ backgroundColor: "#1f2937", border: "#374151", color: "#fff" }} />
-                <Line type="monotone" dataKey="posts" stroke="#10b981" strokeWidth={2} dot={{ fill: "#10b981" }} />
+                <XAxis dataKey="date" fontSize={12} stroke="#6b7280" />
+                <YAxis fontSize={12} stroke="#6b7280" />
+                <Tooltip contentStyle={{ backgroundColor: "#111827", borderColor: "#374151" }} labelStyle={{ color: "#fff" }} />
+                <Line type="monotone" dataKey="posts" stroke="#6b7280" strokeWidth={2} dot={{ fill: "#6b7280" }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Tag Distribution */}
-        <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-gray-700">
+        <Card className="bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800">
           <CardHeader>
-            <CardTitle className="text-base text-white">Top Tags</CardTitle>
-            <p className="text-xs text-gray-400 mt-2">
-              Shows the most popular topics being discussed. Tags with larger slices represent questions that cover more content areas.
-              Use this to understand what topics interest your community most.
+            <CardTitle className="text-base">Top Tags</CardTitle>
+            <p className="text-xs text-muted-foreground mt-2">
+              Most popular topics. Larger slices = more questions. Use to understand what interests your community.
             </p>
           </CardHeader>
           <CardContent>
@@ -316,11 +310,11 @@ export default function AdminCommunityPage() {
                   nameKey="name"
                 >
                   {tagStats.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={["#6b7280", "#4b5563", "#374151", "#1f2937", "#111827", "#9ca3af", "#d1d5db", "#e5e7eb"][index % 8]} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: "#1f2937", border: "#374151", color: "#fff" }} />
-                <Legend wrapperStyle={{ color: "#9ca3af", fontSize: "12px" }} />
+                <Tooltip contentStyle={{ backgroundColor: "#111827", borderColor: "#374151" }} labelStyle={{ color: "#fff" }} />
+                <Legend wrapperStyle={{ fontSize: "11px", color: "#9ca3af" }} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -329,12 +323,11 @@ export default function AdminCommunityPage() {
 
       {/* Top Users & Hourly */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-gray-700">
+        <Card className="bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800">
           <CardHeader>
-            <CardTitle className="text-base text-white">Top Contributors</CardTitle>
-            <p className="text-xs text-gray-400 mt-2">
-              Your most active community members ranked by total engagement (questions + answers). These users drive the community forward.
-              Consider recognizing or engaging them for special roles.
+            <CardTitle className="text-base">Top Contributors</CardTitle>
+            <p className="text-xs text-muted-foreground mt-2">
+              Most active members by questions + answers. Consider recognizing them for their contributions.
             </p>
           </CardHeader>
           <CardContent>
@@ -342,12 +335,12 @@ export default function AdminCommunityPage() {
               {userStats.slice(0, 5).map((user, index) => (
                 <div key={user.userId} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="size-6 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-xs font-bold text-white">
+                    <span className="size-6 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold">
                       {index + 1}
                     </span>
-                    <span className="text-sm font-medium text-white">{user.name}</span>
+                    <span className="text-sm">{user.name}</span>
                   </div>
-                  <div className="flex gap-3 text-xs text-gray-400">
+                  <div className="flex gap-3 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <FileText className="size-3" />{user.postCount}
                     </span>
@@ -361,22 +354,21 @@ export default function AdminCommunityPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-gray-700">
+        <Card className="bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800">
           <CardHeader>
-            <CardTitle className="text-base text-white">Posting Time (24h)</CardTitle>
-            <p className="text-xs text-gray-400 mt-2">
-              Shows when questions are typically posted throughout the day. Use this to schedule your availability
-              when the community is most active and likely to engage with your responses.
+            <CardTitle className="text-base">Posting Time (24h)</CardTitle>
+            <p className="text-xs text-muted-foreground mt-2">
+              When questions are posted. Schedule your availability when the community is most active.
             </p>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={hourlyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="hour" fontSize={10} stroke="#9ca3af" />
-                <YAxis fontSize={10} stroke="#9ca3af" />
-                <Tooltip contentStyle={{ backgroundColor: "#1f2937", border: "#374151", color: "#fff" }} />
-                <Bar dataKey="posts" fill="#10b981" />
+                <XAxis dataKey="hour" fontSize={10} stroke="#6b7280" />
+                <YAxis fontSize={10} stroke="#6b7280" />
+                <Tooltip contentStyle={{ backgroundColor: "#111827", borderColor: "#374151" }} labelStyle={{ color: "#fff" }} />
+                <Bar dataKey="posts" fill="#6b7280" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
