@@ -26,10 +26,27 @@ export default function HomePage() {
   const [form, setForm] = useState({ name: "", email: "", education: "", interest: "" });
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.name && form.email && form.education && form.interest) {
-      setSubmitted(true);
+      try {
+        const res = await fetch("/api/waitlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            role: form.education,
+            interest: form.interest,
+            motivation: "",
+          }),
+        });
+        if (res.ok) {
+          setSubmitted(true);
+        }
+      } catch (error) {
+        console.error("Failed to submit:", error);
+      }
     }
   };
 
