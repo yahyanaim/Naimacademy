@@ -113,7 +113,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-wrap gap-4">
               <a href="https://discord.gg/3xm8JZ8g" target="_blank" rel="noopener" className="px-8 py-4 bg-[#74B9FF] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-                💬 JOIN DISCORD
+                JOIN DISCORD
               </a>
               <Link href="#waitlist" className="px-8 py-4 bg-[#FFD23F] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
                 JOIN WAITLIST
