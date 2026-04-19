@@ -36,7 +36,7 @@ export default function HomePage() {
           body: JSON.stringify({
             name: form.name,
             email: form.email,
-            role: form.education,
+            education: form.education,
             interest: form.interest,
             motivation: "",
           }),

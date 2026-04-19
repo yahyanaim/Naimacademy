@@ -9,11 +9,11 @@ const corsHeaders = { "Access-Control-Allow-Origin": "*" };
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, country, role, interest, motivation } = body;
+    const { name, email, country, education, interest, motivation } = body;
 
-    if (!name || !email || !role || !interest) {
+    if (!name || !email || !education || !interest) {
       return NextResponse.json(
-        { error: "Required fields: name, email, role, interest" },
+        { error: "Required fields: name, email, education, interest" },
         { status: 400, headers: corsHeaders }
       );
     }
@@ -32,7 +32,8 @@ export async function POST(request: NextRequest) {
       name,
       email: email.toLowerCase(),
       country: country || "",
-      role,
+      role: "student",
+      education,
       skillsInterest: interest,
       motivation: motivation || "",
       isWaitlisted: true,
