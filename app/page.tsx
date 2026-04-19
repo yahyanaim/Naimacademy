@@ -96,14 +96,9 @@ export default function HomePage() {
                   Skills that generate income.<br/>
                   Learn by building, not watching.
                 </p>
-                <div className="flex flex-wrap gap-4">
-                  <Link href="/course" className="px-8 py-4 bg-[#74B9FF] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-                    EXPLORE COURSES
-                  </Link>
-                  <Link href="/community" className="px-8 py-4 bg-[#88D498] border-4 border-black font-black text-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-                    JOIN DISCORD
-                  </Link>
-                </div>
+                <Link href="/course" className="inline-block px-10 py-5 bg-[#74B9FF] border-4 border-black font-black text-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+                  START LEARNING →
+                </Link>
               </div>
               <div className="flex-1">
                 <div className="border-4 border-black shadow-[8px_8px_0_0_#000]">
@@ -216,9 +211,9 @@ export default function HomePage() {
           <p className="text-xl font-bold mb-8">
             Join thousands learning practical tech skills in Discord.
           </p>
-          <Link href="/course" className="inline-block px-10 py-5 bg-[#FFD23F] border-4 border-black font-black text-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-            START LEARNING →
-          </Link>
+          <a href="https://discord.com" target="_blank" rel="noopener" className="inline-block px-10 py-5 bg-[#88D498] border-4 border-black font-black text-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
+            JOIN DISCORD →
+          </a>
         </div>
       </section>
 
