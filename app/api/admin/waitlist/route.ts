@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select("name email education interest isWaitlisted createdAt")
+      .select("name email education skillsInterest isWaitlisted createdAt")
       .lean();
 
     return NextResponse.json({

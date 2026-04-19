@@ -69,7 +69,7 @@ export default function WaitlistPage() {
       e.name,
       e.email,
       e.education || "",
-      e.interest || "",
+      e.skillsInterest || e.interest || "",
       e.createdAt ? new Date(e.createdAt).toLocaleDateString() : ""
     ]);
     
