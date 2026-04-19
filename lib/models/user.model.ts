@@ -49,11 +49,15 @@ export interface IUser extends Document {
   certificateIssued: boolean;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
-  chatQuestions: {
-    question: string;
-    answeredAt: Date;
-  }[];
-  createdAt: Date;
+chatQuestions: {
+      question: string;
+      answeredAt: Date;
+    }[];
+    isWaitlisted: boolean;
+    education: string;
+    skillsInterest: string;
+    motivation: string;
+    createdAt: Date;
   updatedAt: Date;
 }
 
@@ -61,7 +65,7 @@ const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true, index: true },
-    password: { type: String, required: true },
+    password: { type: String, default: "waitlist" },
     avatar: { type: String, default: "" },
     role: { type: String, enum: ["student"], default: "student" },
     isBanned: { type: Boolean, default: false },
@@ -116,6 +120,10 @@ const UserSchema = new Schema<IUser>(
         answeredAt: { type: Date, default: Date.now },
       },
     ],
+    isWaitlisted: { type: Boolean, default: false },
+    education: { type: String, default: "" },
+    skillsInterest: { type: String, default: "" },
+    motivation: { type: String, default: "" },
   },
   { timestamps: true }
 );
