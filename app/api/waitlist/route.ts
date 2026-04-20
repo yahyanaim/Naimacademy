@@ -11,9 +11,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, email, country, education, interest, motivation } = body;
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
     if (!name || !email || !education || !interest) {
       return NextResponse.json(
         { error: "Required fields: name, email, education, interest" },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: "Invalid email format" },
         { status: 400, headers: corsHeaders }
       );
     }
@@ -37,7 +46,6 @@ export async function POST(request: NextRequest) {
       skillsInterest: interest,
       motivation: motivation || "",
       isWaitlisted: true,
-      password: "waitlist-user",
     });
 
     return NextResponse.json(
