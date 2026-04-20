@@ -21,11 +21,20 @@ export const metadata: Metadata = {
     siteName: "Naim Academy",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "https://naimacademy.com/assets/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Naim Academy",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Naim Academy - Master AI & Automation",
     description: "Not theory. Real working projects. Skills that generate income.",
+    images: ["https://naimacademy.com/assets/og-image.png"],
   },
   robots: {
     index: true,
