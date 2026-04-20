@@ -104,29 +104,44 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <main className="pt-28 pb-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm font-medium mb-6">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-            Join 2,000+ learners on Discord
-          </div>
-          
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-            Master AI & <span className="text-primary">Automation</span>
-          </h1>
-          
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-            Not theory. Real working projects. Skills that generate income. 
-            Learn by building, not watching.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="https://discord.gg/3xm8JZ8g" target="_blank" rel="noopener" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity">
-              Join Discord
-              <ArrowRight className="w-4 h-4" />
-            </a>
-            <Link href="#waitlist" className="inline-flex items-center gap-2 px-6 py-3 border rounded-md font-medium hover:bg-accent transition-colors">
-              Join Waitlist
-            </Link>
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm font-medium mb-6">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                Join 2,000+ learners on Discord
+              </div>
+              
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                Master AI & <span className="text-primary">Automation</span>
+              </h1>
+              
+              <p className="text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-8">
+                Not theory. Real working projects. Skills that generate income. 
+                Learn by building, not watching.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                <a href="https://discord.gg/3xm8JZ8g" target="_blank" rel="noopener" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity">
+                  Join Discord
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+                <Link href="#waitlist" className="inline-flex items-center gap-2 px-6 py-3 border-2 border-primary rounded-md font-medium hover:bg-primary/10 transition-colors">
+                  Join Waitlist
+                </Link>
+              </div>
+            </div>
+            
+            <div className="relative">
+              <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="/assets/hero.png" 
+                  alt="Learn AI & Automation" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -141,8 +156,8 @@ export default function HomePage() {
           
           <div className="grid md:grid-cols-2 gap-6">
             {courses.map((course, index) => (
-              <div key={index} className="p-6 rounded-lg border bg-card">
-                <div className="text-sm text-muted-foreground mb-2">0{index + 1}</div>
+              <div key={index} className="p-6 rounded-lg border bg-card hover:shadow-lg hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 group">
+                <div className="text-sm text-muted-foreground mb-2 group-hover:text-primary transition-colors">0{index + 1}</div>
                 <h3 className="font-semibold text-lg mb-1">{course.title}</h3>
                 <p className="text-sm text-muted-foreground mb-2">{course.subtitle}</p>
                 <p className="text-sm text-muted-foreground">{course.desc}</p>
