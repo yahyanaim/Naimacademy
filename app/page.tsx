@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ArrowRight, CheckCircle } from "lucide-react";
 
 const navLinks = [
   { name: "Courses", href: "/course" },
@@ -15,7 +15,7 @@ const courses = [
   { title: "Workflow Automation", subtitle: "n8n Mastery", desc: "Build automation systems that save hours" },
   { title: "AI Engineering", subtitle: "Practical AI Skills", desc: "Build real AI-powered applications that generate value" },
   { title: "Prompt Engineering", subtitle: "Master Communication", desc: "Get better AI results from AI tools" },
-  { title: "English Tech & Soft Skills", subtitle: "Career & Communication", desc: "Professional English + communication, productivity & entrepreneurship" },
+  { title: "English Tech & Soft Skills", subtitle: "Career & Communication", desc: "Professional English + communication skills" },
 ];
 
 const educationLevels = ["High School", "University Student", "Bachelor", "Master", "PhD", "Other"];
@@ -59,43 +59,40 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF5] font-sans">
+    <div className="min-h-screen bg-background font-sans">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FFFDF5] border-b-4 border-black">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-black tracking-tight uppercase">
+          <Link href="/" className="text-xl font-semibold">
             Naim Academy
           </Link>
           
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               link.href.startsWith("#") ? (
-                <a key={link.name} href={link.href} className="px-4 py-2 bg-[#FFD23F] border-3 border-black font-bold hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all shadow-[3px_3px_0_0_#000]">
+                <a key={link.name} href={link.href} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                   {link.name}
                 </a>
               ) : (
-                <Link key={link.name} href={link.href} className="font-bold text-black hover:underline underline-offset-4">
+                <Link key={link.name} href={link.href} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                   {link.name}
                 </Link>
               )
             ))}
           </div>
           
-          {/* Mobile Menu Button */}
-          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 border-4 border-black">
-            {menuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2">
+            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
         
-        {/* Mobile Menu */}
         {menuOpen && (
-          <div className="md:hidden border-t-4 border-black p-4 bg-[#FFFDF5]">
+          <div className="md:hidden border-t px-6 py-4 bg-background">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
                 href={link.href} 
-                className="block py-3 font-bold border-b-2 border-gray-200"
+                className="block py-3 text-sm font-medium"
                 onClick={() => setMenuOpen(false)}
               >
                 {link.name}
@@ -107,89 +104,95 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <main className="pt-28 pb-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="border-[5px] border-black p-10 md:p-14 bg-white shadow-[10px_10px_0_0_#000] animate-in fade-in zoom-in duration-500">
-            <div className="flex flex-col items-center text-center">
-            <h1 className="text-5xl md:text-7xl lg:text-[5rem] font-black leading-[0.95] mb-8 tracking-tight">
-              MASTER<br/>
-              AI & <span className="text-[#FF6B6B]">AUTOMATION</span>
-            </h1>
-            <p className="text-lg md:text-xl font-bold mb-10 max-w-xl text-gray-600 leading-relaxed animate-in slide-in-from-bottom-4 duration-700">
-              Not theory. Real working projects.<br/>
-              Skills that generate income.<br/>
-              Learn by building, not watching.
-            </p>
-            <div className="flex flex-wrap justify-center gap-5">
-              <a href="https://discord.gg/3xm8JZ8g" target="_blank" rel="noopener" className="px-9 py-4 bg-[#74B9FF] border-[4px] border-black font-black text-lg hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all shadow-[5px_5px_0_0_#000]">
-                JOIN DISCORD
-              </a>
-              <Link href="#waitlist" className="px-9 py-4 bg-[#FFD23F] border-[4px] border-black font-black text-lg hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all shadow-[5px_5px_0_0_#000]">
-                JOIN WAITLIST
-              </Link>
-            </div>
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm font-medium mb-6">
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            Join 2,000+ learners on Discord
           </div>
+          
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+            Master AI & <span className="text-primary">Automation</span>
+          </h1>
+          
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+            Not theory. Real working projects. Skills that generate income. 
+            Learn by building, not watching.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="https://discord.gg/3xm8JZ8g" target="_blank" rel="noopener" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity">
+              Join Discord
+              <ArrowRight className="w-4 h-4" />
+            </a>
+            <Link href="#waitlist" className="inline-flex items-center gap-2 px-6 py-3 border rounded-md font-medium hover:bg-accent transition-colors">
+              Join Waitlist
+            </Link>
           </div>
         </div>
       </main>
 
-      {/* Services Section */}
-      <section className="py-20 px-6 bg-[#FFD23F] border-y-[4px] border-black">
+      {/* Courses Section */}
+      <section className="py-20 px-6 bg-muted/50">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-black mb-12 text-center">COURSES WE OFFER</h2>
+          <h2 className="text-3xl font-bold text-center mb-4">Courses We Offer</h2>
+          <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+            Practical skills that actually matter in today's job market
+          </p>
           
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6">
             {courses.map((course, index) => (
-              <div key={index} className="p-7 bg-white border-[4px] border-black hover:-translate-y-1.5 transition-transform duration-200 shadow-[6px_6px_0_0_#000]">
-                <div className="text-xs font-black text-gray-400 mb-3 tracking-widest">0{index + 1}</div>
-                <h3 className="text-xl font-black mb-2">{course.title}</h3>
-                <p className="text-sm font-bold text-gray-500 mb-3">{course.subtitle}</p>
-                <p className="font-medium text-sm text-gray-600 leading-relaxed">{course.desc}</p>
+              <div key={index} className="p-6 rounded-lg border bg-card">
+                <div className="text-sm text-muted-foreground mb-2">0{index + 1}</div>
+                <h3 className="font-semibold text-lg mb-1">{course.title}</h3>
+                <p className="text-sm text-muted-foreground mb-2">{course.subtitle}</p>
+                <p className="text-sm text-muted-foreground">{course.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Join Form Section */}
-      <section id="waitlist" className="py-20 px-6 bg-white border-b-[4px] border-black">
-        <div className="max-w-xl mx-auto">
-          <div className="border-[4px] border-black p-8 bg-white shadow-[8px_8px_0_0_#000]">
-            <h2 className="text-4xl md:text-5xl font-black mb-3 text-center">JOIN THE WAITLIST</h2>
-            <p className="text-base font-semibold mb-8 text-center text-gray-600">Be the first to know when we launch.</p>
+      {/* Waitlist Section */}
+      <section id="waitlist" className="py-20 px-6">
+        <div className="max-w-md mx-auto">
+          <div className="border rounded-lg p-8">
+            <h2 className="text-2xl font-bold text-center mb-2">Join the Waitlist</h2>
+            <p className="text-muted-foreground text-center mb-6">Be the first to know when we launch</p>
           
           {submitted ? (
-            <div className="p-6 bg-[#88D498] border-[3px] border-black text-center">
-              <p className="text-2xl font-black">THANKS! YOU'RE ON THE LIST.</p>
-              <p className="font-bold mt-2">We'll contact you soon.</p>
+            <div className="p-6 bg-green-50 border border-green-200 rounded-md text-center">
+              <CheckCircle className="w-10 h-10 text-green-500 mx-auto mb-3" />
+              <p className="font-semibold text-green-800">Thanks! You're on the list.</p>
+              <p className="text-green-600 text-sm mt-1">We'll contact you soon.</p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block font-bold mb-2 text-sm uppercase tracking-wide">Full Name *</label>
+                <label className="text-sm font-medium mb-2 block">Full Name</label>
                 <input 
                   type="text" 
                   value={form.name}
                   onChange={(e) => setForm({...form, name: e.target.value})}
-                  className="w-full p-3.5 border-[3px] border-black font-semibold focus:outline-none focus:ring-2 focus:ring-[#FFD23F] focus:ring-offset-1 transition-all"
+                  className="w-full px-3 py-2 border rounded-md text-sm"
                   required
                 />
               </div>
               <div>
-                <label className="block font-bold mb-2 text-sm uppercase tracking-wide">Email *</label>
+                <label className="text-sm font-medium mb-2 block">Email</label>
                 <input 
                   type="email" 
                   value={form.email}
                   onChange={(e) => setForm({...form, email: e.target.value})}
-                  className="w-full p-3.5 border-[3px] border-black font-semibold focus:outline-none focus:ring-2 focus:ring-[#FFD23F] focus:ring-offset-1 transition-all"
+                  className="w-full px-3 py-2 border rounded-md text-sm"
                   required
                 />
               </div>
               <div>
-                <label className="block font-bold mb-2 text-sm uppercase tracking-wide">Education Level *</label>
+                <label className="text-sm font-medium mb-2 block">Education Level</label>
                 <select 
                   value={form.education}
                   onChange={(e) => setForm({...form, education: e.target.value})}
-                  className="w-full p-3.5 border-[3px] border-black font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#FFD23F] focus:ring-offset-1 transition-all"
+                  className="w-full px-3 py-2 border rounded-md text-sm bg-background"
                   required
                 >
                   <option value="">Select your education level</option>
@@ -199,11 +202,11 @@ export default function HomePage() {
                 </select>
               </div>
               <div>
-                <label className="block font-bold mb-2 text-sm uppercase tracking-wide">What do you want to learn? *</label>
+                <label className="text-sm font-medium mb-2 block">What do you want to learn?</label>
                 <select 
                   value={form.interest}
                   onChange={(e) => setForm({...form, interest: e.target.value})}
-                  className="w-full p-3.5 border-[3px] border-black font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#FFD23F] focus:ring-offset-1 transition-all"
+                  className="w-full px-3 py-2 border rounded-md text-sm bg-background"
                   required
                 >
                   <option value="">Select your interest</option>
@@ -212,8 +215,8 @@ export default function HomePage() {
                   ))}
                 </select>
               </div>
-              <button type="submit" disabled={loading} className="w-full py-4 bg-[#FF6B6B] border-[3px] border-black font-black text-lg hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all shadow-[4px_4px_0_0_#000] disabled:opacity-50 disabled:cursor-not-allowed">
-                {loading ? "SUBMITTING..." : "JOIN WAITLIST"}
+              <button type="submit" disabled={loading} className="w-full py-2.5 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+                {loading ? "Submitting..." : "Join Waitlist"}
               </button>
             </form>
           )}
@@ -222,42 +225,45 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-[#B8A9FA] border-y-[4px] border-black">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-black mb-5">
-            READY TO BUILD?
-          </h2>
-          <p className="text-lg font-semibold mb-8 text-gray-700">
-            Join thousands learning practical tech skills.
+      <section className="py-20 px-6 bg-muted/50">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to Build?</h2>
+          <p className="text-muted-foreground mb-6">
+            Join thousands learning practical tech skills
           </p>
-          <Link href="/course" className="inline-block px-10 py-4 bg-[#88D498] border-[3px] border-black font-black text-lg hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all shadow-[4px_4px_0_0_#000]">
-            START LEARNING →
-          </Link>
+          <a href="https://discord.gg/3xm8JZ8g" target="_blank" rel="noopener" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity">
+            Start Learning
+            <ArrowRight className="w-4 h-4" />
+          </a>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 bg-[#FFFDF5] border-t-4 border-black">
+      <footer className="py-12 px-6 border-t">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-2xl font-black uppercase">Naim Academy</div>
-            <div className="flex flex-wrap gap-4 text-sm font-bold">
-              <Link href="/about" className="hover:underline">ABOUT US</Link>
-              <Link href="/privacy" className="hover:underline">PRIVACY</Link>
-              <Link href="/terms" className="hover:underline">TERMS</Link>
+            <div className="text-lg font-semibold">Naim Academy</div>
+            <div className="flex gap-6 text-sm text-muted-foreground">
+              <Link href="/about" className="hover:text-foreground">About</Link>
+              <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
+              <Link href="/terms" className="hover:text-foreground">Terms</Link>
             </div>
             <div className="flex gap-3">
-              <a href="https://facebook.com" target="_blank" rel="noopener" className="px-4 py-2 bg-[#74B9FF] border-2 border-black font-bold text-sm hover:bg-blue-500 hover:text-white">
-                FACEBOOK
+              <a href="https://facebook.com" target="_blank" rel="noopener" className="p-2 hover:bg-accent rounded-md">
+                <span className="sr-only">Facebook</span>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.77,7.46H14.5v-1.9c0-.9.6-1.1,1-1.1h3V.5L14.17.5C10.24.5,9.5,3.44,9.5,5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4Z"/></svg>
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener" className="px-4 py-2 bg-black border-2 border-black font-bold text-sm text-white hover:bg-gray-700">
-                TWITTER
+              <a href="https://twitter.com" target="_blank" rel="noopener" className="p-2 hover:bg-accent rounded-md">
+                <span className="sr-only">Twitter</span>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.95,4.57a10,10,0,0,1-2.82.77,4.96,4.96,0,0,0,2.16-2.72,9.9,9.9,0,0,1-3.12,1.19,4.92,4.92,0,0,0-8.39,4.49A14,14,0,0,1,1.64,3.16,4.92,4.92,0,0,0,3.2,9.72,4.86,4.86,0,0,1,.96,9.11v.06a4.93,4.93,0,0,0,3.95,4.83,4.86,4.86,0,0,1-2.22.08,4.93,4.93,0,0,0,4.6,3.42A9.87,9.87,0,0,1,0,19.54a13.94,13.94,0,0,0,7.55,2.21A13.9,13.9,0,0,0,21.56,7.68c0-.21,0-.42,0-.63A10,10,0,0,0,24,4.59Z"/></svg>
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener" className="px-4 py-2 bg-[#FF6B6B] border-2 border-black font-bold text-sm hover:bg-pink-600 hover:text-white">
-                INSTAGRAM
+              <a href="https://instagram.com" target="_blank" rel="noopener" className="p-2 hover:bg-accent rounded-md">
+                <span className="sr-only">Instagram</span>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2.16c3.2,0,3.58,0,4.85.07,3.25.15,4.77,1.69,4.92,4.92.06,1.27.07,1.65.07,4.85s0,3.58-.07,4.85c-.15,3.23-1.66,4.77-4.92,4.92-1.27.06-1.65.07-4.85.07s-3.58,0-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s0-3.58.07-4.85C2.38,3.92,3.9,2.38,7.15,2.23,8.42,2.18,8.8,2.16,12,2.16ZM12,0C8.74,0,8.33,0,7.05.07c-4.27.2-6.78,2.71-7,7C0,8.33,0,8.74,0,12s0,3.67.07,4.95c.2,4.27,2.71,6.78,7,7C8.33,24,8.74,24,12,24s3.67,0,4.95-.07c4.27-.2,6.78-2.71,7-7C24,15.67,24,15.26,24,12s0-3.67-.07-4.95c-.2-4.27-2.71-6.78-7-7C15.67,0,15.26,0,12,0Zm0,5.84A6.16,6.16,0,1,0,18.16,12,6.16,6.16,0,0,0,12,5.84ZM12,16a4,4,0,1,1,4-4A4,4,0,0,1,12,16ZM18.41,4.15a1.44,1.44,0,1,0,1.44,1.44A1.44,1.44,0,0,0,18.41,4.15Z"/></svg>
               </a>
-              <a href="mailto:hello@naimacademy.com" className="px-4 py-2 bg-[#FFD23F] border-2 border-black font-bold text-sm hover:bg-yellow-500">
-                EMAIL
+              <a href="mailto:hello@naimacademy.com" className="p-2 hover:bg-accent rounded-md">
+                <span className="sr-only">Email</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
               </a>
             </div>
           </div>
