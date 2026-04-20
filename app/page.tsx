@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle } from "lucide-react";
+import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 
 const navLinks = [
@@ -23,7 +24,6 @@ const educationLevels = ["High School", "University Student", "Bachelor", "Maste
 const interests = ["Workflow Automation", "AI Engineering", "Prompt Engineering", "English Tech & Soft Skills", "All of them"];
 
 export default function HomePage() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", education: "", interest: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -59,9 +59,11 @@ export default function HomePage() {
     }
   };
 
-  return (
-<div className="min-h-screen bg-background font-sans">
-      {/* Hero Section */}
+return (
+    <div className="min-h-screen bg-background font-sans">
+      <Navbar />
+      <main className="pt-14">
+        {/* Hero Section */}
       <main className="pt-28 pb-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm font-medium mb-6">
@@ -196,7 +198,7 @@ export default function HomePage() {
           </a>
         </div>
       </section>
-
+      </main>
       <Footer />
     </div>
   );
