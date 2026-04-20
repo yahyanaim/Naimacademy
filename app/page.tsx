@@ -85,7 +85,7 @@ return (
               Join Discord
               <ArrowRight className="w-4 h-4" />
             </a>
-            <Link href="#waitlist" className="inline-flex items-center gap-2 px-6 py-3 border-2 border-primary rounded-md font-medium hover:bg-primary/10 transition-colors">
+            <Link href="#waitlist" className="inline-flex items-center gap-2 px-6 py-3 border border-slate-400 rounded-md font-medium hover:bg-muted transition-colors">
               Join Waitlist
             </Link>
           </div>
