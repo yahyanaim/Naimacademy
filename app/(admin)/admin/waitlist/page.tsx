@@ -31,6 +31,7 @@ export default function WaitlistPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   const fetchEntries = useCallback(async () => {
@@ -40,6 +41,7 @@ export default function WaitlistPage() {
       if (data.entries) {
         setEntries(data.entries);
         setTotalPages(data.totalPages || 1);
+        setTotal(data.total || 0);
         setLastUpdate(new Date());
       }
     } catch (error) {
@@ -111,7 +113,7 @@ export default function WaitlistPage() {
         <div>
           <h1 className="text-2xl font-bold">Waitlist</h1>
           <p className="text-muted-foreground text-sm">
-            {entries.length} entries &bull; Last updated: {lastUpdate.toLocaleTimeString()}
+            {total.toLocaleString()} registered &bull; {entries.length} on this page &bull; Last updated: {lastUpdate.toLocaleTimeString()}
           </p>
         </div>
         <Button onClick={exportCSV} className="gap-2">
