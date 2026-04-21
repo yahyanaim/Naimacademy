@@ -38,7 +38,7 @@ export default function WaitlistPage() {
 
   const fetchEntries = async () => {
     try {
-      const res = await fetch(`/api/admin/waitlist?page=${page}&limit=20`);
+      const res = await fetch(`/api/admin/waitlist?page=${page}&limit=13`);
       const data = await res.json();
       if (data.entries) {
         setEntries(data.entries);
