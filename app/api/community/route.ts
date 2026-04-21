@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Daily limit reached. You can post up to 5 questions per day." }, { status: 400 });
       }
 
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
       const post = await CommunityPost.create({
         authorId: payload.userId,

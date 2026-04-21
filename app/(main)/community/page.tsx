@@ -493,7 +493,7 @@ function CommunityHomePageContent() {
 
   const fetchPosts = async (page = 1) => {
     try {
-      const res = await fetch(`/api/community?type=posts&page=${page}&limit=5`);
+      const res = await fetch(`/api/community?type=posts&page=${page}&limit=1`);
       if (res.ok) {
         const data = await res.json();
         setPosts(data.posts || []);
