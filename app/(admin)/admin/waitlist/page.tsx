@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import {
   Table,
@@ -31,25 +31,32 @@ export default function WaitlistPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
-  useEffect(() => {
-    fetchEntries();
-  }, [page]);
-
-  const fetchEntries = async () => {
+  const fetchEntries = useCallback(async () => {
     try {
       const res = await fetch(`/api/admin/waitlist?page=${page}&limit=13`);
       const data = await res.json();
       if (data.entries) {
         setEntries(data.entries);
         setTotalPages(data.totalPages || 1);
+        setLastUpdate(new Date());
       }
     } catch (error) {
       console.error("Failed to fetch waitlist:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
+
+  useEffect(() => {
+    fetchEntries();
+  }, [fetchEntries]);
+
+  useEffect(() => {
+    const interval = setInterval(fetchEntries, 30000);
+    return () => clearInterval(interval);
+  }, [fetchEntries]);
 
   const deleteEntry = async (id: string) => {
     if (!confirm("Are you sure you want to delete this entry?")) return;
@@ -103,8 +110,8 @@ export default function WaitlistPage() {
       <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
         <div>
           <h1 className="text-2xl font-bold">Waitlist</h1>
-          <p className="text-muted-foreground">
-            {entries.length} entries collected
+          <p className="text-muted-foreground text-sm">
+            {entries.length} entries &bull; Last updated: {lastUpdate.toLocaleTimeString()}
           </p>
         </div>
         <Button onClick={exportCSV} className="gap-2">
