@@ -141,6 +141,20 @@ return (
               <h2 className="text-2xl font-bold">Join the Waitlist</h2>
               <p className="text-muted-foreground text-sm mt-2">Be the first to know when we launch</p>
             </div>
+            
+            <div className="mb-6 p-4 bg-muted rounded-lg text-center">
+              <p className="text-sm text-muted-foreground mb-3">200+ people already signed up</p>
+              <div className="flex items-center justify-center gap-2 text-lg font-mono">
+                <span className="bg-background px-3 py-1 rounded">12</span>
+                <span>:</span>
+                <span className="bg-background px-3 py-1 rounded">05</span>
+                <span>:</span>
+                <span className="bg-background px-3 py-1 rounded">18</span>
+                <span>:</span>
+                <span className="bg-background px-3 py-1 rounded">55</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Time remaining until launch</p>
+            </div>
           
           {submitted ? (
             <div className="text-center py-6">
