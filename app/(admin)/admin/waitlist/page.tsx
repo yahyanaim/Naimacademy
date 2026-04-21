@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Trash2, Download, Mail, Calendar, GraduationCap, Target } from "lucide-react";
+import { Search, Trash2, Download, Mail, Calendar, GraduationCap, Target, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -132,109 +132,111 @@ export default function WaitlistPage() {
         </div>
       </div>
 
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Education</TableHead>
-              <TableHead>Interest</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="w-10"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredEntries.length === 0 ? (
+      <div className="rounded-xl border border-border overflow-hidden">
+        <div className="overflow-auto max-h-[500px] min-w-[800px]">
+          <Table>
+            <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
-                  No waitlist entries found
-                </TableCell>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Education</TableHead>
+                <TableHead>Interest</TableHead>
+                <TableHead className="w-32">Date</TableHead>
+                <TableHead className="w-16 text-right">Actions</TableHead>
               </TableRow>
-            ) : (
-              filteredEntries.map(entry => (
-                <TableRow key={entry._id}>
-                  <TableCell className="font-medium">{entry.name}</TableCell>
-                  <TableCell>
-                    <a href={`mailto:${entry.email}`} className="flex items-center gap-2 hover:underline">
-                      <Mail className="h-4 w-4" />
-                      {entry.email}
-                    </a>
-                  </TableCell>
-                  <TableCell>
-                    <span className="flex items-center gap-2">
-                      <GraduationCap className="h-4 w-4" />
-                      {entry.education || "-"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="flex items-center gap-2">
-                      <Target className="h-4 w-4" />
-                      {entry.skillsInterest || "-"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {entry.createdAt
-                        ? new Date(entry.createdAt).toLocaleDateString()
-                        : "-"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteEntry(entry._id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+            </TableHeader>
+            <TableBody>
+              {filteredEntries.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8">
+                    No waitlist entries found
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {totalPages > 1 && (
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex justify-center gap-1 flex-wrap">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <Button
-                key={p}
-                variant={page === p ? "default" : "outline"}
-                size="sm"
-                className="w-10"
-                onClick={() => setPage(p)}
-              >
-                {p}
-              </Button>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page === 1}
-              onClick={() => setPage(p => p - 1)}
-            >
-              Previous
-            </Button>
-            <span className="flex items-center px-2 text-sm text-muted-foreground">
-              {page} / {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page === totalPages}
-              onClick={() => setPage(p => p + 1)}
-            >
-              Next
-            </Button>
-          </div>
+              ) : (
+                filteredEntries.map(entry => (
+                  <TableRow key={entry._id}>
+                    <TableCell className="font-medium">{entry.name}</TableCell>
+                    <TableCell>
+                      <a href={`mailto:${entry.email}`} className="flex items-center gap-2 hover:underline">
+                        <Mail className="h-4 w-4" />
+                        {entry.email}
+                      </a>
+                    </TableCell>
+                    <TableCell>
+                      <span className="flex items-center gap-2">
+                        <GraduationCap className="h-4 w-4" />
+                        {entry.education || "-"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="flex items-center gap-2">
+                        <Target className="h-4 w-4" />
+                        {entry.skillsInterest || "-"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        {entry.createdAt
+                          ? new Date(entry.createdAt).toLocaleDateString()
+                          : "-"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => deleteEntry(entry._id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
-      )}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t bg-muted/30">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                Page {page} of {totalPages}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon-sm"
+                disabled={page === 1}
+                onClick={() => setPage(p => p - 1)}
+              >
+                <ChevronLeft className="size-4" />
+              </Button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <Button
+                  key={p}
+                  variant={page === p ? "default" : "outline"}
+                  size="sm"
+                  className="w-10"
+                  onClick={() => setPage(p)}
+                >
+                  {p}
+                </Button>
+              ))}
+              <Button
+                variant="outline"
+                size="icon-sm"
+                disabled={page === totalPages}
+                onClick={() => setPage(p => p + 1)}
+              >
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
