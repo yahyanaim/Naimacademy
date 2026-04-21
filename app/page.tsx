@@ -5,6 +5,10 @@ import { useState } from "react";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 const navLinks = [
   { name: "Courses", href: "/course" },
@@ -131,45 +135,50 @@ return (
 
       {/* Waitlist Section */}
       <section id="waitlist" className="py-20 px-6">
-        <div className="max-w-md mx-auto">
-          <div className="border border-slate-300 rounded-lg p-8">
-            <h2 className="text-2xl font-bold text-center mb-2">Join the Waitlist</h2>
-            <p className="text-muted-foreground text-center mb-6">Be the first to know when we launch</p>
+        <Card className="max-w-md mx-auto">
+          <CardContent className="pt-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold">Join the Waitlist</h2>
+              <p className="text-muted-foreground text-sm mt-2">Be the first to know when we launch</p>
+            </div>
           
           {submitted ? (
-            <div className="p-6 bg-green-50 border border-green-200 rounded-md text-center">
-              <CheckCircle className="w-10 h-10 text-green-500 mx-auto mb-3" />
-              <p className="font-semibold text-green-800">Thanks! You're on the list.</p>
-              <p className="text-green-600 text-sm mt-1">We'll contact you soon.</p>
+            <div className="text-center py-6">
+              <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
+              <p className="font-semibold text-lg">Thanks! You're on the list.</p>
+              <p className="text-muted-foreground text-sm mt-1">We'll contact you soon.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Full Name</label>
-                <input 
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input 
+                  id="name"
                   type="text" 
+                  placeholder="John Doe"
                   value={form.name}
                   onChange={(e) => setForm({...form, name: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-md text-sm"
                   required
                 />
               </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Email</label>
-                <input 
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email"
                   type="email" 
+                  placeholder="john@example.com"
                   value={form.email}
                   onChange={(e) => setForm({...form, email: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-md text-sm"
                   required
                 />
               </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Education Level</label>
+              <div className="space-y-2">
+                <Label htmlFor="education">Education Level</Label>
                 <select 
+                  id="education"
                   value={form.education}
                   onChange={(e) => setForm({...form, education: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-md text-sm bg-background"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   required
                 >
                   <option value="">Select your education level</option>
@@ -178,12 +187,13 @@ return (
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">What do you want to learn?</label>
+              <div className="space-y-2">
+                <Label htmlFor="interest">What do you want to learn?</Label>
                 <select 
+                  id="interest"
                   value={form.interest}
                   onChange={(e) => setForm({...form, interest: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-md text-sm bg-background"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   required
                 >
                   <option value="">Select your interest</option>
@@ -192,13 +202,13 @@ return (
                   ))}
                 </select>
               </div>
-              <button type="submit" disabled={loading} className="w-full py-2.5 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+              <Button type="submit" disabled={loading} className="w-full">
                 {loading ? "Submitting..." : "Join Waitlist"}
-              </button>
+              </Button>
             </form>
           )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </section>
 
       {/* CTA Section */}
