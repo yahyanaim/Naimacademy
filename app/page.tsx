@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
@@ -31,6 +31,35 @@ export default function HomePage() {
   const [form, setForm] = useState({ name: "", email: "", education: "", interest: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [countdown, setCountdown] = useState({ days: 12, hours: 5, minutes: 18, seconds: 55 });
+  const [signupCount, setSignupCount] = useState(200);
+
+  useEffect(() => {
+    const launchDate = new Date();
+    launchDate.setDate(launchDate.getDate() + 12);
+    
+    const interval = setInterval(() => {
+      const now = new Date();
+      const diff = launchDate.getTime() - now.getTime();
+      
+      if (diff > 0) {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        setCountdown({ days, hours, minutes, seconds });
+      }
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/waitlist?type=count")
+      .then(res => res.json())
+      .then(data => setSignupCount(data.count || 200))
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,15 +172,15 @@ return (
             </div>
             
             <div className="mb-6 p-4 bg-muted rounded-lg text-center">
-              <p className="text-sm text-muted-foreground mb-3">200+ people already signed up</p>
+              <p className="text-sm text-muted-foreground mb-3">{signupCount}+ people already signed up</p>
               <div className="flex items-center justify-center gap-2 text-lg font-mono">
-                <span className="bg-background px-3 py-1 rounded">12</span>
+                <span className="bg-background px-3 py-1 rounded">{String(countdown.days).padStart(2, '0')}</span>
                 <span>:</span>
-                <span className="bg-background px-3 py-1 rounded">05</span>
+                <span className="bg-background px-3 py-1 rounded">{String(countdown.hours).padStart(2, '0')}</span>
                 <span>:</span>
-                <span className="bg-background px-3 py-1 rounded">18</span>
+                <span className="bg-background px-3 py-1 rounded">{String(countdown.minutes).padStart(2, '0')}</span>
                 <span>:</span>
-                <span className="bg-background px-3 py-1 rounded">55</span>
+                <span className="bg-background px-3 py-1 rounded">{String(countdown.seconds).padStart(2, '0')}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-2">Time remaining until launch</p>
             </div>

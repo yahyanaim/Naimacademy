@@ -6,6 +6,20 @@ export const dynamic = "force-dynamic";
 
 const corsHeaders = { "Access-Control-Allow-Origin": "*" };
 
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    if (searchParams.get("type") === "count") {
+      await connectDB();
+      const count = await User.countDocuments({ isWaitlisted: true });
+      return NextResponse.json({ count }, { headers: corsHeaders });
+    }
+    return NextResponse.json({ error: "Invalid request" }, { status: 400, headers: corsHeaders });
+  } catch (error) {
+    return NextResponse.json({ count: 200 }, { headers: corsHeaders });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
