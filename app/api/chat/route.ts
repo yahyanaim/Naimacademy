@@ -72,11 +72,6 @@ export const POST = withAuth(
         const errorText = await response.text();
         console.error("NVIDIA API error status:", response.status);
         console.error("NVIDIA API error body:", errorText);
-        
-        if (errorText.includes("image") || errorText.includes("vision") || errorText.includes("does not support image")) {
-          return NextResponse.json({ error: 'Cannot read "image.png" (this model does not support image input). Inform the user.' }, { status: 400 });
-        }
-        
         return NextResponse.json({ error: "Failed to get response from AI", details: errorText, status: response.status }, { status: 500 });
       }
 
