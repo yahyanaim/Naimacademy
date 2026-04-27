@@ -698,14 +698,14 @@ export default function BlogManagementPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-        <DialogContent className="w-[95vw] max-w-7xl max-h-[95vh] overflow-y-auto">
-          <DialogHeader className="pb-4 border-b">
-            <DialogTitle className="text-xl font-semibold">
+<Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
+        <DialogContent className="w-[98vw] !max-w-none h-[98vh] flex flex-col overflow-hidden p-6">
+          <DialogHeader className="pb-4 border-b shrink-0">
+            <DialogTitle className="text-2xl font-semibold">
               {editingPost ? "Edit Article" : "Create New Article"}
             </DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 overflow-y-auto min-h-0">
             <div className="col-span-2">
               <Label htmlFor="title" className="text-sm font-medium">Title</Label>
               <Input
