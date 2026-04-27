@@ -124,8 +124,10 @@ function renderMarkdown(content: string): string {
   html = html.replace(/<hr class="my-8 border-t-2 border-gray-300 w-full" \/>/g, '<hr class="my-8 border-t-2 border-gray-300 w-full" />');
   html = html.replace(/---/g, '<hr class="my-8 border-t-2 border-gray-300 w-full" />');
 
-  html = html.replace(/<span style="color: (#[^"]+)">(.*?)<\/span>/g, '<span style="color: $1">$2</span>');
-  html = html.replace(/<span style="background-color: (#[^"]+)">(.*?)<\/span>/g, '<span style="background-color: $1" class="px-1 rounded">$2</span>');
+  const colorRegex = /<span style="color: (#[0-9a-fA-F]+)">(.*?)<\/span>/g;
+  const bgColorRegex = /<span style="background-color: (#[0-9a-fA-F]+)">(.*?)<\/span>/g;
+  html = html.replace(colorRegex, '<span style="color: $1">$2</span>');
+  html = html.replace(bgColorRegex, '<span style="background-color: $1" class="px-1 rounded">$2</span>');
 
   html = html.replace(/\n\n/g, '</p><p class="mb-2 sm:mb-3 text-sm sm:text-base leading-relaxed">');
   html = html.replace(/\n/g, "<br />");

@@ -4,6 +4,12 @@ import { BlogPost } from "@/lib/models/blog-post.model";
 import { Admin } from "@/lib/models/admin.model";
 import { withAdmin } from "@/lib/auth/guards";
 
+function calculateReadingTime(content: string): number {
+  const words = content.trim().split(/\s+/).length;
+  const wpm = 200;
+  return Math.max(1, Math.ceil(words / wpm));
+}
+
 export async function GET(request: Request) {
   try {
     await connectDB();
@@ -57,6 +63,8 @@ export async function POST(req: NextRequest) {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "") + "-" + Date.now().toString(36);
 
+      const readingTime = calculateReadingTime(content || "");
+
       const post = await BlogPost.create({
         title,
         slug,
@@ -69,6 +77,7 @@ export async function POST(req: NextRequest) {
         titleStyle: titleStyle || "h1",
         isPublished: isPublished ?? true,
         publishedAt: isPublished ? new Date() : undefined,
+        readingTime,
       });
 
       return NextResponse.json(post, { status: 201 });
@@ -98,7 +107,10 @@ export async function PUT(req: NextRequest) {
       const updateData: Record<string, unknown> = {};
       if (title !== undefined) updateData.title = title;
       if (excerpt !== undefined) updateData.excerpt = excerpt;
-      if (content !== undefined) updateData.content = content;
+      if (content !== undefined) {
+        updateData.content = content;
+        updateData.readingTime = calculateReadingTime(content);
+      }
       if (coverImage !== undefined) updateData.coverImage = coverImage;
       if (tags !== undefined) updateData.tags = tags;
       if (author !== undefined) updateData.author = author;
