@@ -818,7 +818,7 @@ export default function BlogManagementPage() {
                   <button type="button" onClick={(e) => { e.preventDefault(); insertCode(); }} className="px-2 py-1 text-xs font-mono border rounded hover:bg-muted" title="Insert Code">
                     {"</>"}
                   </button>
-                  <button type="button" onClick={(e) => { e.preventDefault(); insertSpecialChar("\n---\n"); }} className="px-2 py-1 text-xs border rounded hover:bg-muted flex items-center" title="Horizontal Line">
+                  <button type="button" onClick={(e) => { e.preventDefault(); insertSpecialChar('\n<hr class="my-8 border-t-2 border-gray-300 w-full" />\n'); }} className="px-2 py-1 text-xs border rounded hover:bg-muted flex items-center" title="Full Width Line">
                     <Minus className="size-3" />
                   </button>
                   <div className="relative group">
