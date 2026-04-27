@@ -699,9 +699,9 @@ export default function BlogManagementPage() {
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-4 border-b">
-            <DialogTitle className="text-lg">
+            <DialogTitle className="text-xl font-semibold">
               {editingPost ? "Edit Article" : "Create New Article"}
             </DialogTitle>
           </DialogHeader>
