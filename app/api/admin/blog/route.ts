@@ -5,8 +5,16 @@ import { Admin } from "@/lib/models/admin.model";
 import { withAdmin } from "@/lib/auth/guards";
 
 function calculateReadingTime(content: string): number {
-  const words = content.trim().split(/\s+/).length;
-  const wpm = 200;
+  const textOnly = content
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .trim();
+  const words = textOnly.split(/\s+/).filter(w => w.length > 0).length;
+  const wpm = 150;
   return Math.max(1, Math.ceil(words / wpm));
 }
 
