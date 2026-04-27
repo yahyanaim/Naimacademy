@@ -50,6 +50,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   Star,
+  Minus,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -353,6 +354,44 @@ export default function BlogManagementPage() {
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(start + char.length, start + char.length);
+    }, 0);
+  }
+
+  function insertColor(color: string) {
+    const textarea = document.getElementById("content") as HTMLTextAreaElement;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+    const coloredText = `<span style="color: ${color}">${selectedText || "text"}</span>`;
+    
+    const text = textarea.value;
+    const newText = text.substring(0, start) + coloredText + text.substring(end);
+    setFormData({ ...formData, content: newText });
+    
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + coloredText.length, start + coloredText.length);
+    }, 0);
+  }
+
+  function insertBgColor(color: string) {
+    const textarea = document.getElementById("content") as HTMLTextAreaElement;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+    const coloredText = `<span style="background-color: ${color}">${selectedText || "text"}</span>`;
+    
+    const text = textarea.value;
+    const newText = text.substring(0, start) + coloredText + text.substring(end);
+    setFormData({ ...formData, content: newText });
+    
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + coloredText.length, start + coloredText.length);
     }, 0);
   }
 
@@ -779,6 +818,70 @@ export default function BlogManagementPage() {
                   <button type="button" onClick={(e) => { e.preventDefault(); insertCode(); }} className="px-2 py-1 text-xs font-mono border rounded hover:bg-muted" title="Insert Code">
                     {"</>"}
                   </button>
+                  <button type="button" onClick={(e) => { e.preventDefault(); insertSpecialChar("\n---\n"); }} className="px-2 py-1 text-xs border rounded hover:bg-muted flex items-center" title="Horizontal Line">
+                    <Minus className="size-3" />
+                  </button>
+                  <div className="relative group">
+                    <button type="button" className="px-2 py-1 text-xs border rounded hover:bg-muted" title="Text Color">
+                      <span className="font-bold" style={{color: '#ef4444'}}>A</span>
+                    </button>
+                    <div className="absolute right-0 top-full mt-1 bg-background border rounded-lg shadow-lg p-2 z-50 hidden group-hover:block">
+                      <p className="text-xs text-muted-foreground mb-2 px-2">Text Color:</p>
+                      <div className="grid grid-cols-5 gap-1">
+                        {[
+                          { color: "#ef4444", name: "Red" },
+                          { color: "#f97316", name: "Orange" },
+                          { color: "#eab308", name: "Yellow" },
+                          { color: "#22c55e", name: "Green" },
+                          { color: "#3b82f6", name: "Blue" },
+                          { color: "#8b5cf6", name: "Purple" },
+                          { color: "#ec4899", name: "Pink" },
+                          { color: "#000000", name: "Black" },
+                          { color: "#6b7280", name: "Gray" },
+                        ].map((item, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => insertColor(item.color)}
+                            className="w-8 h-8 rounded border hover:bg-muted flex items-center justify-center"
+                            style={{ backgroundColor: item.color }}
+                            title={item.name}
+                          >
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="relative group">
+                    <button type="button" className="px-2 py-1 text-xs border rounded hover:bg-muted" title="Background Color">
+                      <span className="font-bold text-xs bg-yellow-400 px-1">A</span>
+                    </button>
+                    <div className="absolute right-0 top-full mt-1 bg-background border rounded-lg shadow-lg p-2 z-50 hidden group-hover:block">
+                      <p className="text-xs text-muted-foreground mb-2 px-2">Background:</p>
+                      <div className="grid grid-cols-5 gap-1">
+                        {[
+                          { color: "#fef2f2", name: "Light Red" },
+                          { color: "#fff7ed", name: "Light Orange" },
+                          { color: "#fefce8", name: "Light Yellow" },
+                          { color: "#f0fdf4", name: "Light Green" },
+                          { color: "#eff6ff", name: "Light Blue" },
+                          { color: "#f5f3ff", name: "Light Purple" },
+                          { color: "#fdf2f8", name: "Light Pink" },
+                          { color: "#f3f4f6", name: "Light Gray" },
+                        ].map((item, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => insertBgColor(item.color)}
+                            className="w-8 h-8 rounded border hover:bg-muted flex items-center justify-center"
+                            style={{ backgroundColor: item.color }}
+                            title={item.name}
+                          >
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                   <div className="relative group">
                     <button type="button" className="px-2 py-1 text-xs border rounded hover:bg-muted" title="Special Characters">
                       <Star className="size-3" />
