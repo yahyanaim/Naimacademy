@@ -103,13 +103,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (role === "student" && !(user as Record<string, unknown>).isEmailVerified) {
-      return NextResponse.json(
-        { error: "Please verify your email before logging in", unverified: true },
-        { status: 403 }
-      );
-    }
-
     resetRateLimit(rateKey);
 
     const token = await signToken({ userId: user._id.toString(), role });
