@@ -19,10 +19,14 @@ export const POST = withAuth(
     ctx: { params: Promise<Record<string, string>>; user: { userId: string; role: string } }
   ) => {
     try {
+      console.log("[AI Chat] Request received from user:", ctx.user.userId);
       await connectDB();
 
       const body = await req.json();
       const { question, context } = body;
+      console.log("[AI Chat] Question:", question?.substring(0, 50));
+      console.log("[AI Chat] API Key present:", !!process.env.NVIDIA_API_KEY);
+      console.log("[AI Chat] Model:", MODEL);
 
       if (!question?.trim()) {
         return NextResponse.json({ error: "Question is required" }, { status: 400 });
@@ -47,30 +51,44 @@ export const POST = withAuth(
         );
       }
 
-      const systemPrompt = `You are a helpful teaching assistant for a course about n8n workflow automation. You help students understand video lessons and answer their questions. Be concise, friendly, and educational. Current lesson context: ${context || "General course questions"}`;
+      const systemPrompt = `You are a helpful teaching assistant for a course about n8n workflow automation. You help students understand video lessons and answer their questions. Be concise, friendly, and educational. Keep responses under 150 words. Current lesson context: ${context || "General course questions"}`;
 
-      const response = await fetch(INVOKE_URL, {
-        method: "POST",
-        headers: {
-          "Authorization": API_KEY,
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: question }
-          ],
-          max_tokens: 16384,
-          temperature: 1.00,
-          top_p: 0.95,
-        }),
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("NVIDIA API error status:", response.status);
+      let nvidiaResponse;
+      try {
+        nvidiaResponse = await fetch(INVOKE_URL, {
+          method: "POST",
+          headers: {
+            "Authorization": API_KEY,
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: question }
+            ],
+            max_tokens: 2048,
+            temperature: 0.7,
+            top_p: 0.95,
+          }),
+          signal: controller.signal,
+        });
+      } catch (fetchError: unknown) {
+        clearTimeout(timeoutId);
+        if (fetchError instanceof Error && fetchError.name === "AbortError") {
+          return NextResponse.json({ error: "AI response timed out. Please try again." }, { status: 504 });
+        }
+        throw fetchError;
+      }
+      clearTimeout(timeoutId);
+
+      if (!nvidiaResponse.ok) {
+        const errorText = await nvidiaResponse.text();
+        console.error("NVIDIA API error status:", nvidiaResponse.status);
         console.error("NVIDIA API error body:", errorText);
         
         if (errorText.toLowerCase().includes("image") || errorText.includes("vision") || errorText.includes("does not support")) {
@@ -80,10 +98,10 @@ export const POST = withAuth(
           });
         }
         
-        return NextResponse.json({ error: "Failed to get response from AI", details: errorText, status: response.status }, { status: 500 });
+        return NextResponse.json({ error: "AI service unavailable. Please try again later.", details: errorText, status: nvidiaResponse.status }, { status: 500 });
       }
 
-      const data = await response.json();
+      const data = await nvidiaResponse.json();
       const answer = data.choices?.[0]?.message?.content || "I couldn't generate a response. Please try again.";
 
       if (!user.chatQuestions) {

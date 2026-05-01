@@ -74,11 +74,17 @@ export function AIChat({ lessonTitle, lessonContent }: { lessonTitle?: string; l
       const data = await res.json();
 
       if (!res.ok) {
-        const errorMsg = data.details
-          ? `${data.error}: ${JSON.stringify(data.details).substring(0, 200)}`
-          : data.error || "Failed to get response";
+        console.error("AI API error:", data);
+        const errorMsg = data.error || "Failed to get response";
         toast.error(errorMsg);
-        setMessages((prev) => [...prev, { role: "assistant", content: `Error: ${errorMsg}` }]);
+        setMessages((prev) => [...prev, { role: "assistant", content: `⚠️ ${errorMsg}` }]);
+        return;
+      }
+
+      if (!data.answer) {
+        console.error("No answer in response:", data);
+        toast.error("AI returned an empty response");
+        setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I couldn't generate a response. Please try rephrasing your question." }]);
         return;
       }
 
