@@ -5,8 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 const MAX_QUESTIONS_PER_DAY = 5;
 const INVOKE_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-const API_KEY = `Bearer ${process.env.NVIDIA_API_KEY || ""}`;
 const MODEL = process.env.NVIDIA_MODEL || "meta/llama-3.1-8b-instruct";
+const API_TIMEOUT = 15000;
 
 interface ChatQuestion {
   question: string;
@@ -19,14 +19,15 @@ export const POST = withAuth(
     ctx: { params: Promise<Record<string, string>>; user: { userId: string; role: string } }
   ) => {
     try {
-      console.log("[AI Chat] Request received from user:", ctx.user.userId);
       await connectDB();
+
+      if (!process.env.NVIDIA_API_KEY) {
+        console.error("[AI Chat] NVIDIA_API_KEY is not set");
+        return NextResponse.json({ error: "AI service is not configured. Please contact support." }, { status: 503 });
+      }
 
       const body = await req.json();
       const { question, context } = body;
-      console.log("[AI Chat] Question:", question?.substring(0, 50));
-      console.log("[AI Chat] API Key present:", !!process.env.NVIDIA_API_KEY);
-      console.log("[AI Chat] Model:", MODEL);
 
       if (!question?.trim()) {
         return NextResponse.json({ error: "Question is required" }, { status: 400 });
@@ -51,17 +52,17 @@ export const POST = withAuth(
         );
       }
 
-      const systemPrompt = `You are a helpful teaching assistant for a course about n8n workflow automation. You help students understand video lessons and answer their questions. Be concise, friendly, and educational. Keep responses under 150 words. Current lesson context: ${context || "General course questions"}`;
+      const systemPrompt = `You are a helpful teaching assistant for a course about n8n workflow automation. You help students understand video lessons and answer their questions. Be concise, friendly, and educational. Keep responses under 100 words. Current lesson context: ${context || "General course questions"}`;
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
 
       let nvidiaResponse;
       try {
         nvidiaResponse = await fetch(INVOKE_URL, {
           method: "POST",
           headers: {
-            "Authorization": API_KEY,
+            "Authorization": `Bearer ${process.env.NVIDIA_API_KEY}`,
             "Accept": "application/json",
             "Content-Type": "application/json",
           },
@@ -71,7 +72,7 @@ export const POST = withAuth(
               { role: "system", content: systemPrompt },
               { role: "user", content: question }
             ],
-            max_tokens: 2048,
+            max_tokens: 1024,
             temperature: 0.7,
             top_p: 0.95,
           }),
@@ -80,7 +81,7 @@ export const POST = withAuth(
       } catch (fetchError: unknown) {
         clearTimeout(timeoutId);
         if (fetchError instanceof Error && fetchError.name === "AbortError") {
-          return NextResponse.json({ error: "AI response timed out. Please try again." }, { status: 504 });
+          return NextResponse.json({ error: "AI request timed out. The service is slow right now, please try again in a moment." }, { status: 504 });
         }
         throw fetchError;
       }
@@ -91,14 +92,10 @@ export const POST = withAuth(
         console.error("NVIDIA API error status:", nvidiaResponse.status);
         console.error("NVIDIA API error body:", errorText);
         
-        if (errorText.toLowerCase().includes("image") || errorText.includes("vision") || errorText.includes("does not support")) {
-          return NextResponse.json({ 
-            answer: 'Cannot read "image.png" (this model does not support image input). Please describe your question in text instead.',
-            remainingQuestions: MAX_QUESTIONS_PER_DAY - todayQuestions.length
-          });
-        }
-        
-        return NextResponse.json({ error: "AI service unavailable. Please try again later.", details: errorText, status: nvidiaResponse.status }, { status: 500 });
+        return NextResponse.json({ 
+          error: `AI service error (${nvidiaResponse.status}). Please try again later.`, 
+          details: errorText 
+        }, { status: 500 });
       }
 
       const data = await nvidiaResponse.json();
