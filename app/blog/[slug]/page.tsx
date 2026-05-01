@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Clock } from "lucide-react";
 import { connectDB } from "@/lib/db/mongoose";
@@ -282,13 +281,13 @@ export default async function BlogPostPage({
         <div className="max-w-3xl mx-auto px-6 py-12">
           <article itemProp="articleBody">
             {post.coverImage && (
-              <div className="aspect-video rounded-lg border border-gray-300 shadow-md overflow-hidden mb-10 bg-muted">
-                <Image
+              <div className="relative aspect-video rounded-lg border border-gray-300 shadow-md overflow-hidden mb-10 bg-muted">
+                <img
                   src={post.coverImage}
                   alt={post.title}
-                  fill
-                  className="object-cover"
-                  priority
+                  className="w-full h-full object-cover"
+                  loading="eager"
+                  decoding="async"
                 />
               </div>
             )}
