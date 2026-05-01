@@ -30,9 +30,11 @@ export function AIChat({ lessonTitle, lessonContent }: { lessonTitle?: string; l
           (q: { answeredAt: string }) => new Date(q.answeredAt) >= today
         );
         setRemaining(5 - todayQuestions.length);
+      } else {
+        setRemaining(5);
       }
     } catch {
-      setRemaining(0);
+      setRemaining(5);
     }
   }
 
