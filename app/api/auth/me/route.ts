@@ -64,6 +64,7 @@ export const GET = withAuth(
               })
             ),
             certifications: user.certifications || [],
+            chatQuestions: user.chatQuestions || [],
           },
         },
         { status: 200 }
