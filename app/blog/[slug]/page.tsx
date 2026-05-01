@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Clock } from "lucide-react";
 import { connectDB } from "@/lib/db/mongoose";
@@ -167,6 +168,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${post.title} | Naim Academy`,
     description: post.excerpt,
+    keywords: post.tags?.join(", "),
+    alternates: {
+      canonical: articleUrl,
+    },
     authors: [{ name: post.author || "Naim Academy" }],
     openGraph: {
       type: "article",
@@ -278,28 +283,20 @@ export default async function BlogPostPage({
           <article itemProp="articleBody">
             {post.coverImage && (
               <div className="aspect-video rounded-lg border border-gray-300 shadow-md overflow-hidden mb-10 bg-muted">
-                <img
+                <Image
                   src={post.coverImage}
                   alt={post.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  priority
                 />
               </div>
             )}
 
             <header className="mb-6">
-              {post.titleStyle === "h2" ? (
-                <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-4" itemProp="headline">
-                  {post.title}
-                </h2>
-              ) : post.titleStyle === "h3" ? (
-                <h3 className="text-xl md:text-2xl font-bold tracking-tight mb-4" itemProp="headline">
-                  {post.title}
-                </h3>
-              ) : (
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4" itemProp="headline">
-                  {post.title}
-                </h1>
-              )}
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4" itemProp="headline">
+                {post.title}
+              </h1>
               <div className="flex items-center gap-4 text-muted-foreground">
                 <div className="flex items-center gap-3">
                   {post.authorAvatar ? (

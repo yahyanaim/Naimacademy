@@ -14,6 +14,13 @@ export const metadata: Metadata = {
   title: "Naim Academy - Master AI & Automation",
   description: "Learn practical tech skills. Not theory. Real working projects. Skills that generate income.",
   metadataBase: new URL("https://naimacademy.com"),
+  alternates: {
+    canonical: "/",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
   openGraph: {
     title: "Naim Academy - Master AI & Automation",
     description: "Not theory. Real working projects. Skills that generate income. Learn by building, not watching.",
@@ -23,7 +30,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://naimacademy.com/assets/og-image.png",
+        url: "/api/og/blog",
         width: 1200,
         height: 630,
         alt: "Naim Academy",
@@ -34,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Naim Academy - Master AI & Automation",
     description: "Not theory. Real working projects. Skills that generate income.",
-    images: ["https://naimacademy.com/assets/og-image.png"],
+    images: ["/api/og/blog"],
   },
   robots: {
     index: true,
