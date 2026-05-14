@@ -15,9 +15,10 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(1);
   const [speed, setSpeed] = useState(1);
+  const [voicesLoaded, setVoicesLoaded] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const totalCharsRef = useRef(0);
-  const synthRef = useRef<globalThis.SpeechSynthesis | null>(null);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
   const contentRef = useRef(content);
   const titleRef = useRef(title);
 
@@ -27,11 +28,29 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
   }, [content, title]);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      synthRef.current = window.speechSynthesis;
-      setSpeechSupported(true);
-      window.speechSynthesis.getVoices();
+    if (typeof window === "undefined") return;
+    
+    if (!("speechSynthesis" in window)) {
+      setSpeechSupported(false);
+      return;
     }
+
+    const synth = window.speechSynthesis;
+    synthRef.current = synth;
+    setSpeechSupported(true);
+
+    const loadVoices = () => {
+      if (synth.getVoices().length > 0) {
+        setVoicesLoaded(true);
+      }
+    };
+
+    loadVoices();
+    synth.addEventListener("voiceschanged", loadVoices);
+
+    return () => {
+      synth.removeEventListener("voiceschanged", loadVoices);
+    };
   }, []);
 
   const stripMarkdown = (text: string): string => {
@@ -59,28 +78,16 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
     utteranceRef.current = null;
   }, []);
 
-  const togglePlay = useCallback(() => {
+  const startSpeech = useCallback(() => {
     const synth = synthRef.current;
     if (!synth) return;
 
-    if (synth.paused) {
-      synth.resume();
-      setIsPlaying(true);
-      return;
-    }
-
-    if (isPlaying) {
-      synth.pause();
-      setIsPlaying(false);
-      return;
-    }
-
     synth.cancel();
 
-    const text = `${titleRef.current}. ${stripMarkdown(contentRef.current)}`;
-    totalCharsRef.current = text.length;
+    const textToSpeak = `${titleRef.current}. ${stripMarkdown(contentRef.current)}`;
+    totalCharsRef.current = textToSpeak.length;
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
     utteranceRef.current = utterance;
 
     const voices = synth.getVoices();
@@ -118,7 +125,26 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
     synth.speak(utterance);
     setIsPlaying(true);
     setShowControls(true);
-  }, [isPlaying, speed, volume]);
+  }, [speed, volume]);
+
+  const togglePlay = useCallback(() => {
+    const synth = synthRef.current;
+    if (!synth) return;
+
+    if (synth.paused) {
+      synth.resume();
+      setIsPlaying(true);
+      return;
+    }
+
+    if (isPlaying) {
+      synth.pause();
+      setIsPlaying(false);
+      return;
+    }
+
+    startSpeech();
+  }, [isPlaying, startSpeech]);
 
   const handleSpeedChange = (newSpeed: number) => {
     setSpeed(newSpeed);
