@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Volume2, VolumeX, Pause, Play, X } from "lucide-react";
+import { Volume2, Pause, Play, X, Gauge } from "lucide-react";
 
 interface ListenButtonProps {
   content: string;
@@ -142,95 +142,82 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
     <>
       <button
         onClick={speak}
-        className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all ${
-          isPlaying
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
-        }`}
-        title={isPlaying ? "Pause listening" : "Listen to article"}
+        className="group relative p-1.5 rounded-full hover:bg-muted transition-colors"
+        title={isPlaying ? "Pause" : "Listen"}
       >
         {isPlaying ? (
-          <Pause className="size-3" />
+          <Pause className="size-4 text-primary" />
         ) : (
-          <Volume2 className="size-3" />
+          <Volume2 className="size-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         )}
-        <span className="hidden sm:inline">{isPlaying ? "Pause" : "Listen"}</span>
+        {isPlaying && (
+          <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+        )}
       </button>
 
       {showControls && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#1e1e2e] border-t border-gray-700/50 shadow-2xl">
-          <div className="max-w-2xl mx-auto px-4 py-3">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={speak}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-[#3b82f6] text-white hover:bg-[#2563eb] transition-colors shrink-0"
-              >
-                {isPlaying ? <Pause className="size-4" /> : <Play className="size-4" />}
-              </button>
+        <div className="fixed bottom-4 right-4 z-50 bg-[#1a1a2e] border border-gray-700/50 rounded-2xl shadow-2xl p-4 w-72">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs text-gray-400">Audio Player</span>
+            <button onClick={closeControls} className="p-1 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+              <X className="size-3" />
+            </button>
+          </div>
 
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-xs text-gray-400 w-12">Progress</span>
-                  <div className="flex-1 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-[#3b82f6] rounded-full transition-all duration-300"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <span className="text-xs text-gray-400 w-10 text-right">{Math.round(progress)}%</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => handleVolumeChange(Math.max(0, volume - 0.2))}
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    <VolumeX className="size-4" />
-                  </button>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={volume}
-                    onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                    className="w-20 h-1 bg-gray-700 rounded-full appearance-none cursor-pointer accent-[#3b82f6]"
-                  />
-                  <button
-                    onClick={() => handleVolumeChange(Math.min(1, volume + 0.2))}
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    <Volume2 className="size-4" />
-                  </button>
-                  <span className="text-xs text-gray-400 w-12">{Math.round(volume * 100)}%</span>
-                </div>
+          <div className="flex items-center gap-3 mb-4">
+            <button
+              onClick={speak}
+              className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            >
+              {isPlaying ? <Pause className="size-5" /> : <Play className="size-5" />}
+            </button>
+            <div className="flex-1">
+              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-white/80 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
+              <span className="text-[10px] text-gray-500 mt-1">{Math.round(progress)}%</span>
+            </div>
+          </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-gray-400">Speed:</span>
-                <div className="flex gap-1">
-                  {[0.5, 0.75, 1, 1.25, 1.5].map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => handleSpeedChange(s)}
-                      className={`px-2 py-0.5 text-xs rounded transition-colors ${
-                        speed === s
-                          ? "bg-[#3b82f6] text-white"
-                          : "bg-gray-700 text-gray-400 hover:text-white"
-                      }`}
-                    >
-                      {s}x
-                    </button>
-                  ))}
-                </div>
-              </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleVolumeChange(Math.max(0, volume - 0.25))}
+              className="p-1.5 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+            >
+              <Volume2 className="size-3" />
+            </button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={volume}
+              onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+              className="flex-1 h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-white/80"
+              style={{ accentColor: 'rgba(255,255,255,0.8)' }}
+            />
+            <span className="text-[10px] text-gray-500 w-8">{Math.round(volume * 100)}%</span>
+          </div>
 
-              <button
-                onClick={closeControls}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 text-gray-400 hover:text-white hover:bg-gray-600 transition-colors shrink-0"
-              >
-                <X className="size-4" />
-              </button>
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+            <span className="text-[10px] text-gray-500">Speed</span>
+            <div className="flex gap-1">
+              {[0.75, 1, 1.25, 1.5].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => handleSpeedChange(s)}
+                  className={`px-2 py-0.5 text-[10px] rounded transition-colors ${
+                    speed === s
+                      ? "bg-white/20 text-white"
+                      : "bg-white/5 text-gray-500 hover:bg-white/10 hover:text-gray-300"
+                  }`}
+                >
+                  {s}x
+                </button>
+              ))}
             </div>
           </div>
         </div>
