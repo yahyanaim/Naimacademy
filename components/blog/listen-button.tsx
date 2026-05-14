@@ -188,64 +188,51 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
       </button>
 
       {showControls && (
-        <>
-          <div className="hidden md:flex items-center gap-2 bg-muted rounded-full px-3 py-1.5">
-            <button onClick={togglePlay} className="text-muted-foreground hover:text-foreground transition-colors">
-              {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
-            </button>
+        <div className="hidden md:flex items-center gap-2 bg-muted rounded-full px-3 py-1.5">
+          <button onClick={togglePlay} className="text-muted-foreground hover:text-foreground transition-colors">
+            {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
+          </button>
 
-            <div className="w-20 h-1 bg-border rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-foreground/40 rounded-full transition-all"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-
-            <div className="flex items-center gap-1">
-              <Volume2 className="size-3 text-muted-foreground" />
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={volume}
-                onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                className="w-10 h-1 bg-border rounded-full appearance-none cursor-pointer accent-foreground/40"
-              />
-            </div>
-
-            <div className="flex items-center gap-0.5">
-              {[0.75, 1, 1.25, 1.5].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => handleSpeedChange(s)}
-                  className={`px-1.5 py-0.5 text-[10px] rounded transition-colors ${
-                    speed === s
-                      ? "bg-foreground/20 text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {s}x
-                </button>
-              ))}
-            </div>
-
-            <button onClick={closeControls} className="p-1 rounded-full hover:bg-background text-muted-foreground hover:text-foreground transition-colors">
-              <X className="size-3" />
-            </button>
+          <div className="w-20 h-1 bg-border rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-foreground/40 rounded-full transition-all"
+              style={{ width: `${progress}%` }}
+            />
           </div>
 
-          <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#2a2a2a] border-t border-gray-700/50 shadow-2xl px-4 py-3">
-            <div className="flex items-center justify-center gap-4">
-              <button onClick={togglePlay} className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white">
-                {isPlaying ? <Pause className="size-4" /> : <Play className="size-4" />}
-              </button>
-              <button onClick={closeControls} className="text-gray-400 p-1">
-                <X className="size-4" />
-              </button>
-            </div>
+          <div className="flex items-center gap-1">
+            <Volume2 className="size-3 text-muted-foreground" />
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={volume}
+              onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+              className="w-10 h-1 bg-border rounded-full appearance-none cursor-pointer accent-foreground/40"
+            />
           </div>
-        </>
+
+          <div className="flex items-center gap-0.5">
+            {[0.75, 1, 1.25, 1.5].map((s) => (
+              <button
+                key={s}
+                onClick={() => handleSpeedChange(s)}
+                className={`px-1.5 py-0.5 text-[10px] rounded transition-colors ${
+                  speed === s
+                    ? "bg-foreground/20 text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {s}x
+              </button>
+            ))}
+          </div>
+
+          <button onClick={closeControls} className="p-1 rounded-full hover:bg-background text-muted-foreground hover:text-foreground transition-colors">
+            <X className="size-3" />
+          </button>
+        </div>
       )}
     </>
   );
