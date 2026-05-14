@@ -236,35 +236,11 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
           </div>
 
           <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#2a2a2a] border-t border-gray-700/50 shadow-2xl px-4 py-3">
-            <div className="flex items-center gap-3">
-              <button onClick={togglePlay} className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white shrink-0">
+            <div className="flex items-center justify-center gap-4">
+              <button onClick={togglePlay} className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white">
                 {isPlaying ? <Pause className="size-4" /> : <Play className="size-4" />}
               </button>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => handleVolumeChange(Math.max(0, volume - 0.2))} className="text-gray-400 p-1">
-                  <Volume2 className="size-4" />
-                </button>
-                <span className="text-xs text-gray-400 w-8">{Math.round(volume * 100)}%</span>
-              </div>
-
-              <div className="flex items-center gap-1 shrink-0">
-                {[1, 1.25, 1.5].map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => handleSpeedChange(s)}
-                    className={`px-2 py-1 text-xs rounded ${
-                      speed === s
-                        ? "bg-gray-600 text-white"
-                        : "bg-gray-700 text-gray-400"
-                    }`}
-                  >
-                    {s}x
-                  </button>
-                ))}
-              </div>
-
-              <button onClick={closeControls} className="text-gray-400 p-1 shrink-0">
+              <button onClick={closeControls} className="text-gray-400 p-1">
                 <X className="size-4" />
               </button>
             </div>
