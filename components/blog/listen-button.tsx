@@ -241,12 +241,6 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
                 {isPlaying ? <Pause className="size-4" /> : <Play className="size-4" />}
               </button>
 
-              <div className="flex-1">
-                <div className="h-1 bg-gray-600 rounded-full overflow-hidden">
-                  <div className="h-full bg-gray-400 rounded-full transition-all" style={{ width: `${progress}%` }} />
-                </div>
-              </div>
-
               <div className="flex items-center gap-2 shrink-0">
                 <button onClick={() => handleVolumeChange(Math.max(0, volume - 0.2))} className="text-gray-400 p-1">
                   <Volume2 className="size-4" />
