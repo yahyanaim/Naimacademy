@@ -139,7 +139,7 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
   if (!speechSupported) return null;
 
   return (
-    <>
+    <div className="flex items-center gap-1">
       <button
         onClick={speak}
         className="group relative p-1.5 rounded-full hover:bg-muted transition-colors"
@@ -150,78 +150,55 @@ export default function ListenButton({ content, title }: ListenButtonProps) {
         ) : (
           <Volume2 className="size-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         )}
-        {isPlaying && (
-          <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
-        )}
       </button>
 
       {showControls && (
-        <div className="fixed bottom-4 right-4 z-50 bg-[#1a1a2e] border border-gray-700/50 rounded-2xl shadow-2xl p-4 w-72">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-gray-400">Audio Player</span>
-            <button onClick={closeControls} className="p-1 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
-              <X className="size-3" />
-            </button>
+        <div className="flex items-center gap-2 bg-muted rounded-full px-3 py-1.5">
+          <button onClick={speak} className="text-primary hover:text-primary/80 transition-colors">
+            {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
+          </button>
+
+          <div className="w-24 h-1 bg-border rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
           </div>
 
-          <div className="flex items-center gap-3 mb-4">
-            <button
-              onClick={speak}
-              className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-            >
-              {isPlaying ? <Pause className="size-5" /> : <Play className="size-5" />}
-            </button>
-            <div className="flex-1">
-              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-white/80 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <span className="text-[10px] text-gray-500 mt-1">{Math.round(progress)}%</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => handleVolumeChange(Math.max(0, volume - 0.25))}
-              className="p-1.5 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-            >
-              <Volume2 className="size-3" />
-            </button>
+          <div className="flex items-center gap-1">
+            <Volume2 className="size-3 text-muted-foreground" />
             <input
               type="range"
               min="0"
               max="1"
-              step="0.05"
+              step="0.1"
               value={volume}
               onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-              className="flex-1 h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-white/80"
-              style={{ accentColor: 'rgba(255,255,255,0.8)' }}
+              className="w-12 h-1 bg-border rounded-full appearance-none cursor-pointer accent-primary"
             />
-            <span className="text-[10px] text-gray-500 w-8">{Math.round(volume * 100)}%</span>
           </div>
 
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
-            <span className="text-[10px] text-gray-500">Speed</span>
-            <div className="flex gap-1">
-              {[0.75, 1, 1.25, 1.5].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => handleSpeedChange(s)}
-                  className={`px-2 py-0.5 text-[10px] rounded transition-colors ${
-                    speed === s
-                      ? "bg-white/20 text-white"
-                      : "bg-white/5 text-gray-500 hover:bg-white/10 hover:text-gray-300"
-                  }`}
-                >
-                  {s}x
-                </button>
-              ))}
-            </div>
+          <div className="flex items-center gap-0.5">
+            {[0.75, 1, 1.25, 1.5].map((s) => (
+              <button
+                key={s}
+                onClick={() => handleSpeedChange(s)}
+                className={`px-1.5 py-0.5 text-[10px] rounded transition-colors ${
+                  speed === s
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {s}x
+              </button>
+            ))}
           </div>
+
+          <button onClick={closeControls} className="p-1 rounded-full hover:bg-background text-muted-foreground hover:text-foreground transition-colors">
+            <X className="size-3" />
+          </button>
         </div>
       )}
-    </>
+    </div>
   );
 }
